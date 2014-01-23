@@ -2372,7 +2372,8 @@ abstract class CommonITILObject extends CommonDBTM {
     * @since version 0.85
    **/
    function getSearchOptionsMain() {
-
+      global $CFG_GLPI;
+      
       $tab                            = array();
       $tab['common']                  = __('Characteristics');
 
@@ -2389,6 +2390,10 @@ abstract class CommonITILObject extends CommonDBTM {
       $tab[21]['name']                = __('Description');
       $tab[21]['massiveaction']       = false;
       $tab[21]['datatype']            = 'text';
+      if ($this->getType() == 'Ticket'
+          && $CFG_GLPI["use_rich_text"]) {
+         $tab[21]['htmltext'] = true;
+      }
 
       $tab[2]['table']                = $this->getTable();
       $tab[2]['field']                = 'id';
@@ -3348,8 +3353,9 @@ abstract class CommonITILObject extends CommonDBTM {
                  && !$this->isUser(CommonITILActor::REQUESTER, Session::getLoginUserID())) {
          echo "&nbsp;&nbsp;&nbsp;&nbsp;";
          Html::showSimpleForm($this->getFormURL(), 'addme_observer',
-                              __('Associate myself with this ticket'),
-                              array('tickets_id' => $this->fields['id']));
+                              __('Associate myself'),
+                              array($this->getForeignKeyField() => $this->fields['id']),
+                              $CFG_GLPI["root_doc"]."/pics/addme.png");
       }
 
       echo "</th>";
@@ -3374,7 +3380,15 @@ abstract class CommonITILObject extends CommonDBTM {
                 onClick=\"".Html::jsShow("itilactor$rand_assign")."\"
                 class='pointer' src='".$CFG_GLPI["root_doc"]."/pics/add_dropdown.png'>";
       }
-
+      if ($ID && $can_assigntome
+            && !in_array($this->fields['status'], $this->getClosedStatusArray())
+            && !$is_hidden['_users_id_assign']
+            && !$this->isUser(CommonITILActor::ASSIGN, Session::getLoginUserID())) {
+         Html::showSimpleForm($this->getFormURL(), 'addme_assign',
+                              __('Associate myself'),
+                              array($this->getForeignKeyField() => $this->fields['id']),
+                              $CFG_GLPI["root_doc"]."/pics/addme.png");
+      }
       if ($ID
           && $can_assign) {
          $candeleteassign = true;

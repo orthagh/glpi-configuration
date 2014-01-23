@@ -1537,7 +1537,8 @@ class User extends CommonDBTM {
       }
 
       //Perform the search
-      $sr = ldap_search($ds, $ldap_base_dn, $filter, $attrs);
+      $filter = Toolbox::unclean_cross_side_scripting_deep($filter);
+      $sr     = ldap_search($ds, $ldap_base_dn, $filter, $attrs);
 
       //Get the result of the search as an array
       $info = AuthLDAP::get_entries_clean($ds, $sr);
@@ -2695,6 +2696,22 @@ class User extends CommonDBTM {
       $tab[61]['joinparams']           = array('jointype'  => 'child',
                                                'linkfield' => 'users_id_recipient');
 
+      $tab[64]['table']                = 'glpi_tickets';
+      $tab[64]['field']                = 'id';
+      $tab[64]['name']                 = __('Number of assigned tickets');
+      $tab[64]['forcegroupby']         = true;
+      $tab[64]['usehaving']            = true;
+      $tab[64]['datatype']             = 'count';
+      $tab[64]['massiveaction']        = false;
+      $tab[64]['joinparams']           = array('beforejoin'
+                                               => array('table'
+                                                         => 'glpi_tickets_users',
+                                                        'joinparams'
+                                                         => array('jointype'
+                                                                   => 'child',
+                                                                  'condition'
+                                                                   => 'AND NEWTABLE.`type`
+                                                                        = '.CommonITILActor::ASSIGN)));
       return $tab;
    }
 
@@ -4018,11 +4035,14 @@ class User extends CommonDBTM {
     function getRights($interface='central') {
 
       $values = parent::getRights();
+      //TRANS: short for : Add users from an external source
       $values[self::IMPORTEXTAUTHUSERS] = array('short' => __('Add external'),
                                                 'long'  => __('Add users from an external source'));
-      $values[self::READAUTHENT]        = array('short' => __('Read method'),
-                                                'long'  => __('Read method for user authentication and synchronization'));
-      $values[self::UPDATEAUTHENT]      = array('short' => __('Update method'),
+       //TRANS: short for : Read method for user authentication and synchronization
+      $values[self::READAUTHENT]        = array('short' => __('Read auth'),
+                                                'long'  => __('Read user authentication and synchronization method'));
+      //TRANS: short for : Update method for user authentication and synchronization
+      $values[self::UPDATEAUTHENT]      = array('short' => __('Update auth and sync'),
                                                 'long'  => __('Update method for user authentication and synchronization'));
 
       return $values;

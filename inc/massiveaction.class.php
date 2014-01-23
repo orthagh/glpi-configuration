@@ -418,7 +418,7 @@ class MassiveAction {
 
         foreach ($common_fields as $field) {
             if (isset($this->POST[$field])) {
-               echo Html::recursiveHidden($field, array('value' => $this->POST[$field]));
+               echo Html::hidden($field, array('value' => $this->POST[$field]));
             }
          }
       }
@@ -556,6 +556,10 @@ class MassiveAction {
             }
          } else if ($canpurge) {
             $actions[$self_pref.'purge'] = _x('button', 'Delete permanently');
+            if ($item instanceof CommonDropdown) {
+               $actions[$self_pref.'purge_but_item_linked'] = _x('button',
+                                                               'Delete permanently even if linked items');;
+            }
          }
 
          Document::getMassiveActionsForItemtype($actions, $itemtype, $is_deleted, $checkitem);
@@ -681,6 +685,7 @@ class MassiveAction {
                   $group                       = '';
                   $show_all                    = true;
                   $show_infocoms               = true;
+                  $itemtable                   = getTableForItemType($itemtype);
 
                   if (InfoCom::canApplyOn($itemtype)
                       && (!$itemtype::canUpdate()
@@ -689,6 +694,7 @@ class MassiveAction {
                      $show_infocoms = Infocom::canUpdate();
                   }
                   foreach (Search::getCleanedOptions($itemtype, UPDATE) as $index => $option) {
+
                      if (!is_array($option)) {
                         $group                               = $option;
                         $options_per_type[$itemtype][$group] = array();
@@ -707,8 +713,11 @@ class MassiveAction {
                                           && !Search::isInfocomOption($itemtype, $index)))) {
                                  $options_per_type[$itemtype][$group][$itemtype.':'.$index]
                                              = $option['name'];
-
-                                 $field_key = $option['table'].':'.$option['field'];
+                                 if ($itemtable == $option['table']) {
+                                    $field_key = 'MAIN:'.$option['field'].':'.$index;
+                                 } else {
+                                    $field_key = $option['table'].':'.$option['field'].':'.$index;
+                                 }
                                  if (!isset($options_count[$field_key])) {
                                     $options_count[$field_key] = array();
                                  }
@@ -911,7 +920,7 @@ class MassiveAction {
                $search_option = explode(':', $search_option);
                $items_index[$search_option[0]] = $search_option[1];
             }
-            echo Html::recursiveHidden('search_options', array('value' => $items_index));
+            echo Html::hidden('search_options', array('value' => $items_index));
             echo Html::hidden('field', array('value' => $fieldname));
             echo "<br>\n";
 
@@ -1122,6 +1131,7 @@ class MassiveAction {
             break;
 
          case 'purge_item_but_devices' :
+         case 'purge_but_item_linked' :
          case 'purge' :
             foreach ($ids as $id) {
                if ($item->can($id, PURGE)) {
@@ -1139,17 +1149,22 @@ class MassiveAction {
 
                   if ($item instanceof CommonDropdown) {
                      if ($item->haveChildren()) {
-                        $ma->itemDone($item->getType(), $id, MassiveAction::ACTION_KO);
-                        $ma->addMessage(__("You can't delete that item by massive actions, because it has sub-items"));
-                        $ma->addMessage(__("but you can do it by the form of the item"));
-
-                        continue;
+                        if ($action != 'purge_but_item_linked') {
+                           $force = 0;
+                           $ma->itemDone($item->getType(), $id, MassiveAction::ACTION_KO);
+                           $ma->addMessage(__("You can't delete that item by massive actions, because it has sub-items"));
+                           $ma->addMessage(__("but you can do it by the form of the item"));
+                           continue;
+                        }
                      }
                      if ($item->isUsed()) {
-                        $ma->itemDone($item->getType(), $id, MassiveAction::ACTION_KO);
-                        $ma->addMessage(__("You can't delete that item, because it is used for one or more items"));
-                        $ma->addMessage(__("but you can do it by the form of the item"));
-                        continue;
+                        if ($action != 'purge_but_item_linked') {
+                           $force = 0;
+                           $ma->itemDone($item->getType(), $id, MassiveAction::ACTION_KO);
+                           $ma->addMessage(__("You can't delete that item, because it is used for one or more items"));
+                           $ma->addMessage(__("but you can do it by the form of the item"));
+                           continue;
+                        }
                      }
                   }
                   if ($item->delete($delete_array, $force)) {

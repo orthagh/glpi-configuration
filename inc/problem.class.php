@@ -379,11 +379,11 @@ class Problem extends CommonITILObject {
    **/
    static function getDefaultSearchRequest() {
 
-      $search = array('criteria' => array(0=> array('field'      => 12,
-                                                    'searchtype' => 'equals',
-                                                    'value'      => 'notold')),
-                      'sort'       => 19,
-                      'order'      => 'DESC');
+      $search = array('criteria' => array(0 => array('field'      => 12,
+                                                     'searchtype' => 'equals',
+                                                     'value'      => 'notold')),
+                      'sort'     => 19,
+                      'order'    => 'DESC');
 
      return $search;
    }
@@ -650,7 +650,7 @@ class Problem extends CommonITILObject {
       }
 
       if ($numrows > 0) {
-         echo "<table class='tab_cadrehov' style='width:420px'>";
+         echo "<table class='tab_cadre_report'>";
          echo "<tr><th colspan='5'>";
 
          $options['reset'] = 'reset';
@@ -685,7 +685,7 @@ class Problem extends CommonITILObject {
                   $options['criteria'][1]['searchtype'] = 'equals';
                   $options['criteria'][1]['value']      = 'mygroups';
                   $options['criteria'][1]['link']       = 'AND';
-                  
+
                   echo "<a href=\"".$CFG_GLPI["root_doc"]."/front/problem.php?".
                          Toolbox::append_params($options,'&amp;')."\">".
                          Html::makeTitle(__('Problems to be processed'), $number, $numrows)."</a>";
@@ -701,7 +701,7 @@ class Problem extends CommonITILObject {
                   $options['criteria'][1]['searchtype'] = 'equals';
                   $options['criteria'][1]['value']      = 'mygroups';
                   $options['criteria'][1]['link']       = 'AND';
-                  
+
                   echo "<a href=\"".$CFG_GLPI["root_doc"]."/front/problem.php?".
                          Toolbox::append_params($options,'&amp;')."\">".
                          Html::makeTitle(__('Your problems in progress'), $number, $numrows)."</a>";
@@ -853,7 +853,7 @@ class Problem extends CommonITILObject {
       $options['criteria'][0]['link']       = 'AND';
       $options['reset']                     ='reset';
 
-      echo "<table class='tab_cadrehov' >";
+      echo "<table class='tab_cadre_report' >";
       echo "<tr><th colspan='2'>";
 
       echo "<a href=\"".$CFG_GLPI["root_doc"]."/front/problem.php?".

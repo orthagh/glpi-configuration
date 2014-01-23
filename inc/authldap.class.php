@@ -538,10 +538,13 @@ class AuthLDAP extends CommonDBTM {
             echo "<td class='center'>" . $ldap_replicate["name"] . "</td>";
             echo "<td class='center'>".sprintf(__('%1$s: %2$s'), $ldap_replicate["host"],
                                                $ldap_replicate["port"]);
-            echo "</td><td class='center'>";
-            echo "<input type='submit' name='test_ldap_replicate[".$ldap_replicate["id"]."]'
-                  class='submit' value='" . __s('Test') . "'></td>";
-            echo"</tr>";
+            echo "</td>";
+            echo "<td class='center'>";
+            Html::showSimpleForm(Toolbox::getItemTypeFormURL(self::getType()),
+                                 'test_ldap_replicate', __s('Test'),
+                                 array('id'                => $ID,
+                                       'ldap_replicate_id' => $ldap_replicate["id"]));
+            echo "</td></tr>";
          }
          echo "</table>";
          $massiveactionparams['ontop'] = false;
@@ -1340,7 +1343,8 @@ class AuthLDAP extends CommonDBTM {
          if (self::isLdapPageSizeAvailable($config_ldap)) {
             ldap_control_paged_result($ds, $config_ldap->fields['pagesize'], true, $cookie);
          }
-         $sr = @ldap_search($ds, $values['basedn'], $filter, $attrs);
+         $filter = Toolbox::unclean_cross_side_scripting_deep($filter);
+         $sr     = @ldap_search($ds, $values['basedn'], $filter, $attrs);
          if ($sr) {
             if (in_array(ldap_errno($ds),array(4,11))) {
                // openldap return 4 for Size limit exceeded
@@ -1836,7 +1840,9 @@ class AuthLDAP extends CommonDBTM {
                                       true, $cookie);
          }
 
-         $sr = @ldap_search($ldap_connection, $config_ldap->fields['basedn'], $filter , $attrs);
+         $filter = Toolbox::unclean_cross_side_scripting_deep($filter);
+         $sr     = @ldap_search($ldap_connection, $config_ldap->fields['basedn'], $filter ,
+                                $attrs);
 
          if ($sr) {
             if (in_array(ldap_errno($ldap_connection),array(4,11))) {
@@ -2424,6 +2430,7 @@ class AuthLDAP extends CommonDBTM {
          $filter = "(& $filter ".$values['condition'].")";
       }
 
+      $filter = Toolbox::unclean_cross_side_scripting_deep($filter);
       if ($result = @ldap_search($ds, $values['basedn'], $filter, $ldap_parameters)) {
          $info = self::get_entries_clean($ds, $result);
 

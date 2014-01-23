@@ -128,7 +128,7 @@ class Rule extends CommonDBTM {
     *   example array(1 => Condition1,
     *                 2 => Condition2,
     *                 3 => Condition1&Condition2)
-    * 
+    *
     *  @since version 0.85
     *
     *  @return array of conditions
@@ -187,7 +187,7 @@ class Rule extends CommonDBTM {
 
       return NOT_AVAILABLE;
    }
-   
+
    /**
     *  @see CommonGLPI::getMenuContent()
     *
@@ -1352,16 +1352,17 @@ class Rule extends CommonDBTM {
    /**
     * Process the rule
     *
-    * @param &$input    the input data used to check criterias
-    * @param &$output   the initial ouput array used to be manipulate by actions
-    * @param &$params   parameters for all internal functions
-    * @param &options   options :
+    * @param &$input          the input data used to check criterias
+    * @param &$output         the initial ouput array used to be manipulate by actions
+    * @param &$params         parameters for all internal functions
+    * @param &options   array options:
     *                     - only_criteria : only react on specific criteria
     *
     * @return the output array updated by actions.
     *         If rule matched add field _rule_process to return value
    **/
-   function process(&$input, &$output, &$params, &$options = array()) {
+   function process(&$input, &$output, &$params, &$options=array()) {
+
       if ($this->validateCriterias($options)) {
          $this->regex_results     = array();
          $this->criterias_results = array();
@@ -1383,6 +1384,8 @@ class Rule extends CommonDBTM {
          }
       }
    }
+
+
    /**
     * Update Only criteria options if needed
     *
@@ -1394,15 +1397,18 @@ class Rule extends CommonDBTM {
     * @return the options array updated.
    **/
    function updateOnlyCriteria(&$options, $refoutput, $newoutput) {
+
       if (count($this->actions)) {
          if (isset($options['only_criteria'])
-            && !is_null($options['only_criteria'])
-            && is_array($options['only_criteria'])) {
+             && !is_null($options['only_criteria'])
+             && is_array($options['only_criteria'])) {
             foreach ($this->actions as $action) {
                if (!isset($refoutput[$action->fields["field"]])
-                  || ($refoutput[$action->fields["field"]] != $newoutput[$action->fields["field"]])) {
-                  if (!in_array($action->fields["field"], $options['only_criteria']))
-                  $options['only_criteria'][] = $action->fields["field"];
+                   || ($refoutput[$action->fields["field"]]
+                       != $newoutput[$action->fields["field"]])) {
+                  if (!in_array($action->fields["field"], $options['only_criteria'])) {
+                     $options['only_criteria'][] = $action->fields["field"];
+                  }
 
                   // Add linked criteria if available
                   $crit = $this->getCriteria($action->fields["field"]);
@@ -1422,13 +1428,24 @@ class Rule extends CommonDBTM {
          }
       }
    }
-   
+
+
    /// Are criterias valid to be processed
+   /**
+    *  Are criterias valid to be processed
+    *
+    *  @since version 0.85
+    *
+    * @param $options
+    *
+    * @return boolean
+   **/
    function validateCriterias($options) {
+
       if (count($this->criterias)) {
          if (isset($options['only_criteria'])
-            && !is_null($options['only_criteria'])
-            && is_array($options['only_criteria'])) {
+             && !is_null($options['only_criteria'])
+             && is_array($options['only_criteria'])) {
             foreach ($this->criterias as $criteria) {
                if (in_array($criteria->fields['criteria'], $options['only_criteria'])) {
                   return true;
@@ -1441,6 +1458,7 @@ class Rule extends CommonDBTM {
 
       return false;
    }
+
 
    /**
     * Check criterias
@@ -1457,7 +1475,7 @@ class Rule extends CommonDBTM {
          $doactions = true;
 
          foreach ($this->criterias as $criteria) {
-            
+
             $definition_criteria = $this->getCriteria($criteria->fields['criteria']);
             if (!isset($definition_criteria['is_global']) || !$definition_criteria['is_global']) {
                $doactions &= $this->checkCriteria($criteria, $input);
@@ -1524,7 +1542,7 @@ class Rule extends CommonDBTM {
       if (!isset($input[$criteria->fields["criteria"]])) {
          $input[$criteria->fields["criteria"]] = '';
       }
-      
+
       //If the value is not an array
       if (!is_array($input[$criteria->fields["criteria"]])) {
          $value = $this->getCriteriaValue($criteria->fields["criteria"],
@@ -1534,7 +1552,7 @@ class Rule extends CommonDBTM {
          $res   = RuleCriteria::match($criteria, $value, $this->criterias_results,
                                       $partial_regex_result);
       } else {
-      
+
          //If the value if, in fact, an array of values
          // Negative condition : Need to match all condition (never be)
          if (in_array($criteria->fields["condition"], array(self::PATTERN_IS_NOT,
@@ -2509,12 +2527,12 @@ class Rule extends CommonDBTM {
       if ($p['sub_type'] == '') {
          return false;
       }
-      
+
       $add_condition = '';
       if ($p['condition'] > 0) {
          $add_condition = ' AND `condition` & '.$p['condition'];
       }
-      
+
       $p['condition'] = "`sub_type` = '".$p['sub_type']."' $add_condition";
       return Dropdown::show($p['sub_type'],$p);
    }
@@ -2698,9 +2716,9 @@ class Rule extends CommonDBTM {
                            => array('MassiveAction'.MassiveAction::CLASS_ACTION_SEPARATOR.'update'
                                        => _x('button', 'Update'),
                                     'MassiveAction'.MassiveAction::CLASS_ACTION_SEPARATOR.'purge'
-                                       => _x('button', 'Delete permanently')),
-                       'extraparams'
-                           => array('rule_class_name' => $this->getRuleClassName()));
+                                       => _x('button', 'Delete permanently')));
+                  //     'extraparams'
+                //           => array('rule_class_name' => $this->getRuleClassName()));
             Html::showMassiveActions($massiveactionparams);
          }
          echo "<table class='tab_cadre_fixehov'><tr>";

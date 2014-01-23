@@ -1028,7 +1028,7 @@ class Html {
       echo Html::script($CFG_GLPI["root_doc"]."/lib/jqueryplugins/jquery-file-upload/js/jquery.iframe-transport.js");
       echo Html::script($CFG_GLPI["root_doc"]."/lib/jqueryplugins/jquery-file-upload/js/jquery.fileupload.js");
       echo Html::script($CFG_GLPI["root_doc"]."/lib/jqueryplugins/jcrop/jquery.Jcrop.js");
-      echo Html::script($CFG_GLPI["root_doc"]."/lib/tiny_mce/plugins/imagepaste/jquery.image_paste.js");
+      echo Html::script($CFG_GLPI["root_doc"]."/lib/jqueryplugins/imagepaste/jquery.image_paste.js");
       echo Html::script($CFG_GLPI["root_doc"]."/lib/jqueryplugins/spectrum-colorpicker/spectrum.js");
       echo Html::script($CFG_GLPI["root_doc"]."/lib/jqueryplugins/jquery-gantt/js/jquery.fn.gantt.min.js");
 
@@ -3622,16 +3622,17 @@ class Html {
    /**
     * Init the Editor System to a textarea
     *
-    * @param $name          name of the html textarea to use
-    * @param $rand          rand of the html textarea to use
+    * @param $name               name of the html textarea to use
+    * @param $rand       rand    of the html textarea to use (if empty no image paste system)(default '')
+    * @param $display    boolean display or get js script (true by default)
     *
     * @return nothing
    **/
-   static function initEditorSystem($name, $rand='') {
+   static function initEditorSystem($name, $rand='', $display=true) {
       global $CFG_GLPI;
 
       Html::scriptStart();
-      echo "function waitforpastedata(elem){
+      $js = "function waitforpastedata(elem){
          var _html = elem.innerHTML;
          if(_html != undefined) {
             if (_html.match(/<img[^>]+src=\"data:image.*?;base64[^>]*?>/g)){
@@ -3648,13 +3649,13 @@ class Html {
             }
          }
       }";
-      echo "
+      $js .= "
          tinyMCE.init({
          language : '".$CFG_GLPI["languages"][$_SESSION['glpilanguage']][3]."',
          mode : 'exact',
          elements: '$name',
          valid_elements: '*[*]',
-         plugins : 'table,directionality,searchreplace,paste,tabfocus',
+         plugins : 'table,directionality,searchreplace,paste,tabfocus,autoresize',
          paste_use_dialog : false,
          paste_auto_cleanup_on_paste : true,
          paste_convert_headers_to_strong : false,
@@ -3673,18 +3674,23 @@ class Html {
          theme : 'advanced',
          entity_encoding : 'raw', ";
          // directionality + search replace plugin
-      echo "theme_advanced_buttons1_add : 'ltr,rtl,search,replace',";
-      echo "theme_advanced_toolbar_location : 'top',
+      $js .= "theme_advanced_buttons1_add : 'ltr,rtl,search,replace',";
+      $js .= "theme_advanced_toolbar_location : 'top',
             theme_advanced_toolbar_align : 'left',
             theme_advanced_statusbar_location : 'none',
             theme_advanced_resizing : 'true',
             theme_advanced_buttons1 : 'bold,italic,underline,strikethrough,fontsizeselect,formatselect,separator,justifyleft,justifycenter,justifyright,justifyfull,bullist,numlist,outdent,indent',
             theme_advanced_buttons2 : 'forecolor,backcolor,separator,hr,separator,link,unlink,anchor,separator,tablecontrols,undo,redo,cleanup,code,separator',
             theme_advanced_buttons3 : '',";
-      echo "setup : function(ed) {
+      $js .= "setup : function(ed) {
          ed.onInit.add(function(ed) {";
-      echo (!empty($rand))?self::initImagePasteSystem($name, $rand):'';
-      echo "
+      $js .= (!empty($rand))?self::initImagePasteSystem($name, $rand):'';
+      $js .= "
+            // wake up the autoresize plugin
+            setTimeout(
+               function(){
+                  ed.execCommand('mceAutoResize');
+               }, 1);
             if (tinymce.isIE) {
                tinymce.dom.Event.add(ed.getBody(), 'dragenter', function(e) {
                   return tinymce.dom.Event.cancel(e);
@@ -3700,10 +3706,14 @@ class Html {
             }
          });
       }";
-      echo "});";
+      $js .= "});";
 
 //         invalid_elements : 'script',
-      echo Html::scriptEnd();
+      if ($display) {
+         echo  Html::scriptBlock($js);
+      } else {
+         return  Html::scriptBlock($js);
+      }
    }
 
    /**
@@ -3722,10 +3732,14 @@ class Html {
       $params = array('name'     => $name,
                       'root_doc' => $CFG_GLPI['root_doc'],
                       'rand'     => $rand,
-                      'lang'     => array('pasteimage'      => _sx('button', 'Paste image'),
-                                          'itemnotfound'    => __('Item not found'),
-                                          'save'            => _sx('button', 'Save'),
-                                          'cancel'          => _sx('button', 'Cancel')));
+                      'maxsize'  => 500,
+                      'lang'     => array('pasteimage'   => sprintf(__('%1$s - %2$s'),
+                                                                    _sx('button', 'Paste image'),
+                                                                    __('500 pixels max')),
+                                          'itemnotfound' => __('Item not found'),
+                                          'toolarge'     => __('Item is too large'),
+                                          'save'         => _sx('button', 'Save'),
+                                          'cancel'       => _sx('button', 'Cancel')));
 
       return "if (!tinyMCE.isIE) { // Chrome, Firefox plugin
                   tinyMCE.imagePaste = $(document).imagePaste(".json_encode($params).");
@@ -3857,7 +3871,19 @@ class Html {
                self::printCleanArray($val,$pad+1);
                echo "</div>";
             } else {
-               echo $val;
+               if (is_bool($val)) {
+                  if ($val) {
+                     echo 'true';
+                  } else {
+                     echo 'false';
+                  }
+               } else {
+                  if (is_object($val)) {
+                     print_r($val);
+                  } else {
+                     echo $val;
+                  }
+               }
             }
             echo "</td></tr>";
          }
@@ -4560,6 +4586,9 @@ class Html {
    /**
     * Creates a hidden input field.
     *
+    * If value of options is an array then recursively parse it
+    * to generate as many hidden input as necessary
+    *
     * @since version 0.85
     *
     * @param $fieldName          Name of a field
@@ -4568,7 +4597,15 @@ class Html {
     * @return string A generated hidden input
    **/
    static function hidden($fieldName, $options=array()) {
-
+      if ((isset($options['value'])) && (is_array($options['value']))) {
+         $result = '';
+         foreach ($options['value'] as $key => $value) {
+            $options2          = $options;
+            $options2['value'] = $value;
+            $result           .= static::hidden($fieldName.'['.$key.']', $options2)."\n";
+         }
+         return $result;
+      }
       return sprintf('<input type="hidden" name="%1$s" %2$s>',
                      Html::cleanInputText($fieldName), Html::parseAttributes($options));
    }
@@ -4588,32 +4625,6 @@ class Html {
       return sprintf('<input type="text" name="%1$s" %2$s>',
                      Html::cleanInputText($fieldName), Html::parseAttributes($options));
    }
-
-   /**
-    * Recursively creates a hidden input field. If the value is an array, then recursively parse it
-    * to generate as many hidden input as necessary
-    *
-    * @since version 0.85
-    *
-    * @param $fieldName          Name of a field
-    * @param $options    Array   of HTML attributes.
-    *
-    * @return string A generated hidden input
-   **/
-   static function recursiveHidden($fieldName, array $options=array()) {
-
-      if ((isset($options['value'])) && (is_array($options['value']))) {
-         $result = '';
-         foreach ($options['value'] as $key => $value) {
-            $options2          = $options;
-            $options2['value'] = $value;
-            $result           .= static::recursiveHidden($fieldName.'['.$key.']', $options2)."\n";
-         }
-         return $result;
-      }
-      return static::hidden($fieldName, $options);
-   }
-
 
    /**
     * Creates a submit button element. This method will generate `<input />` elements that

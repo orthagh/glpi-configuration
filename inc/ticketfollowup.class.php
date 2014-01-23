@@ -570,19 +570,18 @@ class TicketFollowup  extends CommonDBTM {
          $options['tickets_id'] = $ticket->getField('id');
          $this->check(-1, CREATE, $options);
       }
-      $tech = (Session::haveRightsOr(self::$rightname,
-                                     array(self::ADDALLTICKET))
+      $tech = (Session::haveRight(self::$rightname, self::ADDALLTICKET)
                || $ticket->isUser(CommonITILActor::ASSIGN, Session::getLoginUserID())
                || (isset($_SESSION["glpigroups"])
                    && $ticket->haveAGroup(CommonITILActor::ASSIGN, $_SESSION['glpigroups'])));
 
       $reopen_case = false;
       if (in_array($ticket->fields["status"], $ticket->getClosedStatusArray())
-            && $ticket->isAllowedStatus($ticket->fields['status'], Ticket::INCOMING)) {
+          && $ticket->isAllowedStatus($ticket->fields['status'], Ticket::INCOMING)) {
          $reopen_case = true;
+         echo "<div class='center b'>".__('If you want to reopen the ticket, you must specify a reason')."</div>";
       }
 
-      echo "<div class='center b'>".__('If you want to reopen the ticket, you must specify a reason')."</div>";
       if ($tech) {
          $this->showFormHeader($options);
 
@@ -601,7 +600,7 @@ class TicketFollowup  extends CommonDBTM {
          if ($reopen_case) {
             echo "<input type='hidden' name='add_reopen' value='1'>";
          }
-         
+
          echo "</td></tr>\n";
 
          echo "<tr class='tab_bg_1'>";
@@ -632,7 +631,7 @@ class TicketFollowup  extends CommonDBTM {
          if ($reopen_case) {
             echo "<input type='hidden' name='add_reopen' value='1'>";
          }
-                
+
          echo "</td></tr>\n";
 
          $this->showFormButtons($options);
@@ -662,10 +661,10 @@ class TicketFollowup  extends CommonDBTM {
       $canadd        = $this->can(-1, CREATE, $tmp);
       $reopen_case = false;
       if (in_array($ticket->fields["status"], $ticket->getClosedStatusArray())
-            && $ticket->isAllowedStatus($ticket->fields['status'], Ticket::INCOMING)) {
+          && $ticket->isAllowedStatus($ticket->fields['status'], Ticket::INCOMING)) {
          $reopen_case = true;
       }
-      
+
       $RESTRICT = "";
       if (!$showprivate) {
          $RESTRICT = " AND (`is_private` = '0'
@@ -696,16 +695,17 @@ class TicketFollowup  extends CommonDBTM {
                                 $CFG_GLPI["root_doc"]."/ajax/viewsubitem.php", $params);
          echo "};";
          echo "</script>\n";
-         // Not closed ticket or closed 
-         if (!in_array($ticket->fields["status"], array_merge($ticket->getSolvedStatusArray(),
-                                                             $ticket->getClosedStatusArray()))
+         // Not closed ticket or closed
+         if (!in_array($ticket->fields["status"],
+                       array_merge($ticket->getSolvedStatusArray(), $ticket->getClosedStatusArray()))
              || $reopen_case) {
 
             if (isset($_GET['_openfollowup']) && $_GET['_openfollowup']) {
                echo Html::scriptBlock("viewAddFollowup".$ticket->fields['id']."$rand()");
             } else {
                echo "<div class='center firstbloc'>".
-                  "<a class='vsubmit' href='javascript:viewAddFollowup".$ticket->fields['id']."$rand();'>";
+                  "<a class='vsubmit' href='javascript:viewAddFollowup".$ticket->fields['id'].
+                                            "$rand();'>";
                if ($reopen_case) {
                   _e('Reopen the ticket');
                } else {
@@ -713,7 +713,7 @@ class TicketFollowup  extends CommonDBTM {
                }
                echo "</a></div>\n";
             }
-            
+
          }
       }
 

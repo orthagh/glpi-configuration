@@ -715,7 +715,7 @@ function generateGlobalDropdowns() {
       $dp->add(toolbox::addslashes_deep(array('name'    => $val,
                                               'comment' => "comment $val")));
    }
-   
+
 
    $items = array("Fournisseur", "Transporteur", "SSII", "Revendeur d'", "Assembleur", "SSLL",
                   "Financeur", "Assureur");
@@ -1166,6 +1166,7 @@ function generateGlobalDropdowns() {
       }
       $dp->add(toolbox::addslashes_deep(
                array('designation'        => $val,
+                     'is_recursive' => 1,
                      'comment'            => "comment '$val",
                      'devicecasetypes_id' => mt_rand(0,$MAX["case_type"]),
                      'manufacturers_id'   => mt_rand(1,$MAX['manufacturer']))));
@@ -1183,6 +1184,7 @@ function generateGlobalDropdowns() {
       }
       $dp->add(toolbox::addslashes_deep(
                array('designation'        => $val,
+                     'is_recursive' => 1,
                      'comment'            => "comment ' $val",
                      'interfacetypes_id'  => mt_rand(0,$MAX["interface"]),
                      'manufacturers_id'   => mt_rand(1,$MAX['manufacturer']))));
@@ -1200,6 +1202,7 @@ function generateGlobalDropdowns() {
       }
       $dp->add(toolbox::addslashes_deep(
                array('designation'        => $val,
+                     'is_recursive' => 1,
                      'comment'            => "comment '$val",
                      'is_writer'          => mt_rand(0,1),
                      'speed'              => mt_rand(0,60),
@@ -1220,10 +1223,11 @@ function generateGlobalDropdowns() {
       }
       $dp->add(toolbox::addslashes_deep(
                array('designation'        => $val,
+                     'is_recursive' => 1,
                      'comment'            => "comment ' $val",
                      'interfacetypes_id'  => mt_rand(0,$MAX["interface"]),
                      'manufacturers_id'   => mt_rand(1,$MAX['manufacturer']),
-                     'specif_default'     => 256*mt_rand(0,8))));
+                     'memory_default'     => 256*mt_rand(0,8))));
    }
 
 
@@ -1238,10 +1242,11 @@ function generateGlobalDropdowns() {
       }
       $dp->add(toolbox::addslashes_deep(
                array('designation'        => $val,
+                     'is_recursive' => 1,
                      'comment'            => "comment' $val",
                      'interfacetypes_id'  => mt_rand(0,$MAX["interface"]),
                      'manufacturers_id'   => mt_rand(1,$MAX['manufacturer']),
-                     'specif_default'     => mt_rand(0,300),
+                     'capacity_default'   => mt_rand(0,300),
                      'rpm'                => mt_rand(0,15000),
                      'cache'              => 51200*mt_rand(0,10))));
    }
@@ -1258,6 +1263,7 @@ function generateGlobalDropdowns() {
       }
       $dp->add(toolbox::addslashes_deep(
                array('designation'        => $val,
+                     'is_recursive' => 1,
                      'comment'            => "comment' $val",
                      'manufacturers_id'   => mt_rand(1,$MAX['manufacturer']),
                      'bandwidth'          => mt_rand(0,1000))));
@@ -1277,6 +1283,7 @@ function generateGlobalDropdowns() {
       }
       $dp->add(toolbox::addslashes_deep(
                array('designation'        => $val,
+                     'is_recursive' => 1,
                      'comment'            => "comment' $val",
                      'manufacturers_id'   => mt_rand(1,$MAX['manufacturer']),
                      'chipset'            => 'chipset '.mt_rand(0,1000))));
@@ -1294,6 +1301,7 @@ function generateGlobalDropdowns() {
       }
       $dp->add(toolbox::addslashes_deep(
                array('designation'        => $val,
+                     'is_recursive' => 1,
                      'comment'            => "comment '$val",
                      'manufacturers_id'   => mt_rand(1,$MAX['manufacturer']))));
    }
@@ -1310,6 +1318,7 @@ function generateGlobalDropdowns() {
       }
       $dp->add(toolbox::addslashes_deep(
                array('designation'        => $val,
+                     'is_recursive' => 1,
                      'comment'            => "comment '$val",
                      'manufacturers_id'   => mt_rand(1,$MAX['manufacturer']),
                      'power'              => mt_rand(0,500).'W',
@@ -1329,10 +1338,14 @@ function generateGlobalDropdowns() {
       }
       $dp->add(toolbox::addslashes_deep(
                array('designation'        => $val,
+                     'is_recursive' => 1,
                      'comment'            => "comment' $val",
                      'manufacturers_id'   => mt_rand(1,$MAX['manufacturer']),
                      'frequence'          => mt_rand(1000,3000),
-                     'specif_default'     => 1000+200*mt_rand(0,10))));
+                     'frequency_default'  => 1000+200*mt_rand(0,10),
+                     'nbcores_default'    => mt_rand(1,8),
+                     'nbthreads_default'  => mt_rand(1,4),
+                     )));
    }
 
 
@@ -1348,10 +1361,11 @@ function generateGlobalDropdowns() {
       }
       $dp->add(toolbox::addslashes_deep(
                array('designation'          => $val,
+                     'is_recursive' => 1,
                      'comment'              => "comment' $val",
                      'manufacturers_id'     => mt_rand(1,$MAX['manufacturer']),
                      'frequence'            => 100*mt_rand(0,10),
-                     'specif_default'       => 1024*mt_rand(0,6),
+                     'size_default'         => 1024*mt_rand(0,6),
                      'devicememorytypes_id' => mt_rand(1,$MAX['ram_type']))));
    }
 
@@ -1368,6 +1382,7 @@ function generateGlobalDropdowns() {
       }
        $dp->add(toolbox::addslashes_deep(
                 array('designation'         => $val,
+                     'is_recursive' => 1,
                      'comment'              => "comment '$val",
                      'manufacturers_id'     => mt_rand(1,$MAX['manufacturer']),
                      'type'                 => 'type '.mt_rand(0,100))));
@@ -2473,73 +2488,60 @@ function generate_entity($ID_entity) {
       addInfocoms('Computer', $compID, $ID_entity);
 
       // ADD DEVICE
+      $cdevmb->addDevices(1, 'Computer', $compID, mt_rand(1,$MAX['device']),
+                          array('serial' => Toolbox::getRandomString(15)));
 
-      $cdevmb->add(array('itemtype'              => 'Computer',
-                         'items_id'              => $compID,
-                         'devicemotherboards_id' => mt_rand(1,$MAX['device']),
-                         'serial'            => Toolbox::getRandomString(15)));
-
-      $cdevproc->add(array('itemtype'              => 'Computer',
-                           'items_id'              => $compID,
-                           'serial'            => Toolbox::getRandomString(15),
-                           'deviceprocessors_id'   => mt_rand(1,$MAX['device']),
-                           'frequency'           => (1000+200*mt_rand(0,20))));
-
-      $cdevmem->add(array('itemtype'            => 'Computer',
-                          'items_id'            => $compID,
-                          'serial'            => Toolbox::getRandomString(15),
-                          'devicememories_id'   => mt_rand(1,$MAX['device']),
-                          'size'         => (512*mt_rand(1,20))));
-
-      $cdevhd->add(array('itemtype'              => 'Computer',
-                         'items_id'              => $compID,
-                         'serial'            => Toolbox::getRandomString(15),
-                         'deviceharddrives_id'   => mt_rand(1,$MAX['device']),
-                         'capacity'           => (102400*mt_rand(1,20))));
-
-      $cdevnc->add(array('itemtype'              => 'Computer',
-                         'items_id'              => $compID,
-                         'serial'            => Toolbox::getRandomString(15),
-                         'devicenetworkcards_id' => mt_rand(1,$MAX['device']),
-                         'mac'           => getNextMAC()));
-
-      $cdevdr->add(array('itemtype'         => 'Computer',
-                         'items_id'         => $compID,
-                         'serial'            => Toolbox::getRandomString(15),
-                         'devicedrives_id'  => mt_rand(1,$MAX['device'])));
-
-      $cdevcon->add(array('itemtype'              => 'Computer',
-                          'items_id'              => $compID,
-                          'serial'            => Toolbox::getRandomString(15),
-                          'devicecontrols_id'     => mt_rand(1,$MAX['device'])));
-
-      $cdevgc->add(array('itemtype'              => 'Computer',
-                         'items_id'              => $compID,
-                         'serial'            => Toolbox::getRandomString(15),
-                         'devicegraphiccards_id' => mt_rand(1,$MAX['device']),
-                         'memory'           => (128*mt_rand(1,20))));
-
-      $cdevsc->add(array('itemtype'              => 'Computer',
-                         'items_id'              => $compID,
-                         'serial'            => Toolbox::getRandomString(15),
-                         'devicesoundcards_id'   => mt_rand(1,$MAX['device'])));
-
-      if (mt_rand(0,100)<20) {
-         $cdevpci->add(array('itemtype'         => 'Computer',
-                             'items_id'         => $compID,
-                             'serial'            => Toolbox::getRandomString(15),
-                             'devicepcis_id'    => mt_rand(1,$MAX['device'])));
+      $max   = mt_rand(1,4);
+      $devid = mt_rand(1,$MAX['device']);
+      for($nb = 0; $nb<$max; $nb++) {
+         $cdevproc->addDevices(1, 'Computer', $compID, $devid,
+                               array('serial' => Toolbox::getRandomString(15)));
+      }
+      $max   = mt_rand(1,4);
+      $devid = mt_rand(1,$MAX['device']);
+      for($nb = 0; $nb<$max; $nb++) {
+         $cdevmem->addDevices(1, 'Computer', $compID, $devid,
+                              array('serial' => Toolbox::getRandomString(15)));
       }
 
-      $cdevcase->add(array('itemtype'         => 'Computer',
-                           'items_id'         => $compID,
-                           'serial'            => Toolbox::getRandomString(15),
-                           'devicecases_id'   => mt_rand(1,$MAX['device'])));
+      $max = mt_rand(1,2);
+      $devid = mt_rand(1,$MAX['device']);
+      for($nb = 0; $nb<$max; $nb++) {
+         $cdevhd->addDevices(1, 'Computer', $compID, $devid,
+                             array('serial' => Toolbox::getRandomString(15)));
+      }
 
-      $cdevps->add(array('itemtype'                 => 'Computer',
-                         'items_id'                 => $compID,
-                         'serial'            => Toolbox::getRandomString(15),
-                         'devicepowersupplies_id'   => mt_rand(1,$MAX['device'])));
+      $cdevnc->addDevices(1, 'Computer', $compID, mt_rand(1,$MAX['device']),
+                          array('serial' => Toolbox::getRandomString(15),
+                                'mac'    => getNextMAC()));
+
+      $cdevdr->addDevices(1, 'Computer', $compID, mt_rand(1,$MAX['device']),
+                          array('serial' => Toolbox::getRandomString(15)));
+
+      $cdevcon->addDevices(1, 'Computer', $compID, mt_rand(1,$MAX['device']),
+                           array('serial' => Toolbox::getRandomString(15)));
+
+      $cdevgc->addDevices(1, 'Computer', $compID, mt_rand(1,$MAX['device']),
+                          array('serial' => Toolbox::getRandomString(15)));
+
+      $cdevsc->addDevices(1, 'Computer', $compID, mt_rand(1,$MAX['device']),
+                          array('serial' => Toolbox::getRandomString(15)));
+
+      $max = mt_rand(1,4);
+      for($nb = 0; $nb<$max; $nb++) {
+         $cdevpci->addDevices(1, 'Computer', $compID, mt_rand(1,$MAX['device']),
+                              array('serial' => Toolbox::getRandomString(15)));
+      }
+
+      $cdevcase->addDevices(1, 'Computer', $compID, mt_rand(1,$MAX['device']),
+                            array('serial'=> Toolbox::getRandomString(15)));
+
+      $max   = mt_rand(1,2);
+      $devid = mt_rand(1,$MAX['device']);
+      for($nb = 0; $nb<$max; $nb++) {
+         $cdevps->addDevices(1, 'Computer', $compID, $devid,
+                             array('serial' => Toolbox::getRandomString(15)));
+      }
 
       // insert disk
       $nb_disk = mt_rand(1,$MAX_DISK);
@@ -2547,7 +2549,7 @@ function generate_entity($ID_entity) {
          $totalsize = mt_rand(10000,1000000);
          $freesize  = mt_rand(0,$totalsize);
 
-         $cdisk-> add(toolbox::addslashes_deep(
+         $cdisk->add(toolbox::addslashes_deep(
                       array('entities_id'     => $ID_entity,
                             'computers_id'    => $compID,
                             'name'            => "disk '$j",

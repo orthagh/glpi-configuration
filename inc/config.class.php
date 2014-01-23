@@ -605,7 +605,7 @@ class Config extends CommonDBTM {
       echo "<td><input type='text' name='_dbreplicate_dbuser' value='".$DBslave->dbuser."'></td>";
       echo "<td>" . __('Mysql password') . "</td>";
       echo "<td><input type='password' name='_dbreplicate_dbpassword' value='".
-                 $DBslave->dbpassword."'>";
+                 rawurldecode($DBSlave->dbpassword)."'>";
       echo "</td></tr>";
 
       echo "<tr class='tab_bg_2'>";
@@ -957,7 +957,7 @@ class Config extends CommonDBTM {
                           $data['keep_devices_when_purging_item']);
       echo "</td></tr>";
 
-      echo "<tr class='tab_bg_2'><td>".__('Back to created item after create')."</td>";
+      echo "<tr class='tab_bg_2'><td>".__('Go to created item after creation')."</td>";
       echo "<td>";
       Dropdown::showYesNo("backcreated", $data["backcreated"]);
       echo "</td></tr>";

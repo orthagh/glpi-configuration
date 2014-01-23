@@ -1667,7 +1667,7 @@ function update084to085() {
       $migration->addKey('glpi_states', $field);
    }
 
-
+   
    // glpi_domains by entity
    $migration->addField('glpi_domains', 'entities_id', 'integer', array('after' => 'name'));
    $migration->addField('glpi_domains', 'is_recursive', 'bool', array('update' => '1',
@@ -2416,6 +2416,14 @@ function update084to085() {
       }
    }
 
+   $migration->addField('glpi_deviceprocessors', 'nbcores_default', 'int');
+   $migration->addField('glpi_deviceprocessors', 'nbthreads_default', 'int');
+
+   $migration->addField('glpi_items_deviceprocessors', 'nbcores', 'int');
+   $migration->addField('glpi_items_deviceprocessors', 'nbthreads', 'int');
+   $migration->addKey('glpi_items_deviceprocessors', 'nbcores');
+   $migration->addKey('glpi_items_deviceprocessors', 'nbthreads');
+
    $migration->displayMessage(sprintf(__('Data migration - %s'), 'ticketvalidations status'));
 
    $status  = array('none'     => CommonITILValidation::NONE,
@@ -2460,6 +2468,39 @@ function update084to085() {
       $DB->queryOrDie($query, "0.85 value in glpi_tickettemplatepredefinedfields $old to $new");
    }
 
+   // Migrate templates
+   $query = "SELECT `glpi_notificationtemplatetranslations`.*
+             FROM `glpi_notificationtemplatetranslations`
+             INNER JOIN `glpi_notificationtemplates`
+                  ON (`glpi_notificationtemplates`.`id`
+                        = `glpi_notificationtemplatetranslations`.`notificationtemplates_id`)
+             WHERE `glpi_notificationtemplatetranslations`.`content_text` LIKE '%validation.storestatus=%'
+                   OR `glpi_notificationtemplatetranslations`.`content_html` LIKE '%validation.storestatus=%'
+                   OR `glpi_notificationtemplatetranslations`.`subject` LIKE '%validation.storestatus=%'";
+
+   if ($result=$DB->query($query)) {
+      if ($DB->numrows($result)) {
+         while ($data = $DB->fetch_assoc($result)) {
+            $subject = $data['subject'];
+            $text    = $data['content_text'];
+            $html    = $data['content_html'];
+            foreach ($status as $old => $new) {
+               $subject = str_replace("validation.storestatus=$old","validation.storestatus=$new",
+                                      $subject);
+               $text    = str_replace("validation.storestatus=$old","validation.storestatus=$new",
+                                      $text);
+               $html    = str_replace("validation.storestatus=$old","validation.storestatus=$new",
+                                      $html);
+            }
+            $query = "UPDATE `glpi_notificationtemplatetranslations`
+                      SET `subject` = '".addslashes($subject)."',
+                         `content_text` = '".addslashes($text)."',
+                         `content_html` = '".addslashes($html)."'
+                      WHERE `id` = ".$data['id']."";
+            $DB->queryOrDie($query, "0.85 fix tags usage for storestatus");
+         }
+      }
+   }
 
    // Upgrade ticket bookmarks
    $query = "SELECT *
@@ -2511,7 +2552,7 @@ function update084to085() {
                                                                     'after'  => 'entities_id'));
          $migration->addKey($table, array('is_recursive'), 'is_recursive');
       }
-      
+
    }
 
    // Adding the Registered ID class that contains PCI IDs and USB IDs for vendors
@@ -2565,6 +2606,11 @@ function update084to085() {
    $migration->addField("glpi_changes_suppliers", "use_notification", "bool");
    $migration->addField("glpi_changes_suppliers", "alternative_email", "string");
 
+   // Add field for locations
+   $migration->addField("glpi_locations", "latitude", "string");
+   $migration->addField("glpi_locations", "longitude", "string");
+   $migration->addField("glpi_locations", "altitude", "string");
+   
    // Add fixed columns as variables :
    $ADDTODISPLAYPREF['CartridgeItem']   = array(9);
    $ADDTODISPLAYPREF['ConsumableItem']  = array(9);
@@ -2638,6 +2684,8 @@ function update084to085() {
 
    $DB->queryOrDie($query, "0.85 update default life cycle for helpdesk");
 
+   //Add comment field to a virtualmachine
+   $migration->addField('glpi_computervirtualmachines','comment', 'text');
 
    // Upgrade ticket bookmarks
    $query = "SELECT *
@@ -2654,24 +2702,24 @@ function update084to085() {
 
             // Copy itemtype if not set
             if (!isset($options['itemtype'])) {
-               $options['itemtype'] = $data['itemtype']
+               $options['itemtype'] = $data['itemtype'];
             }
             // Move criteria
             if (isset($options['field']) && is_array($options['field'])) {
                foreach ($options['field'] as $key => $val) {
                   $options['criteria'][$key]['field'] = $val;
-                  
+
                   //  other field
                   if (isset($options['link'][$key])) {
                      $options['criteria'][$key]['link'] = $options['link'][$key];
                   }
-                  
+
                   if (isset($options['searchtype'][$key])) {
                      $options['criteria'][$key]['searchtype'] = $options['searchtype'][$key];
                   } else {
                      $options['criteria'][$key]['searchtype'] = 'contains';
                   }
-                  
+
                   if (isset($options['contains'][$key])) {
                      $options['criteria'][$key]['value'] = $options['contains'][$key];
                   } else {
@@ -2692,17 +2740,17 @@ function update084to085() {
                   if (isset($options['itemtype2'][$key])) {
                      $options['metacriteria'][$key]['itemtype'] = $options['itemtype2'][$key];
                   }
-                  
+
                   if (isset($options['link2'][$key])) {
                      $options['metacriteria'][$key]['link'] = $options['link2'][$key];
                   }
-                  
+
                   if (isset($options['searchtype2'][$key])) {
                      $options['metacriteria'][$key]['searchtype'] = $options['searchtype2'][$key];
                   } else {
                      $options['metacriteria'][$key]['searchtype'] = 'contains';
                   }
-                  
+
                   if (isset($options['contains2'][$key])) {
                      $options['metacriteria'][$key]['value'] = $options['contains2'][$key];
                   } else {
@@ -2715,7 +2763,7 @@ function update084to085() {
                unset($options['link2']);
                unset($options['itemtype2']);
             }
-            
+
             $query2 = "UPDATE `glpi_bookmarks`
                        SET `query` = '".addslashes(Toolbox::append_params($options))."'
                        WHERE `id` = '".$data['id']."'";
@@ -2723,7 +2771,7 @@ function update084to085() {
             $DB->queryOrDie($query2, "0.85 update bookmarks for reorg search");
          }
       }
-   }   
+   }
    // ************ Keep it at the end **************
    //TRANS: %s is the table or item to migrate
    $migration->displayMessage(sprintf(__('Data migration - %s'), 'glpi_displaypreferences'));

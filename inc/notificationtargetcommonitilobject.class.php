@@ -408,10 +408,10 @@ abstract class NotificationTargetCommonITILObject extends NotificationTarget {
          $this->addTarget(Notification::SUPERVISOR_ASSIGN_GROUP,
                           __('Manager of the group in charge of the ticket'));
          $this->addTarget(Notification::ASSIGN_GROUP_WITHOUT_SUPERVISOR,
-                          __('Group in charge of the ticket without manager'));
+                          __("Group in charge of the ticket except manager users"));
          $this->addTarget(Notification::SUPERVISOR_REQUESTER_GROUP, __('Requester group manager'));
          $this->addTarget(Notification::REQUESTER_GROUP_WITHOUT_SUPERVISOR,
-                          __('Requester group without manager'));
+                          __("Requester group except manager users"));
          $this->addTarget(Notification::ITEM_TECH_IN_CHARGE,
                           __('Technician in charge of the hardware'));
          $this->addTarget(Notification::ITEM_TECH_GROUP_IN_CHARGE,
@@ -425,7 +425,7 @@ abstract class NotificationTargetCommonITILObject extends NotificationTarget {
          $this->addTarget(Notification::OBSERVER, __('Watcher'));
          $this->addTarget(Notification::SUPERVISOR_OBSERVER_GROUP,__('Watcher group manager'));
          $this->addTarget(Notification::OBSERVER_GROUP_WITHOUT_SUPERVISOR,
-                          __('Watcher group without manager'));
+                          __("Watcher group except manager users"));
       }
 
       if (($event == 'validation') || ($event == 'validation_answer')) {
@@ -750,7 +750,7 @@ abstract class NotificationTargetCommonITILObject extends NotificationTarget {
             $uid           = $tmp['suppliers_id'];
             $supplier_tmp  = new Supplier();
             if ($supplier_tmp->getFromDB($uid)) {
-               $suppliers[$uid] = $user_tmp->getName();
+               $suppliers[$uid] = $supplier_tmp->getName();
             }
          }
          $datas["##$objettype.assigntosupplier##"] = implode(', ',$suppliers);
