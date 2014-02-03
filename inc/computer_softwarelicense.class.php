@@ -459,43 +459,47 @@ class Computer_SoftwareLicense extends CommonDBRelation {
 
             $sort_img = "<img src='" . $CFG_GLPI["root_doc"] . "/pics/" .
                           ($order == "DESC" ? "puce-down.png" : "puce-up.png") . "' alt='' title=''>";
-            echo "<table class='tab_cadre_fixehov'><tr>";
+            echo "<table class='tab_cadre_fixehov'>";
+
+            $columns = array('compname'          => __('Name'),
+                             'entity'            => __('Entity'),
+                             'serial'            => __('Serial number'),
+                             'otherserial'       => __('Inventory number'),
+                             'location,compname' => __('Location'),
+                             'state,compname'    => __('Status'),
+                             'groupe,compname'   => __('Group'),
+                             'username,compname' => __('User'));
+            if (!$showEntity) {
+               unset($columns['entity']);
+            }
+            $sort_img = "<img src=\"" . $CFG_GLPI["root_doc"] . "/pics/" .
+                          (($order == "DESC") ? "puce-down.png" : "puce-up.png") ."\" alt='' title=''>";
+
+            $header_begin = "<tr>";
+            $header_top = '';
+            $header_bottom = '';
+            $header_end = '';
             if ($canedit) {
-               echo "<th width='10'>";
-               Html::checkAllAsCheckbox('mass'.__CLASS__.$rand);
-               echo "</th>";
-            }
-            echo "<th>".($sort=="`compname`"?$sort_img:"").
-                 "<a href='javascript:reloadTab(\"sort=compname&amp;order=".
-                   ($order=="ASC"?"DESC":"ASC")."&amp;start=0\");'>".__('Name')."</a></th>";
-
-            if ($showEntity) {
-               echo "<th>".(strstr($sort,"entity")?$sort_img:"").
-                    "<a href='javascript:reloadTab(\"sort=entity,compname&amp;order=".
-                      ($order=="ASC"?"DESC":"ASC")."&amp;start=0\");'>".__('Entity')."</a></th>";
+               $header_begin .= "<th width='10'>";
+               $header_top .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
+               $header_bottom .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
+               $header_end .= "</th>";
             }
 
-            echo "<th>".($sort=="`serial`"?$sort_img:"").
-                 "<a href='javascript:reloadTab(\"sort=serial&amp;order=".
-                   ($order=="ASC"?"DESC":"ASC")."&amp;start=0\");'>".__('Serial number')."</a></th>";
-            echo "<th>".($sort=="`otherserial`"?$sort_img:"").
-                 "<a href='javascript:reloadTab(\"sort=otherserial&amp;order=".
-                   ($order=="ASC"?"DESC":"ASC")."&amp;start=0\");'>".__('Inventory number').
-                 "</a></th>";
-            echo "<th>".(strstr($sort,"`location`")?$sort_img:"").
-                 "<a href='javascript:reloadTab(\"sort=location,compname&amp;order=".
-                   ($order=="ASC"?"DESC":"ASC")."&amp;start=0\");'>".__('Location')."</a></th>";
-            echo "<th>".(strstr($sort,"state")?$sort_img:"").
-                 "<a href='javascript:reloadTab(\"sort=state,compname&amp;order=".
-                   ($order=="ASC"?"DESC":"ASC")."&amp;start=0\");'>".__('Status')."</a></th>";
-            echo "<th>".(strstr($sort,"groupe")?$sort_img:"").
-                 "<a href='javascript:reloadTab(\"sort=groupe,compname&amp;order=".
-                   ($order=="ASC"?"DESC":"ASC")."&amp;start=0\");'>".__('Group')."</a></th>";
-            echo "<th>".(strstr($sort,"username")?$sort_img:"").
-                 "<a href='javascript:reloadTab(\"sort=username,compname&amp;order=".
-                   ($order=="ASC"?"DESC":"ASC")."&amp;start=0\");'>".__('User')."</a></th>";
-            echo "</tr>\n";
+            foreach ($columns as $key => $val) {
+               // Non order column
+               if ($key[0] == '_') {
+                  $header_end .= "<th>$val</th>";
+               } else {
+                  $header_end .= "<th>".(($sort == "`$key`") ?$sort_img:"").
+                        "<a href='javascript:reloadTab(\"sort=$key&amp;order=".
+                           (($order == "ASC") ?"DESC":"ASC")."&amp;start=0\");'>$val</a></th>";
+               }
+            }
 
+            $header_end .= "</tr>\n";
+            echo $header_begin.$header_top.$header_end;
+            
             do {
                Session::addToNavigateListItems('Computer',$data["cID"]);
 
@@ -528,7 +532,7 @@ class Computer_SoftwareLicense extends CommonDBRelation {
                echo "</tr>\n";
 
             } while ($data=$DB->fetch_assoc($result));
-
+            echo $header_begin.$header_bottom.$header_end;
             echo "</table>\n";
             if ($canedit) {
                $massiveactionparams['ontop'] = false;
@@ -635,7 +639,7 @@ class Computer_SoftwareLicense extends CommonDBRelation {
                if ($_SESSION['glpishow_count_on_tabs']) {
                   $nb = self::countForLicense($item->getID());
                }
-               return array(1 => SoftwareLicense::getTypeName(1),
+               return array(1 => __('Summary'),
                             2 => self::createTabEntry(Computer::getTypeName(2), $nb));
             }
             break;

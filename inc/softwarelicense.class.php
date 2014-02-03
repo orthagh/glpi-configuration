@@ -628,24 +628,27 @@ class SoftwareLicense extends CommonDBTM {
             $sort_img = "<img src=\"" . $CFG_GLPI["root_doc"] . "/pics/" .
                           (($order == "DESC") ? "puce-down.png" : "puce-up.png") ."\" alt='' title=''>";
 
-            echo "<table class='tab_cadre_fixehov'><tr>";
+            echo "<table class='tab_cadre_fixehov'>";
 
-            echo "<th>";
-            Html::checkAllAsCheckbox('mass'.__CLASS__.$rand);
-            echo "</th>";
+
+            $header_begin = "<tr><th>";
+            $header_top = Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
+            $header_bottom = Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
+            $header_end = '';
 
             foreach ($columns as $key => $val) {
                // Non order column
                if ($key[0] == '_') {
-                  echo "<th>$val</th>";
+                  $header_end .= "<th>$val</th>";
                } else {
-                  echo "<th>".(($sort == "`$key`") ?$sort_img:"").
+                  $header_end .= "<th>".(($sort == "`$key`") ?$sort_img:"").
                         "<a href='javascript:reloadTab(\"sort=$key&amp;order=".
                            (($order == "ASC") ?"DESC":"ASC")."&amp;start=0\");'>$val</a></th>";
                }
             }
 
-            echo "</tr>\n";
+            $header_end .= "</tr>\n";
+            echo $header_begin.$header_top.$header_end;
 
             $tot_assoc = 0;
             for ($tot=0 ; $data=$DB->fetch_assoc($result) ; ) {

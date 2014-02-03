@@ -52,7 +52,7 @@ class CartridgeItem_PrinterModel extends CommonDBRelation {
    function getForbiddenStandardMassiveAction() {
 
       $forbidden   = parent::getForbiddenStandardMassiveAction();
-      $forbidden[] = 'MassiveAction'.MassiveAction::CLASS_ACTION_SEPARATOR.'update';
+      $forbidden[] = 'update';
       return $forbidden;
    }
 
@@ -127,12 +127,7 @@ class CartridgeItem_PrinterModel extends CommonDBRelation {
                 ORDER BY `glpi_printermodels`.`name`";
 
       $result = $DB->query($query);
-      $i      = 0;   function getForbiddenStandardMassiveAction() {
-
-      $forbidden   = parent::getForbiddenStandardMassiveAction();
-      $forbidden[] = 'MassiveAction'.MassiveAction::CLASS_ACTION_SEPARATOR.'update';
-      return $forbidden;
-   }
+      $i      = 0;
 
       $used  = array();
       $datas = array();
@@ -174,13 +169,18 @@ class CartridgeItem_PrinterModel extends CommonDBRelation {
          }
 
          echo "<table class='tab_cadre_fixehov'>";
-         echo "<tr>";
+         $header_begin = "<tr>";
+         $header_top = '';
+         $header_bottom = '';
+         $header_end = '';
          if ($canedit) {
-            echo "<th width='10'>";
-            Html::checkAllAsCheckbox('mass'.__CLASS__.$rand);
-            echo "</th>";
+            $header_begin .= "<th width='10'>";
+            $header_top .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
+            $header_bottom .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
+            $header_end .= "</th>";
          }
-         echo "<th>".__('Model')."</th></tr>";
+         $header_end .= "<th>".__('Model')."</th></tr>";
+         echo $header_begin.$header_top.$header_end;
 
          foreach ($datas as $data) {
             echo "<tr class='tab_bg_1'>";
@@ -192,6 +192,7 @@ class CartridgeItem_PrinterModel extends CommonDBRelation {
             echo "<td class='center'>".$data['type']."</td>";
             echo "</tr>";
          }
+         echo $header_begin.$header_bottom.$header_end;
          echo "</table>";
          if ($canedit) {
             $massiveactionparams['ontop'] = false;

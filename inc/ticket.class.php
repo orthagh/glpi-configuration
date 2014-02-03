@@ -89,12 +89,12 @@ class Ticket extends CommonITILObject {
 
       // TODO: why not trying to do that inside MassiveAction::getAllMassiveActions ?
       if (!self::canUpdate()) {
-         $forbidden[] = 'MassiveAction'.MassiveAction::CLASS_ACTION_SEPARATOR.'update';
+         $forbidden[] = 'update';
       }
       if (!Session::haveRightsOr(self::$rightname, array(DELETE, PURGE))) {
-         $forbidden[] = 'MassiveAction'.MassiveAction::CLASS_ACTION_SEPARATOR.'delete';
-         $forbidden[] = 'MassiveAction'.MassiveAction::CLASS_ACTION_SEPARATOR.'purge';
-         $forbidden[] = 'MassiveAction'.MassiveAction::CLASS_ACTION_SEPARATOR.'restore';
+         $forbidden[] = 'delete';
+         $forbidden[] = 'purge';
+         $forbidden[] = 'restore';
       }
 
       return $forbidden;
@@ -214,6 +214,10 @@ class Ticket extends CommonITILObject {
 
    static function canUpdate() {
 
+      // To allow update of urgency and category for post-only
+      if ($_SESSION["glpiactiveprofile"]["interface"] == "helpdesk") {
+         return Session::haveRight(self::$rightname, CREATE);
+      }
       return Session::haveRightsOr(self::$rightname,
                                    array(UPDATE, self::ASSIGN, self::STEAL, self::OWN));
    }
@@ -404,6 +408,16 @@ class Ticket extends CommonITILObject {
    }
 
 
+   static function canDelete() {
+
+      // to allow delete for self-service only if no action on the ticket
+      if ($_SESSION["glpiactiveprofile"]["interface"] == "helpdesk") {
+         return Session::haveRight(self::$rightname, CREATE);
+      }
+      return Session::haveRight(self::$rightname, DELETE);
+   }
+
+
    /**
     * Is the current user have right to delete the current ticket ?
     *
@@ -424,7 +438,7 @@ class Ticket extends CommonITILObject {
          return true;
       }
 
-      return self::canDelete();
+      return static::canDelete();
    }
 
 
@@ -1952,32 +1966,32 @@ class Ticket extends CommonITILObject {
       $isadmin = static::canUpdate();
       $actions = parent::getSpecificMassiveActions($checkitem);
 
-      if (TicketFollowup::canCreate()
-          && ($_SESSION['glpiactiveprofile']['interface'] == 'central')) {
-         $actions['TicketFollowup'.MassiveAction::CLASS_ACTION_SEPARATOR.'add_followup']
-            = __('Add a new followup');
-      }
+      if ($_SESSION['glpiactiveprofile']['interface'] == 'central') {
+         if (TicketFollowup::canCreate()) {
+            $actions['TicketFollowup'.MassiveAction::CLASS_ACTION_SEPARATOR.'add_followup']
+               = __('Add a new followup');
+         }
 
-      if (TicketTask::canCreate()) {
-         $actions[__CLASS__.MassiveAction::CLASS_ACTION_SEPARATOR.'add_task'] = __('Add a new task');
-      }
+         if (TicketTask::canCreate()) {
+            $actions[__CLASS__.MassiveAction::CLASS_ACTION_SEPARATOR.'add_task'] = __('Add a new task');
+         }
 
-      if (TicketValidation::canCreate()) {
-         $actions['TicketValidation'.MassiveAction::CLASS_ACTION_SEPARATOR.'submit_validation']
-            = __('Approval request');
-      }
+         if (TicketValidation::canCreate()) {
+            $actions['TicketValidation'.MassiveAction::CLASS_ACTION_SEPARATOR.'submit_validation']
+               = __('Approval request');
+         }
 
-      if (Session::haveRight(self::$rightname, UPDATE)) {
-         $actions[__CLASS__.MassiveAction::CLASS_ACTION_SEPARATOR.'add_actor']
-            = __('Add an actor');
-         $actions[__CLASS__.MassiveAction::CLASS_ACTION_SEPARATOR.'link_ticket']
-            = _x('button', 'Link tickets');
-      }
+         if (Session::haveRight(self::$rightname, UPDATE)) {
+            $actions[__CLASS__.MassiveAction::CLASS_ACTION_SEPARATOR.'add_actor']
+               = __('Add an actor');
+            $actions[__CLASS__.MassiveAction::CLASS_ACTION_SEPARATOR.'link_ticket']
+               = _x('button', 'Link tickets');
+         }
 
-      if (Session::haveRight(self::$rightname, UPDATE)) {
-         MassiveAction::getAddTransferList($actions);
+         if (Session::haveRight(self::$rightname, UPDATE)) {
+            MassiveAction::getAddTransferList($actions);
+         }
       }
-
       return $actions;
    }
 
@@ -4453,7 +4467,9 @@ class Ticket extends CommonITILObject {
          echo "<tr class='tab_bg_1'>";
 
          if ($ID) {
-            if (Session::haveRightsOr(self::$rightname, array(UPDATE, DELETE, PURGE))) {
+            if (Session::haveRightsOr(self::$rightname, array(UPDATE, DELETE, PURGE))
+                || $this->canDeleteItem()
+                || $this->canUpdateItem()) {
                echo "<td class='tab_bg_2 center' colspan='2'>";
                if ($this->fields["is_deleted"] == 1) {
                   if (self::canPurge()) {
@@ -4461,7 +4477,7 @@ class Ticket extends CommonITILObject {
                             _sx('button', 'Restore')."'></td>";
                   }
                } else {
-                  if (Session::haveRight(self::$rightname, UPDATE)) {
+                  if (self::canUpdate()) {
                      echo "<input type='submit' class='submit' name='update' value='".
                             _sx('button', 'Save')."'></td>";
                   }
@@ -4478,13 +4494,6 @@ class Ticket extends CommonITILObject {
                      echo "<input type='submit' class='submit' name='delete' value='".
                             _sx('button', 'Put in dustbin')."'></td>";
                   }
-               }
-
-            } else {
-               if (Session::haveRight(self::$rightname, UPDATE)) {
-                  echo "<td class='tab_bg_2 center' colspan='4'>";
-                  echo "<input type='submit' class='submit' name='update' value='".
-                         _sx('button', 'Save')."'>";
                }
             }
             echo "<input type='hidden' name='_read_date_mod' value='".$this->getField('date_mod')."'>";
@@ -5208,6 +5217,12 @@ class Ticket extends CommonITILObject {
       $result = $DB->query($query);
       $number = $DB->numrows($result);
 
+
+      $colspan = 11;
+      if (count($_SESSION["glpiactiveentities"]) > 1) {
+         $colspan++;
+      }
+      
       // Ticket for the item
       echo "<div class='firstbloc'>";
       // Link to open a new ticket
@@ -5229,7 +5244,7 @@ class Ticket extends CommonITILObject {
                                         sprintf(__('%1$s = %2$s'), $item->getTypeName(1),
                                                 $item->getName()));
 
-         echo "<tr class='noHover'><th colspan='12'>";
+         echo "<tr class='noHover'><th colspan='$colspan'>";
          $title = sprintf(_n('Last %d ticket', 'Last %d tickets', $number), $number);
          $link = "<a href='".$CFG_GLPI["root_doc"]."/front/ticket.php?".
                   Toolbox::append_params($options,'&amp;')."'>".__('Show all')."</a>";
@@ -5243,7 +5258,7 @@ class Ticket extends CommonITILObject {
       if ($item->getID()
           && ($item->getType() == 'User')
           && self::canCreate()) {
-         echo "<tr><td class='tab_bg_2 center b' colspan='11'>";
+         echo "<tr><td class='tab_bg_2 center b' colspan='$colspan'>";
          Html::showSimpleForm($CFG_GLPI["root_doc"]."/front/ticket.form.php",
                               '_add_fromitem', __('New ticket for this item...'),
                               array('_users_id_requester' => $item->getID()));
@@ -5260,7 +5275,7 @@ class Ticket extends CommonITILObject {
          }
          self::commonListHeader(Search::HTML_OUTPUT);
       }
-         
+
       echo "</table></div>";
 
       // Tickets for linked items
@@ -5294,6 +5309,7 @@ class Ticket extends CommonITILObject {
                // Session::addToNavigateListItems(TRACKING_TYPE,$data["id"]);
                self::showShort($data["id"]);
             }
+            self::commonListHeader(Search::HTML_OUTPUT);
          } else {
             echo "<tr><th>".__('No ticket found.')."</th></tr>";
          }

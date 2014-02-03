@@ -52,13 +52,13 @@ class Html {
    static function clean($value) {
 
       $specialfilter = array('@<div[^>]*?tooltip_picture[^>]*?>.*?</div[^>]*?>@si'); // Strip ToolTips
-      $value         = preg_replace($specialfilter, ' ', $value);
+      $value         = preg_replace($specialfilter, '', $value);
       $specialfilter = array('@<div[^>]*?tooltip_text[^>]*?>.*?</div[^>]*?>@si'); // Strip ToolTips
-      $value         = preg_replace($specialfilter, ' ', $value);
+      $value         = preg_replace($specialfilter, '', $value);
       $specialfilter = array('@<div[^>]*?tooltip_picture_border[^>]*?>.*?</div[^>]*?>@si'); // Strip ToolTips
-      $value         = preg_replace($specialfilter, ' ', $value);
+      $value         = preg_replace($specialfilter, '', $value);
       $specialfilter = array('@<div[^>]*?invisible[^>]*?>.*?</div[^>]*?>@si'); // Strip ToolTips
-      $value         = preg_replace($specialfilter, ' ', $value);
+      $value         = preg_replace($specialfilter, '', $value);
 
       $value = preg_replace("/<(p|br|div)( [^>]*)?".">/i", "\n", $value);
       $value = preg_replace("/(&nbsp;| )+/", " ", $value);
@@ -67,7 +67,7 @@ class Html {
       $search        = array('@<script[^>]*?>.*?</script[^>]*?>@si', // Strip out javascript
                               );
 
-      $value = preg_replace($search, ' ', $value);
+      $value = preg_replace($search, '', $value);
 
       include_once(GLPI_HTMLAWED);
 
@@ -458,18 +458,22 @@ class Html {
    /**
     * Redirection to Login page
     *
+    * @param $params : param to add to URL
     * @since version 0.85
     *
     * @return nothing
    **/
-   static function redirectToLogin() {
+   static function redirectToLogin($params='') {
       global $CFG_GLPI;
 
       $dest     = $CFG_GLPI["root_doc"] . "/index.php";
       $url_dest = str_replace($CFG_GLPI["root_doc"],'',$_SERVER['REQUEST_URI']);
       $dest    .= "?redirect=".rawurlencode($url_dest);
 
-      $toadd    = '';
+      if (!empty($params)) {
+         $dest .= '&'.$params;
+      }
+      $toadd = '';
       if (!strpos($dest,"?")) {
          $toadd = '&tokonq='.Toolbox::getRandomString(5);
       }

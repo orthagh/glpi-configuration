@@ -61,7 +61,7 @@ class Cartridge extends CommonDBChild {
    function getForbiddenStandardMassiveAction() {
 
       $forbidden   = parent::getForbiddenStandardMassiveAction();
-      $forbidden[] = 'MassiveAction'.MassiveAction::CLASS_ACTION_SEPARATOR.'update';
+      $forbidden[] = 'update';
       return $forbidden;
    }
 
@@ -178,7 +178,23 @@ class Cartridge extends CommonDBChild {
                }
             }
             return;
-
+            
+         case 'backtostock' :
+            foreach ($ids as $id) {
+               if ($item->can($id, UPDATE)) {
+                  if ($item->backToStock(array("id" => $id))) {
+                     $ma->itemDone($item->getType(), $id, MassiveAction::ACTION_OK);
+                  } else {
+                     $ma->itemDone($item->getType(), $id, MassiveAction::ACTION_KO);
+                     $ma->addMessage($item->getErrorMessage(ERROR_ON_ACTION));
+                  }
+               } else {
+                  $ma->itemDone($item->getType(), $id, MassiveAction::ACTION_NORIGHT);
+                  $ma->addMessage($item->getErrorMessage(ERROR_RIGHT));
+               }
+            }
+            return;
+            
          case 'updatepages' :
             $input = $ma->getInput();
             if (isset($input['pages'])) {
@@ -206,12 +222,10 @@ class Cartridge extends CommonDBChild {
 
 
    /**
-    * @see CommonDBTM::restore()
+    * send back to stock
     */
-   function restore(array $input, $history=1) {
+   function backToStock(array $input, $history=1) {
       global $DB;
-
-      // TODO: restore is not what we expect ! We should rename this method !
 
       $query = "UPDATE `".$this->getTable()."`
                 SET `date_out` = NULL,
@@ -324,7 +338,6 @@ class Cartridge extends CommonDBChild {
    static function getCount($tID, $alarm_threshold, $nohtml=0) {
       global $DB;
 
-      /// TODO to be more useful permit to have several columns and display number in it
       // Get total
       $total = self::getTotalNumber($tID);
       $out   = "";
@@ -380,7 +393,6 @@ class Cartridge extends CommonDBChild {
    static function getCountForPrinter($pID, $nohtml=0) {
       global $DB;
 
-      /// TODO to be more useful permit to have several columns and display number in it
       // Get total
       $total = self::getTotalNumberForPrinter($pID);
       $out   = "";
@@ -642,9 +654,11 @@ class Cartridge extends CommonDBChild {
             $actions = array('MassiveAction'.MassiveAction::CLASS_ACTION_SEPARATOR.'purge'
                                        => _x('button', 'Delete permanently'),
                              'Infocom'.MassiveAction::CLASS_ACTION_SEPARATOR.'activate'
-                                       => __('Enable the financial and administrative information'),
-                             'MassiveAction'.MassiveAction::CLASS_ACTION_SEPARATOR.'restore'
-                                       => __('Back to stock'));
+                                       => __('Enable the financial and administrative information')
+                             );
+            if ($show_old) {
+               $actions['Cartridge'.MassiveAction::CLASS_ACTION_SEPARATOR.'backtostock'] = __('Back to stock');
+            }
             $massiveactionparams = array('num_displayed'    => $number,
                               'specific_actions' => $actions,
                               'container'        => 'mass'.__CLASS__.$rand,
@@ -661,26 +675,30 @@ class Cartridge extends CommonDBChild {
          }
          $i = 0;
          
-         $header = "<tr>";
+         $header_begin = "<tr>";
+         $header_top = '';
+         $header_bottom = '';
+         $header_end = '';
+         
          if ($canedit && $number) {
-            $header .= "<th width='10'>";
-            $header .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
-            $header .= "</th>";
+            $header_begin .= "<th width='10'>";
+            $header_top    = Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
+            $header_bottom = Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
+            $header_end .= "</th>";
          }
-         $header .= "<th>".__('ID')."</th>";
-         $header .= "<th>"._x('item', 'State')."</th>";
-         $header .= "<th>".__('Add date')."</th><th>".__('Use date')."</th>";
-         $header .= "<th>".__('Used on')."</th>";
-
+         $header_end .= "<th>".__('ID')."</th>";
+         $header_end .= "<th>"._x('item', 'State')."</th>";
+         $header_end .= "<th>".__('Add date')."</th><th>".__('Use date')."</th>";
+         $header_end .= "<th>".__('Used on')."</th>";
 
          if ($show_old) {
-            $header .= "<th>".__('End date')."</th>";
-            $header .= "<th>".__('Printer counter')."</th>";
+            $header_end .= "<th>".__('End date')."</th>";
+            $header_end .= "<th>".__('Printer counter')."</th>";
          }
 
-         $header .= "<th width='18%'>".__('Financial and administrative information')."</th>";
-         $header .= "</tr>";
-         echo $header;
+         $header_end .= "<th width='18%'>".__('Financial and administrative information')."</th>";
+         $header_end .= "</tr>";
+         echo $header_begin.$header_top.$header_end;
       }
 
       $pages = array();
@@ -769,7 +787,7 @@ class Cartridge extends CommonDBChild {
             echo round($pages_printed/$nb_pages_printed)."</td>";
             echo "<td colspan='".($canedit?'3':'1')."'>&nbsp;</td></tr>";
          } else {
-            echo $header;
+            echo $header_begin.$header_bottom.$header_end;
          }
       }
 
@@ -895,9 +913,11 @@ class Cartridge extends CommonDBChild {
       if ($canedit && $number) {
          Html::openMassiveActionsForm('mass'.__CLASS__.$rand);
          if (!$old) {
-            // TODO : add 'back to store' and 'update printer counter' here ?
             $actions = array(__CLASS__.MassiveAction::CLASS_ACTION_SEPARATOR.'uninstall'
-                                       => __('End of life'));
+                                       => __('End of life'),
+                             __CLASS__.MassiveAction::CLASS_ACTION_SEPARATOR.'backtostock'
+                                       => __('Back to stock')
+                            );
          } else {
             $actions = array(__CLASS__.MassiveAction::CLASS_ACTION_SEPARATOR.'updatepages'
                                       => __('Update printer counter'),
@@ -914,25 +934,33 @@ class Cartridge extends CommonDBChild {
       }
       echo "<table class='tab_cadre_fixehov'>";
       if ($old == 0) {
-         echo "<tr><th colspan='".($canedit?'5':'4')."'>".__('Used cartridges')."</th></tr>";
+         echo "<tr class='noHover'><th colspan='".($canedit?'5':'4')."'>".__('Used cartridges')."</th></tr>";
       } else {
-         echo "<tr><th colspan='".($canedit?'8':'7')."'>".__('Worn cartridges')."</th></tr>";
+         echo "<tr class='noHover'><th colspan='".($canedit?'8':'7')."'>".__('Worn cartridges')."</th></tr>";
       }
-      echo "<tr>";
+      
+      $header_begin = "<tr>";
+      $header_top = '';
+      $header_bottom = '';
+      $header_end = '';
+
       if ($canedit) {
-         echo "<th width='10'>";
-         Html::checkAllAsCheckbox('mass'.__CLASS__.$rand);
-         echo "</th>";
+         $header_begin .= "<th width='10'>";
+         $header_top .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
+         $header_bottom .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
+         $header_end .= "</th>";
       }
-      echo "<th>".__('ID')."</th><th>"._n('Cartridge model','Cartridge models',1)."</th>";
-      echo "<th>".__('Add date')."</th>";
-      echo "<th>".__('Use date')."</th>";
+      $header_end .= "<th>".__('ID')."</th><th>"._n('Cartridge model','Cartridge models',1)."</th>";
+      $header_end .= "<th>".__('Add date')."</th>";
+      $header_end .= "<th>".__('Use date')."</th>";
       if ($old != 0) {
-         echo "<th>".__('End date')."</th>";
-         echo "<th>".__('Printer counter')."</th>";
-         echo "<th>".__('Printed pages')."</th>";
+         $header_end .= "<th>".__('End date')."</th>";
+         $header_end .= "<th>".__('Printer counter')."</th>";
+         $header_end .= "<th>".__('Printed pages')."</th>";
       }
-      echo "</tr>";
+      $header_end .= "</tr>";
+      echo $header_begin.$header_top.$header_end;
+      
       $stock_time       = 0;
       $use_time         = 0;
       $pages_printed    = 0;
@@ -1004,6 +1032,7 @@ class Cartridge extends CommonDBChild {
          }
          echo "</tr>";
       }
+
       if ($old) { // Print average
          if ($number > 0) {
             if ($nb_pages_printed == 0) {
@@ -1021,6 +1050,7 @@ class Cartridge extends CommonDBChild {
             echo "</tr>";
          }
       }
+      
       echo "</table>";
       if ($canedit && $number) {
          $massiveactionparams['ontop'] = false;
@@ -1191,5 +1221,8 @@ class Cartridge extends CommonDBChild {
             return true;
       }
    }
+
+
+   
 }
 ?>

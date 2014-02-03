@@ -49,9 +49,9 @@ class NotImportedEmail extends CommonDBTM {
    function getForbiddenStandardMassiveAction() {
 
       $forbidden   = parent::getForbiddenStandardMassiveAction();
-      $forbidden[] = 'MassiveAction'.MassiveAction::CLASS_ACTION_SEPARATOR.'delete';
-      $forbidden[] = 'MassiveAction'.MassiveAction::CLASS_ACTION_SEPARATOR.'purge';
-      $forbidden[] = 'MassiveAction'.MassiveAction::CLASS_ACTION_SEPARATOR.'restore';
+      $forbidden[] = 'delete';
+      $forbidden[] = 'purge';
+      $forbidden[] = 'restore';
       return $forbidden;
    }
 
@@ -98,8 +98,6 @@ class NotImportedEmail extends CommonDBTM {
 
    /**
     * @since version 0.85
-    *
-    * @TODO: check because I (webmyster) don't have all elements to check
     *
     * @see CommonDBTM::processMassiveActionsForOneItemtype()
    **/

@@ -232,7 +232,9 @@ class TicketFollowup  extends CommonDBTM {
 
    function prepareInputForUpdate($input) {
 
-      if ($uid = Session::getLoginUserID()) {
+      // update writer if content change
+      if ($uid = Session::getLoginUserID() && isset($input['content'])
+         && ($input['content'] != $this->fields['content'])) {
          $input["users_id"] = $uid;
       }
       return $input;
@@ -399,20 +401,6 @@ class TicketFollowup  extends CommonDBTM {
 
 
    // SPECIFIC FUNCTIONS
-
-   /**
-    * Get the users_id name of the followup
-    *
-    * @param $link insert link ? (default 0)
-    *
-    *@return string of the users_id name
-   **/
-   //TODO function never used
-   function getAuthorName($link=0) {
-      return getUserName($this->fields["users_id"], $link);
-   }
-
-
    /**
     * @see CommonDBTM::getRawName()
     *
@@ -722,19 +710,22 @@ class TicketFollowup  extends CommonDBTM {
          echo "<th class='b'>" . __('No followup for this ticket.')."</th></tr></table>";
       } else {
          echo "<table class='tab_cadre_fixehov'>";
-         echo "<tr><th>".__('Type')."</th><th>" . __('Date') . "</th>";
-         echo "<th>" . __('Description') . "</th>";//"<th>" . __('Duration') . "</th>";
-         echo "<th>" . __('Writer') . "</th>";
+         
+         $header = "<tr><th>".__('Type')."</th><th>" . __('Date') . "</th>";
+         $header .= "<th>" . __('Description') . "</th>";//"<th>" . __('Duration') . "</th>";
+         $header .= "<th>" . __('Writer') . "</th>";
          if ($showprivate) {
-            echo "<th>" . __('Private') . "</th>";
+            $header .= "<th>" . __('Private') . "</th>";
          }
-         echo "</tr>\n";
+         $header .= "</tr>\n";
+         echo $header;
 
          while ($data = $DB->fetch_assoc($result)) {
             if ($this->getFromDB($data['id'])) {
                $this->showInTicketSumnary($ticket, $rand, $showprivate);
             }
          }
+         echo $header;
          echo "</table>";
       }
    }

@@ -64,7 +64,7 @@ class NetworkPort extends CommonDBChild {
    function getForbiddenStandardMassiveAction() {
 
       $forbidden   = parent::getForbiddenStandardMassiveAction();
-      $forbidden[] = 'MassiveAction'.MassiveAction::CLASS_ACTION_SEPARATOR.'update';
+      $forbidden[] = 'update';
       return $forbidden;
    }
 
@@ -735,7 +735,8 @@ class NetworkPort extends CommonDBChild {
       }
 
       $table->display(array('display_thead' => false,
-                            'display_tfoot' => false));
+                            'display_tfoot' => false,
+                            'display_header_on_foot_for_each_group' => true));
       unset($table);
 
       if (!$is_active_network_port) {
@@ -743,7 +744,8 @@ class NetworkPort extends CommonDBChild {
          echo "</table>";
       }
 
-      if ($showmassiveactions) {
+      if ($is_active_network_port
+          && $showmassiveactions) {
          $massiveactionparams['ontop'] = false;
          Html::showMassiveActions($massiveactionparams);
 
