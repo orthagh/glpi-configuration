@@ -198,7 +198,12 @@ class ComputerConfiguration extends CommonDropdown {
 
       //show generic search form (duplicated from Search class)
       echo "<form name='searchformComputerConfigurationCriteria' method='post'>";
-      echo "<input type='hidden' name='id' value='".$this->getID()."'>";     
+      echo "<input type='hidden' name='id' value='".$this->getID()."'>";   
+      
+      // add tow hidden fields to permit delete of (meta)criteria
+      echo "<input type='hidden' name='criteria' value=''>";     
+      echo "<input type='hidden' name='metacriteria' value=''>";
+
       echo "<table class='tab_cadre_fixe'>";
       echo "<tr><th>"._n('Criterion', 'Criteria', 2)."</th></tr>";
       echo "<tr><td>";
@@ -332,11 +337,11 @@ class ComputerConfiguration extends CommonDropdown {
       //serialize search parameters
       if (isset($input['criteria']) && is_array($input['criteria'])) {
          $input['criteria'] = http_build_query($input['criteria']);
-      } else $input['criteria'] = "";
+      }
 
       if (isset($input['metacriteria']) && is_array($input['metacriteria'])) {
          $input['metacriteria'] = http_build_query($input['metacriteria']);
-      } else $input['metacriteria'] = "";
+      }
 
       if (isset($input['_inheritance'])) {
          $input = $this->saveInheritance($input);
