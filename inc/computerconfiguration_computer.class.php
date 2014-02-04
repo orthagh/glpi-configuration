@@ -93,8 +93,15 @@ class ComputerConfiguration_Computer extends CommonDBTM {
          case 'add' :
             $compconf_comp = new self;
             foreach ($ids as $computers_id) {
-               $compconf_comp->add(array('computerconfigurations_id' => $_POST['computerconfigurations_id'], 
-                                         'computers_id'              => $computers_id));
+               //find already existing conf
+               $found_comp = $compconf_comp->find("computerconfigurations_id = ".
+                                                    $_POST['computerconfigurations_id'].
+                                                    " AND computers_id = $computers_id");
+            
+               if (count($found_comp) == 0) {
+                  $compconf_comp->add(array('computerconfigurations_id' => $_POST['computerconfigurations_id'], 
+                                            'computers_id'              => $computers_id));
+               }
             }
       }
 
