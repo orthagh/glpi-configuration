@@ -41,7 +41,7 @@ if (!defined('GLPI_ROOT')) {
 class ComputerConfiguration extends CommonDropdown {
 
    // From CommonDBTM
-   public $dohistory                   = true;
+   public $dohistory = true;
 
    /**
     * Name of the type
@@ -271,32 +271,11 @@ class ComputerConfiguration extends CommonDropdown {
     */
    function showComputers() {
       global $CFG_GLPI;
+      
+      // get all computers who match criteria (with inheritance)
+      $criteria_computers = self::getComputerFromCriteria($this->getID());
 
-      $computer = new Computer;
-
-      //search computers who match stored criteria
-      $p['sort']         = '';
-      $p['list_limit']   = 999999999999; // how to get all ?
-      $p['is_deleted']   = 0;
-      $p['criteria']     = array();
-      $p['metacriteria'] = array();
-      $p['all_search']   = false;
-      $p['no_search']    = false;
-
-      // load saved criterias
-      if (!empty($this->fields['criteria'])) {
-         parse_str($this->fields['criteria'], $criteria);
-         $p['criteria'] = $criteria;
-      }
-      if (!empty($this->fields['metacriteria'])) {
-         parse_str($this->fields['metacriteria'], $metacriteria);
-         $p['metacriteria'] = $metacriteria;
-      }
-
-      //get all computers who match criteria (return only id column)
-      $datas = Search::getDatas("Computer", $p, array(1));
-
-      //search and display all computers associated to this configuration (and check if they match criteria)
+      // search and display all computers associated to this configuration (and check if they match criteria)
       $computers_id_list = self::getListofComputersID($this->getID());
       echo "<table class='tab_cadre_fixehov'>";
       echo "<tr>";
@@ -304,13 +283,14 @@ class ComputerConfiguration extends CommonDropdown {
       echo "<th>".__('Results')."</th>";
       echo "<th>".__('Result details')."</th>";
       echo "</tr>";
+      $computer = new Computer;
       foreach ($computers_id_list as $computers_id) {
          $computer->getFromDB($computers_id);
          echo "<tr>";
          echo "<td>".$computer->getLink(array('comments' => true))."</td>";
 
-         //check if current computer match saved criterias
-         if (isset($datas['data']['items'][$computers_id])) {
+         // check if current computer match saved criterias
+         if (isset($criteria_computers[$computers_id])) {
             $pic = "greenbutton.png";
             $title = __('Yes');
          } else {
@@ -322,7 +302,7 @@ class ComputerConfiguration extends CommonDropdown {
          echo "<td></td>";
          echo "</tr>";
       }
-      echo "</table>";
+      echo "</table>";    
    }
 
    function prepareInputForAdd($input) {
@@ -379,16 +359,74 @@ class ComputerConfiguration extends CommonDropdown {
       $found_comp = $compconf_comp->find("computerconfigurations_id = $computerconfigurations_id");
       $listofcomputers_id = array();
       foreach ($found_comp as $comp) {
-         $listofcomputers_id[] = $comp['computers_id'];
+         $listofcomputers_id[$comp['computers_id']] = $comp['computers_id'];
       }
 
       if ($filter === "none") {
          return $listofcomputers_id;
       }
 
-      //TODO : filter param
+      $computers_criteria = self::getComputerFromCriteria($computerconfigurations_id);
+      if ($filter === "match") {
+         return $computers_criteria;
+      }
+
+      if ($filter === "notmatch") {
+         return array_diff($listofcomputers_id, $computers_criteria);
+      }
       
       return false;
+   }
+
+   /**
+    * Return list of computer who match configuration
+    * @param  [int] $computerconfigurations_id [id of the configuration]
+    * @return [array]                            [list of computers_is]
+    */
+   static function getComputerFromCriteria($computerconfigurations_id) {
+      $compconf_comp = new self;
+      $compconf_comp->getFromDB($computerconfigurations_id);
+      
+      // default parameter for search engine
+      $p['sort']         = '';
+      $p['list_limit']   = 999999999999; // how to get all ?
+      $p['is_deleted']   = 0;
+      $p['criteria']     = array();
+      $p['metacriteria'] = array();
+      $p['all_search']   = false;
+      $p['no_search']    = false;
+
+      // load saved criterias
+      if (!empty($compconf_comp->fields['criteria'])) {
+         parse_str($compconf_comp->fields['criteria'], $criteria);
+         $p['criteria'] = $criteria;
+      }
+      if (!empty($compconf_comp->fields['metacriteria'])) {
+         parse_str($compconf_comp->fields['metacriteria'], $metacriteria);
+         $p['metacriteria'] = $metacriteria;
+      }
+
+      // get all computers who match criteria (return only id column)
+      $datas = Search::getDatas("Computer", $p, array(1));
+
+      $computers_list = array();
+      foreach ($datas['data']['items'] as $computers_id => $row_id) {
+         $computers_list[$computers_id] = $computers_id;
+      }
+
+      // find all inheritances for this configuration
+      $compconf_compconf = new ComputerConfiguration_ComputerConfiguration;
+      $found_inheritance = $compconf_compconf->find("computerconfigurations_id_1 = ".
+                                                     $computerconfigurations_id);
+      foreach ($found_inheritance as $compconf_id => $option) {
+         // get all computer for current inheritance
+         $computers_inheritance = self::getComputerFromCriteria($option['computerconfigurations_id_2']);
+
+         // filter computers list with those from the inheritance
+         $computers_list = array_intersect($computers_list, $computers_inheritance);
+      }
+
+      return $computers_list;
    }
 
 
