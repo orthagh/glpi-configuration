@@ -2369,6 +2369,47 @@ function update084to085() {
       }
    }
 
+   $migration->displayMessage(sprintf(__('Change of the database layout - %s'), 'ComputerConfiguration'));
+   if (!TableExists('glpi_computerconfigurations')) {
+      $query = "CREATE TABLE `glpi_computerconfigurations` (
+                  `id` int(11) NOT NULL AUTO_INCREMENT,
+                  `entities_id` int(11) NOT NULL DEFAULT '0',
+                  `is_recursive` int(11) NOT NULL DEFAULT '0',
+                  `name` varchar(255) default NULL,
+                  `date_mod` datetime DEFAULT NULL,
+                  `comment` LONGTEXT DEFAULT NULL,
+                  `criteria` LONGTEXT DEFAULT NULL,
+                  `metacriteria` LONGTEXT DEFAULT NULL,
+                  PRIMARY KEY (`id`),
+                  KEY `date_mod` (`date_mod`),
+                  KEY `entities_id` (`entities_id`),
+                  KEY `is_recursive` (`is_recursive`)
+                ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+      $DB->queryOrDie($query, "0.85 add table glpi_computerconfigurations");
+   }
+
+   if (!TableExists('glpi_computerconfigurations_computerconfigurations')) {
+      $query = "CREATE TABLE `glpi_computerconfigurations_computerconfigurations` (
+                  `id` int(11) NOT NULL AUTO_INCREMENT,
+                  `computerconfigurations_id_1` int(11) NOT NULL DEFAULT '0',
+                  `computerconfigurations_id_2` int(11) NOT NULL DEFAULT '0',
+                  PRIMARY KEY (`id`)
+                ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+      $DB->queryOrDie($query, "0.85 add table glpi_computerconfigurations_computerconfigurations");
+   }
+
+   if (!TableExists('glpi_computerconfigurations_computers')) {
+      $query = "CREATE TABLE `glpi_computerconfigurations_computers` (
+                  `id` int(11) NOT NULL AUTO_INCREMENT,
+                  `computerconfigurations_id` int(11) NOT NULL DEFAULT '0',
+                  `computers_id` int(11) NOT NULL DEFAULT '0',
+                  PRIMARY KEY (`id`),
+                  KEY `computerconfigurations_id` (`computerconfigurations_id`),
+                  KEY `computers_id` (`computers_id`)
+      ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+      $DB->queryOrDie($query, "0.85 add table glpi_computerconfigurations_computers");
+   }
+
    $migration->displayMessage(sprintf(__('Data migration - %s'), 'notepad'));
    // Create new notepad table
    if (!TableExists('glpi_notepads')) {
@@ -2535,6 +2576,8 @@ function update084to085() {
          }
       }
    }
+
+
 
 
    //////////////////////////////////////////////////

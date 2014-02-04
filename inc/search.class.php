@@ -334,8 +334,8 @@ class Search {
 
       // Add default join
       $COMMONLEFTJOIN = self::addDefaultJoin($data['itemtype'], $itemtable, $already_link_tables);
-      $FROM          .= $COMMONLEFTJOIN;
-
+      $FROM          .= $COMMONLEFTJOIN
+;
       // Add all table for toview items
       foreach ($data['toview'] as $key => $val) {
          if (!in_array($searchopt[$val]["table"], $blacklist_tables)) {

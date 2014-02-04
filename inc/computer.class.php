@@ -815,6 +815,17 @@ class Computer extends CommonDBTM {
       $tab[80]['datatype']       = 'dropdown';
 
 
+
+      $tab[50]['table']          = 'glpi_computerconfigurations';
+      $tab[50]['field']          = 'name';
+      $tab[50]['name']           = __('Computer Configuration');
+      $tab[50]['datatype']       = 'dropdown';
+      $tab[50]['massiveaction']  = false;
+      $tab[50]['joinparams']     = array('beforejoin' => array(
+                                            'table' => 'glpi_computerconfigurations_computers',
+                                            'joinparams' => array('jointype' => 'child')));
+
+
       $tab['periph']             = _n('Component', 'Components', 2);
 
       $items_device_joinparams   = array('jointype'          => 'itemtype_item',
