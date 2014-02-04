@@ -155,18 +155,8 @@ class ComputerConfiguration extends CommonDropdown {
    function showCriteria() {
       global $CFG_GLPI;
 
-      // Default values of parameters
-      $p['sort']         = '';
-      $p['is_deleted']   = 0;
-      $p['criteria']     = array();
-      $p['metacriteria'] = array();
       $itemtype = "Computer";
       
-
-      // save search session variables
-      $glpisearch_session = $_SESSION['glpisearch'];
-      unset($_SESSION['glpisearch']);
-
       // load saved criterias
       if (!empty($this->fields['criteria'])) {
          parse_str($this->fields['criteria'], $criteria);
@@ -177,8 +167,10 @@ class ComputerConfiguration extends CommonDropdown {
          $p['metacriteria'] = $metacriteria;
       }
 
-      //store in session GET values
-      Search::manageParams($itemtype, $p);
+      //manage sessions
+      $glpisearch_session = $_SESSION['glpisearch'];
+      unset($_SESSION['glpisearch']);
+      $p = Search::manageParams($itemtype, $p);
 
       //show generic search form (duplicated from Search class)
       echo "<form name='searchformComputerConfigurationCriteria' method='post'>";
@@ -249,6 +241,10 @@ class ComputerConfiguration extends CommonDropdown {
     * @return nothing, display a table
     */
    function showComputers() {
+      global $CFG_GLPI;
+
+      $computer = new Computer;
+
       //search computers associated to this configuration
       $computers_id_list = self::getListofComputersID($this->getID());
 
@@ -271,18 +267,35 @@ class ComputerConfiguration extends CommonDropdown {
       }
 
             
-      $datas = Search::getDatas("Computer", $p, array(1, 31));
-      Html::printCleanArray($datas);
-      Toolbox::logDebug($datas);
+      $datas = Search::getDatas("Computer", $p/*, array(1, 31)*/);
+      //Html::printCleanArray($datas);
 
       //display computers (and check if they match criteria)
-      echo "<ul class=''>";
+      echo "<table class='tab_cadre_fixehov'>";
+      echo "<tr>";
+      echo "<th>".__('name')."</th>";
+      echo "<th>".__('Results')."</th>";
+      echo "<th>".__('Result details')."</th>";
+      echo "</tr>";
       foreach ($computers_id_list as $computers_id) {
-         $name = Dropdown::getDropdownName("glpi_computers", $computers_id);
-         echo "<li><a href='computer.form.php?id=$computers_id'>$name</a></li>";
+         $computer->getFromDB($computers_id);
+         echo "<tr>";
+         echo "<td>".$computer->getLink(array('comments' => true))."</td>";
+
+         $is_ok = mt_rand(0,1);
+         if($is_ok) {
+            $pic = "greenbutton.png";
+            $title = __('Yes');
+         } else {
+            $pic = "redbutton.png";
+            $title = __('No');
+         }
+         echo "<td><img src='".$CFG_GLPI['root_doc']."/pics/$pic' title='$title'></td>";
+
+         echo "<td></td>";
+         echo "</tr>";
       }
-      echo "</ul>";
-      
+      echo "</table>";
    }
 
 
@@ -291,11 +304,11 @@ class ComputerConfiguration extends CommonDropdown {
       //serialize search parameters
       if (isset($input['criteria']) && is_array($input['criteria'])) {
          $input['criteria'] = http_build_query($input['criteria']);
-      }
+      } else $input['criteria'] = "";
 
       if (isset($input['metacriteria']) && is_array($input['metacriteria'])) {
          $input['metacriteria'] = http_build_query($input['metacriteria']);
-      }
+      } else $input['metacriteria'] = "";
 
       return $input;
    }
@@ -323,6 +336,19 @@ class ComputerConfiguration extends CommonDropdown {
       //TODO : filter param
       
       return false;
+   }
+
+
+   /**
+    * redirect to computer search and load the saved criterias in this configuration
+    * @return nothing, redirect browser
+    */
+   function preview() {
+      parse_str($this->fields['criteria'], $criteria['criteria']);
+      parse_str($this->fields['metacriteria'], $metacriteria['metacriteria']);
+      $criteria = http_build_query($criteria);
+      $metacriteria = http_build_query($metacriteria);
+      Html::redirect("computer.php?reset=reset&$criteria&$metacriteria");
    }
 
 

@@ -33,8 +33,6 @@
 
 include ('../inc/includes.php');
 
-Html::header(ComputerConfiguration::GetTypeName(2), $_SERVER['PHP_SELF'], "assets", "computerconfiguration");
-
-Search::show('ComputerConfiguration');
-
-Html::footer();
+$dropdown = new ComputerConfiguration();
+include (GLPI_ROOT . "/front/dropdown.common.php");
+?>

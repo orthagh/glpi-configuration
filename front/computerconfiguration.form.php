@@ -41,6 +41,8 @@ if (!isset($_GET["id"])) {
 $computerconfiguration = new ComputerConfiguration();
 if (isset($_POST["add"])) {
    if ($newID = $computerconfiguration->add($_POST)) {
+      Event::log($newID, "computerconfigurations", 4, "setup",
+              sprintf(__('%1$s adds the item %2$s'), $_SESSION["glpiname"], $_POST["name"]));
       if ($_SESSION['glpibackcreated']) {
          Html::redirect($computerconfiguration->getFormURL()."?id=".$newID);
       }
@@ -50,22 +52,23 @@ if (isset($_POST["add"])) {
 } else if (isset($_POST["purge"])) {
    $computerconfiguration->check($_POST['id'], PURGE);
    $computerconfiguration->delete($_POST,1);
+   Event::log($_POST["id"], "computerconfigurations", 4, "setup",
+                 sprintf(__('%s purges an item'), $_SESSION["glpiname"]));
    $computerconfiguration->redirectToList();
 
 } else if (isset($_POST["update"])) {
    $computerconfiguration->check($_POST['id'], UPDATE);
    $computerconfiguration->update($_POST);
+   Event::log($_POST["id"], "computerconfigurations", 4, "setup",
+              sprintf(__('%s updates an item'), $_SESSION["glpiname"]));
    Html::back();
    
 } else if (isset($_POST["preview"])) {
    $computerconfiguration->getFromDB($_GET["id"]);
-   $criteria = $computerconfiguration->fields['criteria'];
-   $metacriteria = $computerconfiguration->fields['metacriteria'];
-   Html::redirect("computer.php?reset=reset&$criteria&$metacriteria");
+   $computerconfiguration->preview();
 
 } else {
-   Html::header(ComputerConfiguration::GetTypeName(2), $_SERVER['PHP_SELF'], "assets", "computer_configuration");
+   $computerconfiguration->displayHeader();
    $computerconfiguration->display(array('id' => $_GET["id"]));
    Html::footer();
 }
-?>
