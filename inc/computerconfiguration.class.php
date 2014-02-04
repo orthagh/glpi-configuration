@@ -162,7 +162,7 @@ class ComputerConfiguration extends CommonDropdown {
       echo "<td>";
       echo "</td>";
       echo "</tr>";
-      
+
       $this->showFormButtons($options);
 
       return true;
