@@ -68,10 +68,10 @@ class Search {
    **/
    static function show($itemtype) {
 
-      self::manageGetValues($itemtype);
-      self::showGenericSearch($itemtype, $_GET);
+      $params = self::manageParams($itemtype, $_GET);
+      self::showGenericSearch($itemtype, $params);
 
-      self::showList($itemtype, $_GET);
+      self::showList($itemtype, $params);
    }
 
 
@@ -155,22 +155,6 @@ class Search {
 
       if ($p['export_all']) {
          $p['start'] = 0;
-      }
-
-      // Clean criteria / metacriteria based on glpisearchcount / glpisearchcount2
-      if (isset($_SESSION["glpisearchcount"][$itemtype])) {
-         foreach ($p['criteria'] as $key => $val) {
-            if ($key >= $_SESSION["glpisearchcount"][$itemtype] ) {
-               unset($p['criteria'][$key]);
-            }
-         }
-      }
-      if (isset($_SESSION["glpisearchcount2"][$itemtype])) {
-         foreach ($p['metacriteria'] as $key => $val) {
-            if ($key >= $_SESSION["glpisearchcount2"][$itemtype] ) {
-               unset($p['metacriteria'][$key]);
-            }
-         }
       }
 
       $data             = array();
@@ -1080,11 +1064,11 @@ class Search {
    static function displayDatas(array &$data) {
       global $CFG_GLPI;
 
+      $rand = mt_rand();
       if (!isset($data['data']) || !isset($data['data']['totalcount'])) {
          return false;
       }
       // Contruct Pager parameters
-
       $globallinkto
          = Toolbox::append_params(array('criteria'
                                           => Toolbox::stripslashes_deep($data['search']['criteria']),
@@ -1094,6 +1078,10 @@ class Search {
       $parameters = "sort=".$data['search']['sort']."&amp;order=".$data['search']['order'].'&amp;'.
                      $globallinkto;
 
+      if (isset($_GET['_in_modal'])) {
+         $parameters .= "&amp;_in_modal=1";
+      }
+                     
       // Global search header
       if ($data['display_type'] == self::GLOBAL_SEARCH) {
          if ($data['item']) {
@@ -1124,7 +1112,8 @@ class Search {
                }
             }
             $search_config = "";
-            if (Session::haveRightsOr('search_config', array(DisplayPreference::PERSONAL,
+            if (!isset($_GET['_in_modal'])
+                  && Session::haveRightsOr('search_config', array(DisplayPreference::PERSONAL,
                                                              DisplayPreference::GENERAL))) {
 
                $tmp = " class='pointer' onClick=\"".Html::jsGetElementbyID('search_config').".
@@ -1199,8 +1188,13 @@ class Search {
          $headers_line        = '';
          $headers_line_top    = '';
          $headers_line_bottom = '';
-         echo self::showBeginHeader($data['display_type']);
-         echo self::showNewLine($data['display_type']);
+         
+         $headers_line_top .= self::showBeginHeader($data['display_type']);
+         $headers_line_top .= self::showNewLine($data['display_type']);
+         
+//          $headers_line_bottom .= self::showBeginHeader($data['display_type']);
+         $headers_line_bottom .= self::showNewLine($data['display_type']);
+
          $header_num = 1;
          if (($data['display_type'] == self::HTML_OUTPUT)
                && $showmassiveactions) { // HTML display - massive modif
@@ -1260,8 +1254,10 @@ class Search {
          $headers_line_top    .= $headers_line;
          $headers_line_bottom .= $headers_line;
 
+         $headers_line_top    .= self::showEndHeader($data['display_type']);
+//          $headers_line_bottom .= self::showEndHeader($data['display_type']);
+
          echo $headers_line_top;
-         echo self::showEndHeader($data['display_type']);
 
          // Init list of items displayed
          if ($data['display_type'] == self::HTML_OUTPUT) {
@@ -1332,109 +1328,6 @@ class Search {
                }
             }
 
-            // Print Meta Item
-//             $already_printed = array();
-//             if (($_SESSION["glpisearchcount2"][$itemtype] > 0)
-//                   && is_array($p['metacriteria'])) {
-//
-//                for ($j=0 ; $j<$_SESSION["glpisearchcount2"][$itemtype] ; $j++) {
-//                   $metacriteria = array();
-//
-//                   if (isset($p['metacriteria'][$j])
-//                         && is_array($p['metacriteria'][$j])) {
-//                      $metacriteria = $p['metacriteria'][$j];
-//                   }
-//                   if (isset($metacriteria['itemtype']) && !empty($metacriteria['itemtype'])
-//                         && isset($metacriteria['value']) && (strlen($metacriteria['value'])  >0)) {
-//                      $sopt = $searchopt[$metacriteria['itemtype']][$metacriteria['field']];
-//
-//                      if (!isset($already_printed[$metacriteria['itemtype'].$metacriteria['field']])) {
-//                         // General case
-//                         if (strpos($data["META_$j"],"$$$$") === false) {
-//
-//                            $out = self::giveItem($metacriteria['itemtype'], $metacriteria['field'], $data,
-//                                                    $j, 1);
-//                            echo self::showItem(self::$output_type, $out, $item_num, $row_num);
-//
-//                         // Case of GROUP_CONCAT item : split item and multilline display
-//                         } else {
-//                            $split         = explode("$$$$", $data["META_$j"]);
-//                            $count_display = 0;
-//                            $out           = "";
-//                            $unit          = "";
-//                            $separate      = self::LBBR;
-//
-//                            if (isset($sopt['splititems'])
-//                                  && $sopt['splititems']) {
-//                               $separate = self::LBHR;
-//                            }
-//
-//                            if (isset($sopt['unit'])) {
-//                               $unit = $sopt['unit'];
-//                            }
-//
-//                            for ($k=0 ; $k<count($split) ; $k++) {
-//                               if (($metacriteria['value'] == "NULL")
-//                                     || (strlen($metacriteria['value']) == 0)
-//                                     || preg_match('/'.$metacriteria['value'].'/i',$split[$k])
-//                                     || isset($sopt['forcegroupby'])) {
-//
-//                                  if ($count_display) {
-//                                     $out .= $separate;
-//                                  }
-//                                  $count_display++;
-//                                  // Manage Link to item
-//                                  $split2 = self::explodeWithID("$$", $split[$k]);
-//                                  if (isset($split2[1])) {
-//                                     if (isset($sopt['datatype'])
-//                                           && ($sopt['datatype'] == 'itemlink')) {
-//                                        $out .= "<a id='".$metacriteria['itemtype'].'_'.$data["id"].'_'.
-//                                                 $split2[1]."' ";
-//                                        $out .= "href=\"".
-//                                                 Toolbox::getItemTypeFormURL($metacriteria['itemtype']).
-//                                                 "?id=".$split2[1]."\">";
-//                                        $out .= Dropdown::getValueWithUnit($split2[0],$unit);
-//                                        $linkout = $out;
-//                                        if ($_SESSION["glpiis_ids_visible"]
-//                                              || empty($split2[0])) {
-//                                           $linkout = sprintf(__('%1$s (%2$s)'), $linkout,
-//                                                                $split2[1]);
-//                                        }
-//                                        $out = $linkout."</a>";
-//                                     } else {
-//                                        // Get specific display if available
-//                                        $itemtypemeta = getItemTypeForTable($searchopt[$metacriteria['itemtype']]
-//                                                                            [$metacriteria['field']]['table']);
-//                                        if ($itemmeta = getItemForItemtype($itemtypemeta)) {
-//                                           $tmpdata
-//                                              = array($searchopt[$metacriteria['itemtype']]
-//                                                       [$metacriteria['field']]['field'] => $split2[0]);
-//                                           $valdiplay = $searchopt[$metacriteria['itemtype']]
-//                                                                   [$metacriteria['field']]['field'];
-//                                           $specific
-//                                              = $itemmeta->getSpecificValueToDisplay($valdisplay,
-//                                                                                     $tmpdata,
-//                                                                                     array('html'
-//                                                                                           => true));
-//                                        }
-//                                        if (!empty($specific)) {
-//                                           $out .= $specific;
-//                                        } else {
-//                                           $out .= Dropdown::getValueWithUnit($split2[0], $unit);
-//                                        }
-//                                     }
-//                                  } else {
-//                                     $out .= Dropdown::getValueWithUnit($split[$k],$unit);
-//                                  }
-//                               }
-//                            }
-//                            echo self::showItem(self::$output_type, $out, $item_num, $row_num);
-//                         }
-//                         $already_printed[$metacriteria['itemtype'].$metacriteria['field']] = 1;
-//                      }
-//                   }
-//                }
-//             }
 
             if (isset($CFG_GLPI["union_search_type"][$data['itemtype']])) {
                if (!isset($typenames[$row["TYPE"]])) {
@@ -1713,6 +1606,8 @@ class Search {
    /**
     * Print generic search form
     *
+    * Params need to parsed before using Search::manageParams function
+    * 
     * @param $itemtype        type to display the form
     * @param $params    array of parameters may include sort, is_deleted, criteria, metacriteria
     *
@@ -1739,14 +1634,14 @@ class Search {
       $nbmetasearchcountvar = 'nbmetacriteria'.strtolower($itemtype).mt_rand();
       $searchcriteriatableid = 'criteriatable'.strtolower($itemtype).mt_rand();
       // init criteria count
-      $js = "var $nbsearchcountvar=".$_SESSION["glpisearchcount"][$itemtype].";";
-      $js .= "var $nbmetasearchcountvar=".$_SESSION["glpisearchcount2"][$itemtype].";";
+      $js = "var $nbsearchcountvar=".count($p['criteria']).";";
+      $js .= "var $nbmetasearchcountvar=".count($p['metacriteria']).";";
       echo Html::scriptBlock($js);
 
       echo "<table class='tab_cadre_fixe' >";
       echo "<tr class='tab_bg_1'>";
 
-      if (($_SESSION["glpisearchcount"][$itemtype] + $_SESSION["glpisearchcount2"][$itemtype]) > 1) {
+      if ((count($p['criteria']) + count($p['metacriteria'])) > 1) {
          echo "<td width='10' class='center'>";
          echo "<a href=\"javascript:toggleTableDisplay('searchcriteriastable','searchcriteriasimg',
                                                        '".$CFG_GLPI["root_doc"].
@@ -1765,7 +1660,7 @@ class Search {
       echo "<table class='tab_format' id='$searchcriteriatableid'>";
 
       // Display normal search parameters
-      for ($i=0 ; $i<$_SESSION["glpisearchcount"][$itemtype] ; $i++) {
+      for ($i=0 ; $i<count($p['criteria']) ; $i++) {
          $_POST['itemtype'] = $itemtype;
          $_POST['num'] = $i ;
          include(GLPI_ROOT.'/ajax/searchrow.php');
@@ -1775,7 +1670,7 @@ class Search {
       $linked =  self::getMetaItemtypeAvailable($itemtype);
       
       if (is_array($linked) && (count($linked) > 0)) {
-         for ($i=0 ; $i<$_SESSION["glpisearchcount2"][$itemtype] ; $i++) {
+         for ($i=0 ; $i<count($p['metacriteria']) ; $i++) {
 
             $_POST['itemtype'] = $itemtype;
             $_POST['num'] = $i ;
@@ -4596,10 +4491,6 @@ class Search {
 
       unset($_SESSION['glpisearch']);
       $_SESSION['glpisearch']       = array();
-      unset($_SESSION['glpisearchcount']);
-      $_SESSION['glpisearchcount']  = array();
-      unset($_SESSION['glpisearchcount2']);
-      $_SESSION['glpisearchcount2'] = array();
    }
 
 
@@ -4607,41 +4498,17 @@ class Search {
     * Completion of the URL $_GET values with the $_SESSION values or define default values
     *
     * @param $itemtype        item type to manage
+    * @param $params          params to parse
     * @param $usesession      Use datas save in session (true by default)
     * @param $forcebookmark   force trying to load parameters from default bookmark:
     *                         used for global search (false by default)
     *
-    * @return nothing
+    * @return parsed params array
    **/
-   static function manageGetValues($itemtype, $usesession=true, $forcebookmark=false) {
+   static function manageParams($itemtype, $params = array(), $usesession=true, $forcebookmark=false) {
       global $_GET, $DB;
 
       $redirect = false;
-
-      
-//       if (isset($_GET["add_search_count"]) && $_GET["add_search_count"]) {
-//          $_SESSION["glpisearchcount"][$itemtype]++;
-//          Html::redirect(str_replace("add_search_count=1&", "", $_SERVER['REQUEST_URI']));
-//       }
-
-//       if (isset($_GET["delete_search_count"]) && $_GET["delete_search_count"]) {
-//          if ($_SESSION["glpisearchcount"][$itemtype] > 1) {
-//             $_SESSION["glpisearchcount"][$itemtype]--;
-//          }
-//          Html::redirect(str_replace("delete_search_count=1&", "", $_SERVER['REQUEST_URI']));
-//       }
-
-//       if (isset($_GET["add_search_count2"]) && $_GET["add_search_count2"]) {
-//          $_SESSION["glpisearchcount2"][$itemtype]++;
-//          Html::redirect(str_replace("add_search_count2=1&", "", $_SERVER['REQUEST_URI']));
-//       }
-
-//       if (isset($_GET["delete_search_count2"]) && $_GET["delete_search_count2"]) {
-//          if ($_SESSION["glpisearchcount2"][$itemtype] >= 1) {
-//             $_SESSION["glpisearchcount2"][$itemtype]--;
-//          }
-//          Html::redirect(str_replace("delete_search_count2=1&", "", $_SERVER['REQUEST_URI']));
-//       }
 
       $default_values = array();
 
@@ -4649,7 +4516,9 @@ class Search {
       $default_values["order"]       = "ASC";
       $default_values["sort"]        = 1;
       $default_values["is_deleted"]  = 0;
-      $default_values["criteria"]    = array();
+      $default_values["criteria"]    = array(0 => array('field' => 0,
+                                                        'link'  => 'contains',
+                                                        'value' => ''));
       $default_values["metacriteria"]    = array();
 
       // Reorg search array
@@ -4680,7 +4549,7 @@ class Search {
       // First view of the page or force bookmark : try to load a bookmark
       if ($forcebookmark
           || ($usesession
-              && !isset($_GET["reset"])
+              && !isset($params["reset"])
               && !isset($_SESSION['glpisearch'][$itemtype]))) {
 
          $query = "SELECT `bookmarks_id`
@@ -4696,96 +4565,58 @@ class Search {
                $bookmark = new Bookmark();
                // Only get datas for bookmarks
                if ($forcebookmark) {
-                  $_GET = $bookmark->getParameters($IDtoload);
+                  $params = $bookmark->getParameters($IDtoload);
                } else {
                   $bookmark->load($IDtoload, false);
                }
             }
          }
       }
-
       // Force reorder criterias
-      if (isset($_GET["criteria"]) && is_array($_GET["criteria"])
-            && count($_GET["criteria"])) {
-         $tmp = $_GET["criteria"];
-         $_GET["criteria"] = array();
+      if (isset($params["criteria"]) && is_array($params["criteria"])
+            && count($params["criteria"])) {
+         $tmp = $params["criteria"];
+         $params["criteria"] = array();
          foreach ($tmp as $val) {
-            $_GET["criteria"][] = $val;
+            $params["criteria"][] = $val;
          }
       }
-      if (isset($_GET["metacriteria"]) && is_array($_GET["metacriteria"])
-            && count($_GET["metacriteria"])) {
-         $tmp = $_GET["metacriteria"];
-         $_GET["metacriteria"] = array();
+      if (isset($params["metacriteria"]) && is_array($params["metacriteria"])
+            && count($params["metacriteria"])) {
+         $tmp = $params["metacriteria"];
+         $params["metacriteria"] = array();
          foreach ($tmp as $val) {
-            $_GET["metacriteria"][] = $val;
+            $params["metacriteria"][] = $val;
          }
       }
 
       if ($usesession
-          && isset($_GET["reset"])) {
+          && isset($params["reset"])) {
          if (isset($_SESSION['glpisearch'][$itemtype])) {
             unset($_SESSION['glpisearch'][$itemtype]);
          }
-         if (isset($_SESSION['glpisearchcount'][$itemtype])) {
-            unset($_SESSION['glpisearchcount'][$itemtype]);
-         }
-         if (isset($_SESSION['glpisearchcount2'][$itemtype])) {
-            unset($_SESSION['glpisearchcount2'][$itemtype]);
-         }
-      }
-      if ($usesession) {
-         // Bookmark use
-         if (isset($_GET["glpisearchcount"])) {
-            $_SESSION["glpisearchcount"][$itemtype] = $_GET["glpisearchcount"];
-         } else if (isset($_GET["criteria"])) {
-            $_SESSION["glpisearchcount"][$itemtype] = count($_GET["criteria"]);
-         }
-
-         // Bookmark use
-         if (isset($_GET["glpisearchcount2"])) {
-            $_SESSION["glpisearchcount2"][$itemtype] = $_GET["glpisearchcount2"];
-         } else if (isset($_GET["metacriteria"])) {
-            $_SESSION["glpisearchcount2"][$itemtype] = count($_GET["metacriteria"]);
-         }
       }
 
-      if (isset($_GET)
-          && is_array($_GET)
+      if (isset($params)
+          && is_array($params)
           && $usesession) {
-         foreach ($_GET as $key => $val) {
+         foreach ($params as $key => $val) {
             $_SESSION['glpisearch'][$itemtype][$key] = $val;
          }
       }
 
       foreach ($default_values as $key => $val) {
-         if (!isset($_GET[$key])) {
+         if (!isset($params[$key])) {
             if ($usesession
                 && isset($_SESSION['glpisearch'][$itemtype][$key])) {
-               $_GET[$key] = $_SESSION['glpisearch'][$itemtype][$key];
+               $params[$key] = $_SESSION['glpisearch'][$itemtype][$key];
             } else {
-               $_GET[$key]                    = $val;
+               $params[$key]                    = $val;
                $_SESSION['glpisearch'][$itemtype][$key] = $val;
             }
          }
       }
-
-      if (!isset($_SESSION["glpisearchcount"][$itemtype])) {
-         if (isset($_GET["glpisearchcount"])) {
-            $_SESSION["glpisearchcount"][$itemtype] = $_GET["glpisearchcount"];
-         } else {
-            $_SESSION["glpisearchcount"][$itemtype] = 1;
-         }
-      }
-      if (!isset($_SESSION["glpisearchcount2"][$itemtype])) {
-         // Set in URL for bookmark
-         if (isset($_GET["glpisearchcount2"])) {
-            $_SESSION["glpisearchcount2"][$itemtype] = $_GET["glpisearchcount2"];
-         } else {
-            $_SESSION["glpisearchcount2"][$itemtype] = 0;
-         }
-      }
-
+      return $params;
    }
 
 
