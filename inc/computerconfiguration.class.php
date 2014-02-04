@@ -129,8 +129,32 @@ class ComputerConfiguration extends CommonDropdown {
 
       echo "<tr class='tab_bg_2'><td>".__('Inheritance')."</td>";
       echo "<td>";
+
+      
+      // find all inheritances for this configuration
       $actives = array();
-      Dropdown::showFromArray('_inheritance', array(), array('values'   => $actives,
+      if (!$this->isNewId($this->getID())) {
+         $compconf_compconf = new ComputerConfiguration_ComputerConfiguration;
+         $found_inheritance = $compconf_compconf->find("computerconfigurations_id_1 = ".
+                                                        $this->getID());
+         foreach ($found_inheritance as $computerconfigurations_id => $inheritance_options) {
+            $actives[] = $inheritance_options['computerconfigurations_id_2'];
+         }
+      }
+      
+      // find all configuration to display dropdown of inheritance
+      $where = "";
+      if (!$this->isNewId($this->getID())) {
+         $where = "id != ".$this->getID();
+      }
+      $found_configurations = $this->find($where);
+      $inheritance_options = array();
+      foreach ($found_configurations as $computerconfigurations_id => $computerconfigurations) {
+         $inheritance_options[$computerconfigurations_id] = $computerconfigurations['name'];
+      }
+
+      // display dropdown of inheritance
+      Dropdown::showFromArray('_inheritance', $inheritance_options, array('values'   => $actives,
                                                             'multiple' => true,
                                                             'readonly' => !$canedit));
       echo "</td>\n";
@@ -138,9 +162,7 @@ class ComputerConfiguration extends CommonDropdown {
       echo "<td>";
       echo "</td>";
       echo "</tr>";
-
-
-
+      
       $this->showFormButtons($options);
 
       return true;
@@ -156,6 +178,8 @@ class ComputerConfiguration extends CommonDropdown {
       global $CFG_GLPI;
 
       $itemtype = "Computer";
+
+      $p = array();
       
       // load saved criterias
       if (!empty($this->fields['criteria'])) {
@@ -296,6 +320,12 @@ class ComputerConfiguration extends CommonDropdown {
       echo "</table>";
    }
 
+   function prepareInputForAdd($input) {
+      if (isset($input['_inheritance'])) {
+         $input = $this->saveInheritance($input);
+      }
+      return $input;
+   }
 
    function prepareInputForUpdate($input) {
 
@@ -308,7 +338,27 @@ class ComputerConfiguration extends CommonDropdown {
          $input['metacriteria'] = http_build_query($input['metacriteria']);
       } else $input['metacriteria'] = "";
 
+      if (isset($input['_inheritance'])) {
+         $input = $this->saveInheritance($input);
+      }
+
       return $input;
+   }
+
+   function saveInheritance($input) {
+      global $DB;
+
+      //clear all old inheritance for this configuration
+      $DB->query("DELETE FROM glpi_computerconfigurations_computerconfigurations 
+                         WHERE computerconfigurations_id_1 = ".$input['id']);
+
+      //add new inheritance
+      $compconf_compconf = new ComputerConfiguration_ComputerConfiguration;
+      foreach ($input['_inheritance'] as $inheritance_options) {
+         $compconf_compconf->add(array('computerconfigurations_id_1' => $input['id'], 
+                                       'computerconfigurations_id_2' => $inheritance_options));
+      }
+
    }
 
    /**
