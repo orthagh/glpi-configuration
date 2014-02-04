@@ -62,4 +62,42 @@ class ComputerConfiguration_Computer extends CommonDBTM {
       }
       return false;
    }
+
+   /**
+    * @since version 0.85
+    *
+    * @see CommonDBTM::showMassiveActionsSubForm()
+   **/
+   static function showMassiveActionsSubForm(MassiveAction $ma) {
+      global $CFG_GLPI;
+
+      switch ($ma->getAction()) {
+         case 'add' :
+            ComputerConfiguration::dropdown();
+            echo Html::submit(_x('button','Post'), array('name' => 'massiveaction'))."</span>";
+            return true;
+      }
+      return parent::showMassiveActionsSubForm($ma);
+   }
+
+   /**
+    * @since version 0.85
+    *
+    * @see CommonDBTM::processMassiveActionsForOneItemtype()
+   **/
+   static function processMassiveActionsForOneItemtype(MassiveAction $ma, CommonDBTM $item,
+                                                       array $ids) {
+      global $DB;
+
+      switch ($ma->getAction()) {
+         case 'add' :
+            $compconf_comp = new self;
+            foreach ($ids as $computers_id) {
+               $compconf_comp->add(array('computerconfigurations_id' => $_POST['computerconfigurations_id'], 
+                                         'computers_id'              => $computers_id));
+            }
+      }
+
+      parent::processMassiveActionsForOneItemtype($ma, $item, $ids);
+   }
 }

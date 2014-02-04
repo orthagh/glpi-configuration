@@ -650,6 +650,7 @@ class Computer extends CommonDBTM {
          // TODO : don't we need this action ?
          //$actions['Computer_Item'.MassiveAction::CLASS_ACTION_SEPARATOR.'remove'] = _x('button', 'Disconnect');
          $actions['Computer_SoftwareVersion'.MassiveAction::CLASS_ACTION_SEPARATOR.'add'] = _x('button', 'Install');
+         $actions['ComputerConfiguration_Computer'.MassiveAction::CLASS_ACTION_SEPARATOR.'add'] = _x('button', 'add to a configuration');
       }
 
       if ($isadmin) {
