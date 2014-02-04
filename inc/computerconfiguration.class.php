@@ -172,15 +172,15 @@ class ComputerConfiguration extends CommonDropdown {
       // load saved criterias
       if (!empty($this->fields['criteria'])) {
          parse_str($this->fields['criteria'], $criteria);
-         $_GET['criteria'] = $p['criteria'] = $criteria;
+         $p['criteria'] = $criteria;
       }
       if (!empty($this->fields['metacriteria'])) {
          parse_str($this->fields['metacriteria'], $metacriteria);
-         $_GET['metacriteria'] = $p['metacriteria'] = $metacriteria;
+         $p['metacriteria'] = $metacriteria;
       }
 
       //store in session GET values
-      Search::manageGetValues($itemtype);
+      Search::manageParams($itemtype, $p);
 
       //show generic search form (duplicated from Search class)
       echo "<form name='searchformComputerConfigurationCriteria' method='post'>";
@@ -194,8 +194,8 @@ class ComputerConfiguration extends CommonDropdown {
       $nbmetasearchcountvar = 'nbmetacriteria'.strtolower($itemtype).mt_rand();
       $searchcriteriatableid = 'criteriatable'.strtolower($itemtype).mt_rand();
       // init criteria count
-      $js = "var $nbsearchcountvar=".$_SESSION["glpisearchcount"][$itemtype].";";
-      $js .= "var $nbmetasearchcountvar=".$_SESSION["glpisearchcount2"][$itemtype].";";
+      $js = "var $nbsearchcountvar=".count($p['criteria']).";";
+      $js .= "var $nbmetasearchcountvar=".count($p['metacriteria']).";";
       echo Html::scriptBlock($js);
 
       echo "<table class='tab_cadre_fixe' >";
@@ -205,7 +205,7 @@ class ComputerConfiguration extends CommonDropdown {
       echo "<table class='tab_format' id='$searchcriteriatableid'>";
 
       // Display normal search parameters
-      for ($i=0 ; $i<$_SESSION["glpisearchcount"][$itemtype] ; $i++) {
+      for ($i=0 ; $i<count($p['criteria']) ; $i++) {
          $_POST['itemtype'] = $itemtype;
          $_POST['num'] = $i ;
          include(GLPI_ROOT.'/ajax/searchrow.php');
@@ -215,7 +215,7 @@ class ComputerConfiguration extends CommonDropdown {
       $linked =  Search::getMetaItemtypeAvailable($itemtype);
       
       if (is_array($linked) && (count($linked) > 0)) {
-         for ($i=0 ; $i<$_SESSION["glpisearchcount2"][$itemtype] ; $i++) {
+         for ($i=0 ; $i<count($p['metacriteria']) ; $i++) {
 
             $_POST['itemtype'] = $itemtype;
             $_POST['num'] = $i ;
@@ -275,8 +275,9 @@ class ComputerConfiguration extends CommonDropdown {
       }
 
             
-      $datas = Search::getDatas("Computer", $p/*, array(1, 31)*/);
+      $datas = Search::getDatas("Computer", $p, array(1, 31));
       Html::printCleanArray($datas);
+      Toolbox::logDebug($datas);
 
       //display computers (and check if they match criteria)
       echo "<ul class=''>";
