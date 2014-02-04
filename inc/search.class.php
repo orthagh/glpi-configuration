@@ -186,10 +186,21 @@ class Search {
       }
 
       /// Get the items to display
-      // Force item to display
+      // Add searched items
+      
+      $forcetoview = false;
       if (is_array($forcedisplay) && count($forcedisplay)) {
-         $data['toview'] = $forcedisplay;
-      } else {
+         $forcetoview = true;
+      }
+      $data['search']['all_search']  = false;
+      $data['search']['view_search'] = false;
+      // If no research limit research to display item and compute number of item using simple request
+      $data['search']['no_search'] = false;
+
+      $data['toview'] = array();
+      
+      
+      if (!$forcetoview) {
          $data['toview'] = self::addDefaultToView($itemtype);
 
          // Add items to display depending of personal prefs
@@ -199,44 +210,38 @@ class Search {
                array_push($data['toview'],$val);
             }
          }
-
-         // Add searched items
-         $data['search']['all_search']  = false;
-         $data['search']['view_search'] = false;
-         // If no research limit research to display item and compute number of item using simple request
-         $data['search']['no_search'] = false;
-
-         if (count($p['criteria']) > 0) {
-            foreach ($p['criteria'] as $key => $val) {
-               if (!in_array($val['field'], $data['toview'])) {
-                  if (($val['field'] != 'all') && ($val['field'] != 'view')) {
-                     array_push($data['toview'], $val['field']);
-                  } else if ($val['field'] == 'all'){
-                     $data['search']['all_search'] = true;
-                  } else if ($val['field'] == 'view'){
-                     $data['search']['view_search'] = true;
-                  }
-               }
-               if (isset($val['value']) && (strlen($val['value']) > 0)) {
-                  $data['search']['no_search'] = false;
+      }
+      
+      if (count($p['criteria']) > 0) {
+         foreach ($p['criteria'] as $key => $val) {
+            if (!in_array($val['field'], $data['toview'])) {
+               if (($val['field'] != 'all') && ($val['field'] != 'view')) {
+                  array_push($data['toview'], $val['field']);
+               } else if ($val['field'] == 'all'){
+                  $data['search']['all_search'] = true;
+               } else if ($val['field'] == 'view'){
+                  $data['search']['view_search'] = true;
                }
             }
+            if (isset($val['value']) && (strlen($val['value']) > 0)) {
+               $data['search']['no_search'] = false;
+            }
          }
+      }
 
-         if (count($p['metacriteria'])) {
-            $data['search']['no_search'] = false;
-         }
+      if (count($p['metacriteria'])) {
+         $data['search']['no_search'] = false;
+      }
 
 
-         // Add order item
-         if (!in_array($p['sort'], $data['toview'])) {
-            array_push($data['toview'], $p['sort']);
-         }
+      // Add order item
+      if (!in_array($p['sort'], $data['toview'])) {
+         array_push($data['toview'], $p['sort']);
+      }
 
-         // Special case for Ticket : put ID in front
-         if ($itemtype == 'Ticket') {
-            array_unshift($data['toview'], 2);
-         }
+      // Special case for Ticket : put ID in front
+      if ($itemtype == 'Ticket') {
+         array_unshift($data['toview'], 2);
       }
 
       $limitsearchopt   = self::getCleanedOptions($itemtype);
@@ -247,8 +252,21 @@ class Search {
             $tmpview[] = $val;
          }
       }
-      $data['toview'] = $tmpview;
+      $data['toview']    = $tmpview;
+      $data['tocompute'] = $data['toview'];
 
+      
+      // Force item to display
+      if ($forcetoview) {
+         $data['toview'] = $forcedisplay;
+         foreach ($data['toview'] as $val) {
+            if (!in_array($val, $data['tocompute'])) {
+                array_push($data['tocompute'], $val);
+            }
+         }
+      } 
+      
+      
       return $data;
    }
 
@@ -321,7 +339,7 @@ class Search {
       $FROM          .= $COMMONLEFTJOIN;
 
       // Add all table for toview items
-      foreach ($data['toview'] as $key => $val) {
+      foreach ($data['tocompute'] as $key => $val) {
          if (!in_array($searchopt[$val]["table"], $blacklist_tables)) {
             $FROM .= self::addLeftJoin($data['itemtype'], $itemtable, $already_link_tables,
                                        $searchopt[$val]["table"],
@@ -330,7 +348,7 @@ class Search {
                                        $searchopt[$val]["field"]);
          }
       }
-
+      
       // Search all case :
       if ($data['search']['all_search']) {
          foreach ($searchopt as $key => $val) {
@@ -346,7 +364,6 @@ class Search {
             }
          }
       }
-
 
       //// 3 - WHERE
 
@@ -424,7 +441,7 @@ class Search {
                         $LINK = $tmplink;
                      }
                      // Find key
-                     $item_num = array_search($criteria['field'], $data['toview']);
+                     $item_num = array_search($criteria['field'], $data['tocompute']);
                      $HAVING  .= self::addHaving($LINK, $NOT, $data['itemtype'],
                                                  $criteria['field'], $criteria['searchtype'],
                                                  $criteria['value'], 0, $item_num);
@@ -516,7 +533,7 @@ class Search {
 
       //// 4 - ORDER
       $ORDER = " ORDER BY `id` ";
-      foreach ($data['toview'] as $key => $val) {
+      foreach ($data['tocompute'] as $key => $val) {
          if ($data['search']['sort'] == $val) {
             $ORDER = self::addOrderBy($data['itemtype'], $data['search']['sort'],
                                       $data['search']['order'], $key);
@@ -861,6 +878,7 @@ class Search {
       // Use a ReadOnly connection if available and configured to be used
       $DBread = DBConnection::getReadConnection();
       $DBread->query("SET SESSION group_concat_max_len = 4096;");
+
       $result = $DBread->query($data['sql']['search']);
       /// Check group concat limit : if warning : increase limit
       if ($result2 = $DBread->query('SHOW WARNINGS')) {
@@ -4506,7 +4524,7 @@ class Search {
     * @return parsed params array
    **/
    static function manageParams($itemtype, $params = array(), $usesession=true, $forcebookmark=false) {
-      global $_GET, $DB;
+      global $CFG_GLPI, $DB;
 
       $redirect = false;
 
@@ -4516,7 +4534,21 @@ class Search {
       $default_values["order"]       = "ASC";
       $default_values["sort"]        = 1;
       $default_values["is_deleted"]  = 0;
-      $default_values["criteria"]    = array(0 => array('field' => 0,
+      
+      if ($CFG_GLPI['allow_search_view'] == 2) {
+         $default_criteria = 'view';
+      } else {
+         $options = self::getCleanedOptions($itemtype);
+         foreach ($options as $key => $val) {
+            if (is_array($val)) {
+               $default_criteria = $key;
+               break;
+            }
+         }
+         
+      }
+      
+      $default_values["criteria"]    = array(0 => array('field' => $default_criteria,
                                                         'link'  => 'contains',
                                                         'value' => ''));
       $default_values["metacriteria"]    = array();
