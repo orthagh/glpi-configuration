@@ -245,11 +245,9 @@ class ComputerConfiguration extends CommonDropdown {
 
       $computer = new Computer;
 
-      //search computers associated to this configuration
-      $computers_id_list = self::getListofComputersID($this->getID());
-
       //search computers who match stored criteria
       $p['sort']         = '';
+      $p['list_limit']   = 999999999999; // how to get all ?
       $p['is_deleted']   = 0;
       $p['criteria']     = array();
       $p['metacriteria'] = array();
@@ -266,11 +264,11 @@ class ComputerConfiguration extends CommonDropdown {
          $p['metacriteria'] = $metacriteria;
       }
 
-            
-      $datas = Search::getDatas("Computer", $p/*, array(1, 31)*/);
-      //Html::printCleanArray($datas);
+      //get all computers who match criteria (return only id column)
+      $datas = Search::getDatas("Computer", $p, array(1));
 
-      //display computers (and check if they match criteria)
+      //search and display all computers associated to this configuration (and check if they match criteria)
+      $computers_id_list = self::getListofComputersID($this->getID());
       echo "<table class='tab_cadre_fixehov'>";
       echo "<tr>";
       echo "<th>".__('name')."</th>";
@@ -282,8 +280,8 @@ class ComputerConfiguration extends CommonDropdown {
          echo "<tr>";
          echo "<td>".$computer->getLink(array('comments' => true))."</td>";
 
-         $is_ok = mt_rand(0,1);
-         if($is_ok) {
+         //check if current computer match saved criterias
+         if (isset($datas['data']['items'][$computers_id])) {
             $pic = "greenbutton.png";
             $title = __('Yes');
          } else {
@@ -326,7 +324,7 @@ class ComputerConfiguration extends CommonDropdown {
       $found_comp = $compconf_comp->find("computerconfigurations_id = $computerconfigurations_id");
       $listofcomputers_id = array();
       foreach ($found_comp as $comp) {
-         $listofcomputers_id[] = $comp['id'];
+         $listofcomputers_id[] = $comp['computers_id'];
       }
 
       if ($filter === "none") {
