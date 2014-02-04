@@ -601,7 +601,7 @@ CREATE TABLE `glpi_computerconfigurations` (
   KEY `date_mod` (`date_mod`),
   KEY `entities_id` (`entities_id`),
   KEY `is_recursive` (`is_recursive`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `glpi_computerconfigurations_computerconfigurations` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -610,7 +610,7 @@ CREATE TABLE `glpi_computerconfigurations_computerconfigurations` (
   PRIMARY KEY (`id`),
   KEY `computerconfigurations_id_1` (`computerconfigurations_id_1`),
   KEY `computerconfigurations_id_2` (`computerconfigurations_id_2`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 DROP TABLE IF EXISTS `glpi_computerconfigurations_computers`;
 CREATE TABLE `glpi_computerconfigurations_computers` (
@@ -620,7 +620,7 @@ CREATE TABLE `glpi_computerconfigurations_computers` (
   PRIMARY KEY (`id`),
   KEY `computerconfigurations_id` (`computerconfigurations_id`),
   KEY `computers_id` (`computers_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
 ### Dump table glpi_computerdisks

@@ -165,9 +165,7 @@ class ComputerConfiguration extends CommonDropdown {
 
       // save search session variables
       $glpisearch_session = $_SESSION['glpisearch'];
-      $glpisearchcount_session = $_SESSION['glpisearchcount'];
-      $glpisearchcount2_session = $_SESSION['glpisearchcount2'];
-      unset($_SESSION['glpisearch'], $_SESSION['glpisearchcount'], $_SESSION['glpisearchcount2']);
+      unset($_SESSION['glpisearch']);
 
       // load saved criterias
       if (!empty($this->fields['criteria'])) {
@@ -242,8 +240,6 @@ class ComputerConfiguration extends CommonDropdown {
 
       //restore search session variables
       $_SESSION['glpisearch'] = $glpisearch_session;
-      $_SESSION['glpisearchcount'] = $glpisearchcount_session;
-      $_SESSION['glpisearchcount2'] = $glpisearchcount2_session;
 
       Html::closeForm();
    }
