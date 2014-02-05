@@ -84,8 +84,10 @@ class ComputerConfiguration extends CommonDropdown {
    function getTabNameForItem(CommonGLPI $item, $withtemplate=0) {
       switch ($item->getType()) {
          case __CLASS__:
+            $ong = array();
             $nb = count($item->getCriteria()) + count($item->getMetaCriteria());
-            return self::createTabEntry(_n('Criterion', 'Criteria', $nb), $nb);
+            $ong[1] = self::createTabEntry(_n('Criterion', 'Criteria', $nb), $nb);
+            return $ong;
       }
       return '';
    }
