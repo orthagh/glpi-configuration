@@ -154,7 +154,7 @@ class ComputerConfiguration extends CommonDropdown {
       echo "</td>";
       echo "</tr>";
 
-      echo "<tr class='tab_bg_2'><td>".__('View computers of childs configurations')."</td>";
+      echo "<tr class='tab_bg_2'><td>".__('View computers of childs configurations in computers tabs')."</td>";
       echo "<td>";
       Dropdown::showYesNo('viewchilds', $this->fields["viewchilds"]);
       echo "</td>";
