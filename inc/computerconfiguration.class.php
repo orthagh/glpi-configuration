@@ -315,7 +315,7 @@ class ComputerConfiguration extends CommonDropdown {
       echo "<table class='tab_cadre_fixehov'>";
       echo "<tr>";
       echo "<th width='10'>".Html::getCheckAllAsCheckbox('mass'.$classname.$rand)."</th>";
-      echo "<th>".__('name')."</th>";
+      echo "<th>".__('Name')."</th>";
       if ($this->fields['viewchilds']) {
          echo "<th>".__('viewed from the configuration ')." :</th>";
       }
