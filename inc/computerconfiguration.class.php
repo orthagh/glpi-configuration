@@ -418,6 +418,14 @@ class ComputerConfiguration extends CommonDropdown {
       return $input;
    }
 
+   function cleanDBonPurge() {
+      $compconf_comp = new ComputerConfiguration_Computer();
+      $compconf_comp->cleanDBonItemDelete(__CLASS__, $this->fields['id']);
+
+      $compconf_compconf = new ComputerConfiguration_ComputerConfiguration();
+      $compconf_compconf->cleanDBonItemDelete(__CLASS__, $this->fields['id']);
+   }
+
    function saveInheritance($input) {
       global $DB;
 
