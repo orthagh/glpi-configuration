@@ -113,16 +113,11 @@ class ComputerConfiguration extends CommonDropdown {
       global $CFG_GLPI;
 
       $this->initForm($ID, $options);
-      $canedit = $this->can($ID, UPDATE);
       $this->showFormHeader($options);
 
       echo "<tr class='tab_bg_2'><td>".__('Name')."</td>";
       echo "<td>";
-      if ($canedit) {
-         Html::autocompletionTextField($this, "name");
-      } else {
-         echo $this->fields['name'];
-      }
+      Html::autocompletionTextField($this, "name");
       echo "</td>\n";
 
       echo "<td rowspan='2'>". __('Comments')."</td>";
@@ -130,10 +125,9 @@ class ComputerConfiguration extends CommonDropdown {
             <textarea cols='55' rows='5' name='comment' >".$this->fields["comment"];
       echo "</textarea></td></tr>\n";
 
+
       echo "<tr class='tab_bg_2'><td>".__('Inheritance')."</td>";
       echo "<td>";
-
-      
       // find all inheritances for this configuration
       $actives = array();
       if (!$this->isNewId($this->getID())) {
@@ -153,10 +147,7 @@ class ComputerConfiguration extends CommonDropdown {
 
       // displays dropdown of inheritance
       Dropdown::showFromArray('_inheritance', $inheritance_options, array('values'   => $actives,
-                                                            'multiple' => true,
-                         
-
-                                                            'readonly' => !$canedit));
+                                                            'multiple' => true));
       echo "</td>\n";
 
       echo "<td>";
@@ -439,9 +430,8 @@ class ComputerConfiguration extends CommonDropdown {
       // get computers associated to child configurations
       if ($getchilds) {
          $conf_childs = self::getChilds($computerconfigurations_id);
-         foreach ($conf_childs as $child_configuration) {
-            $computers_id_child = self::getListofComputersID($child_configuration['computerconfigurations_id_1'], 
-                                                             $filter, $getchilds);
+         foreach ($conf_childs as $childs_id) {
+            $computers_id_child = self::getListofComputersID($childs_id, $filter, $getchilds);
 
             // merge computer of child configuration with computer of current configuration
             $listofcomputers_id = array_merge($listofcomputers_id, $computers_id_child);
