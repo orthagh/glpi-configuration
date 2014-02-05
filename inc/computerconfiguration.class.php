@@ -523,8 +523,8 @@ class ComputerConfiguration extends CommonDropdown {
       $p['no_search']    = false;
 
       // load saved criterias
-      $p['criteria'] = $this->getCriteria();
-      $p['metacriteria'] = $this->getMetaCriteria();
+      $p['criteria'] = $configuration->getCriteria();
+      $p['metacriteria'] = $configuration->getMetaCriteria();
 
       // get all computers who match criteria (return only id column)
       $datas = Search::getDatas("Computer", $p, array(1));
