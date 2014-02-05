@@ -276,7 +276,8 @@ class ComputerConfiguration extends CommonDropdown {
       global $CFG_GLPI;
       
       // get all computers who match criteria (with inheritance)
-      $criteria_computers = self::getComputerFromCriteria($this->getID());
+      $computers_mismatch = array();
+      $criteria_computers = self::getComputerFromCriteria($this->getID(), $computers_mismatch);
 
       // search and display all computers associated to this configuration (and check if they match criteria)
       $computers_id_list = self::getListofComputersID($this->getID());
@@ -299,10 +300,12 @@ class ComputerConfiguration extends CommonDropdown {
       echo "<th>".__('Result details')."</th>";
       echo "</tr>";
       $computer = new Computer;
+      $configuration = new self;
       foreach ($computers_id_list as $ccompconf_comps_id => $computers_id) {
          $computer->getFromDB($computers_id);
          echo "<tr>";
    
+         // display massive actions checkboxes
          echo "<td>";
          Html::showMassiveActionCheckBox($classname, $ccompconf_comps_id);
          echo "</td>";
@@ -319,7 +322,18 @@ class ComputerConfiguration extends CommonDropdown {
          }
          echo "<td><img src='".$CFG_GLPI['root_doc']."/pics/$pic' title='$title'></td>";
 
-         echo "<td></td>";
+         //for mismatch computers, display the configuration who trigger
+         echo "<td>";
+         if (!isset($criteria_computers[$computers_id])) {
+            if (isset($computers_mismatch[$computers_id])) {
+               $computerconfigurations_id = $computers_mismatch[$computers_id];
+            } else {
+               $computerconfigurations_id = $this->getID();
+            }
+            $configuration->getFromDB($computerconfigurations_id);
+            echo $configuration->getLink(array('comments' => true));
+         }
+         echo "</td>";
          echo "</tr>";
       }
       echo "</table>";  
@@ -444,7 +458,16 @@ class ComputerConfiguration extends CommonDropdown {
                                                      $computerconfigurations_id);
       foreach ($found_inheritance as $compconf_id => $option) {
          // get all computer for current inheritance
-         $computers_inheritance = self::getComputerFromCriteria($option['computerconfigurations_id_2']);
+         $computers_inheritance = self::getComputerFromCriteria($option['computerconfigurations_id_2'], 
+                                                                $computers_mismatch);
+
+         // populate computer_mismatch to reference which rule mismatch each computer
+         $computers_diff = array_diff($computers_list, $computers_inheritance);
+         foreach ($computers_diff as $computers_id) {
+            if (!isset($computers_mismatch[$computers_id])) {
+               $computers_mismatch[$computers_id] = $option['computerconfigurations_id_2'];
+            }
+         }
 
          // filter computers list with those from the inheritance
          $computers_list = array_intersect($computers_list, $computers_inheritance);
