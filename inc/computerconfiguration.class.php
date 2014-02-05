@@ -394,15 +394,14 @@ class ComputerConfiguration extends CommonDropdown {
       Html::showMassiveActions($massiveactionparams);  
    }
 
-   function prepareInputForAdd($input) {
-      if (isset($input['_inheritance'])) {
-         $input = $this->saveInheritance($input);
+   function post_addItem() {
+      if (isset($this->input['_inheritance'])) {
+         $this->input['id'] = $this->fields['id'];
+         $this->saveInheritance($this->input);
       }
-      return $input;
    }
 
    function prepareInputForUpdate($input) {
-
       //serialize search parameters
       if (isset($input['criteria']) && is_array($input['criteria'])) {
          $input['criteria'] = http_build_query($input['criteria']);
