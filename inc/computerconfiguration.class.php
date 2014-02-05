@@ -105,8 +105,8 @@ class ComputerConfiguration extends CommonDropdown {
 
    /**
     * Configuration principal form
-    * @param  [int] $ID     id of the configurationj
-    * @param  [array]  $options 
+    * @param  int $ID : id of the configuration
+    * @param  array $options 
     * @return nothing, display a form
     */
    function showForm($ID, $options = array()) {
@@ -370,11 +370,11 @@ class ComputerConfiguration extends CommonDropdown {
 
    /**
     * Retrieve the id of computers associated to this configuration
-    * @param  [int] $computerconfigurations_id  id of the configuration
-    * @param  [string] $filter                    [none : no filter
-    *                                            match: computers who match criteria,
-    *                                            notmatch : computers who not match criteria]
-    * @return [array] array of computers_id 
+    * @param  int $computerconfigurations_id : id of the configuration
+    * @param  string $filter: - none : no filter
+    *                         - match: computers who match criteria,
+    *                         - notmatch : computers who not match criteria]
+    * @return array : array of computers_id 
     */
    static function getListofComputersID($computerconfigurations_id, $filter = 'none') {
       $compconf_comp = new ComputerConfiguration_Computer;
@@ -402,10 +402,12 @@ class ComputerConfiguration extends CommonDropdown {
 
    /**
     * Return list of computer who match configuration
-    * @param  [int] $computerconfigurations_id [id of the configuration]
-    * @return [array]                            [list of computers_is]
+    * @param  int $computerconfigurations_id :id of the configuration
+    * @param  array $computers_mismatch : output param who reference wich configuration 
+    *                                       from inheritance mismatch each computer
+    * @return array : list of computers_id
     */
-   static function getComputerFromCriteria($computerconfigurations_id) {
+   static function getComputerFromCriteria($computerconfigurations_id, &$computers_mismatch = array()) {
       $configuration = new self;
       $configuration->getFromDB($computerconfigurations_id);
       
