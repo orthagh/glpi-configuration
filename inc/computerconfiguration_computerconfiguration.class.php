@@ -44,4 +44,28 @@ class ComputerConfiguration_ComputerConfiguration extends CommonDBRelation {
    static public $items_id_1     = 'computerconfigurations_id_1';
    static public $itemtype_2     = 'ComputerConfiguration';
    static public $items_id_2     = 'computerconfigurations_id_2';
+
+   function getTabNameForItem(CommonGLPI $item, $withtemplate=0) {
+      switch ($item->getType()) {
+         case "ComputerConfiguration":
+            $ong = array();
+            $nb = count(ComputerConfiguration::getChilds($item->getID()));
+            $ong[1] = self::createTabEntry(_n('Child Configuration', 'Childs Configurations', $nb), $nb);
+            return $ong;
+      }
+      return '';
+   }
+
+   static function displayTabContentForItem(CommonGLPI $item, $tabnum=1, $withtemplate=0) {
+      switch ($item->getType()) {
+         case "ComputerConfiguration" :
+            switch ($tabnum) {
+               case 1 :
+                  $item->showChildsConfigurations();
+                  return true;
+            }
+      }
+      return false;
+   }
+
 }

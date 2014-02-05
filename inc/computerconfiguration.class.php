@@ -77,6 +77,7 @@ class ComputerConfiguration extends CommonDropdown {
       $this->addDefaultFormTab($ong);
       $this->addStandardTab(__CLASS__, $ong, $options);
       $this->addStandardTab("ComputerConfiguration_Computer", $ong, $options);
+      $this->addStandardTab("ComputerConfiguration_ComputerConfiguration", $ong, $options);
       $this->addStandardTab('Log', $ong, $options);
       return $ong;
    }
@@ -278,6 +279,24 @@ class ComputerConfiguration extends CommonDropdown {
       $_SESSION['glpisearch'] = $glpisearch_session;
 
       Html::closeForm();
+   }
+
+   /**
+    * displays tab content, list of childs configurations
+    * @return nothing, displays a table
+    */
+   function showChildsConfigurations() {
+      $configuration = new self;
+      $childs_configuration = self::getChilds($this->getID());
+      echo "<table class='tab_cadre_fixehov'>";
+      echo "<tr>";
+      echo "<th>".__('Name')."</th>";
+      echo "</tr>";
+      foreach ($childs_configuration as $computerconfigurations_id) {
+         $configuration->getFromDB($computerconfigurations_id);
+         echo "<tr><td>".$configuration->getLink(array('comments' => true))."</td></tr>";
+      }
+      echo "</table>";
    }
 
    /**
