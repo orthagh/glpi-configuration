@@ -107,7 +107,7 @@ class ComputerConfiguration extends CommonDropdown {
     * Configuration principal form
     * @param  int $ID : id of the configuration
     * @param  array $options 
-    * @return nothing, display a form
+    * @return nothing, displays a form
     */
    function showForm($ID, $options = array()) {
       global $CFG_GLPI;
@@ -137,15 +137,10 @@ class ComputerConfiguration extends CommonDropdown {
       // find all inheritances for this configuration
       $actives = array();
       if (!$this->isNewId($this->getID())) {
-         $compconf_compconf = new ComputerConfiguration_ComputerConfiguration;
-         $found_inheritance = $compconf_compconf->find("computerconfigurations_id_1 = ".
-                                                        $this->getID());
-         foreach ($found_inheritance as $computerconfigurations_id => $inheritance_options) {
-            $actives[] = $inheritance_options['computerconfigurations_id_2'];
-         }
+         $actives = self::getAncestors($ID);
       }
       
-      // find all configuration to display dropdown of inheritance
+      // find all configuration to displays dropdown of inheritance
       $where = "";
       if (!$this->isNewId($this->getID())) {
          $where = "id != ".$this->getID();
@@ -156,13 +151,21 @@ class ComputerConfiguration extends CommonDropdown {
          $inheritance_options[$computerconfigurations_id] = $computerconfigurations['name'];
       }
 
-      // display dropdown of inheritance
+      // displays dropdown of inheritance
       Dropdown::showFromArray('_inheritance', $inheritance_options, array('values'   => $actives,
                                                             'multiple' => true,
+                         
+
                                                             'readonly' => !$canedit));
       echo "</td>\n";
 
       echo "<td>";
+      echo "</td>";
+      echo "</tr>";
+
+      echo "<tr class='tab_bg_2'><td>".__('View computer of childs configurations')."</td>";
+      echo "<td>";
+      Dropdown::showYesNo('viewchilds', $this->fields["viewchilds"]);
       echo "</td>";
       echo "</tr>";
 
@@ -173,9 +176,9 @@ class ComputerConfiguration extends CommonDropdown {
 
 
    /**
-    * Display tab content
+    * Displays tab content
     * This function adapted from Search::showGenericSearch with controls removed
-    * @return nothing, display a seach form
+    * @return nothing, displays a seach form
     */
    function showCriteria() {
       global $CFG_GLPI;
@@ -226,7 +229,7 @@ class ComputerConfiguration extends CommonDropdown {
 
       echo "<table class='tab_format' id='$searchcriteriatableid'>";
 
-      // Display normal search parameters
+      // Displays normal search parameters
       for ($i=0 ; $i<count($p['criteria']) ; $i++) {
          $_POST['itemtype'] = $itemtype;
          $_POST['num'] = $i ;
@@ -269,8 +272,8 @@ class ComputerConfiguration extends CommonDropdown {
    }
 
    /**
-    * display tab content, list of computer associated to the current configuration
-    * @return nothing, display a table
+    * displays tab content, list of computer associated to the current configuration
+    * @return nothing, displays a table
     */
    function showComputers() {
       global $CFG_GLPI;
@@ -279,8 +282,9 @@ class ComputerConfiguration extends CommonDropdown {
       $computers_mismatch = array();
       $criteria_computers = self::getComputerFromCriteria($this->getID(), $computers_mismatch);
 
-      // search and display all computers associated to this configuration (and check if they match criteria)
-      $computers_id_list = self::getListofComputersID($this->getID());
+      // search and displays all computers associated to this configuration (and check if they match criteria)
+      $computers_id_list = self::getListofComputersID($this->getID(), "none", 
+                                                      $this->fields['viewchilds']);
 
       $rand = mt_rand();
 
@@ -290,14 +294,18 @@ class ComputerConfiguration extends CommonDropdown {
                  'specific_actions' => array('MassiveAction'.MassiveAction::CLASS_ACTION_SEPARATOR.
                                                 'purge' => _x('button', 'Delete permanently')));
 
+
       Html::openMassiveActionsForm('mass'.$classname.$rand);
       Html::showMassiveActions($massiveactionparams);
       echo "<table class='tab_cadre_fixehov'>";
       echo "<tr>";
       echo "<th width='10'>".Html::getCheckAllAsCheckbox('mass'.$classname.$rand)."</th>";
       echo "<th>".__('name')."</th>";
-      echo "<th>".__('Results')."</th>";
-      echo "<th>".__('Result details')."</th>";
+      if ($this->fields['viewchilds']) {
+         echo "<th>".__('inherited from the configuration ')." :</th>";
+      }
+      echo "<th width='10'>".__('State')."</th>";
+      echo "<th>".__('does not match the configuration')." :</th>";
       echo "</tr>";
       $computer = new Computer;
       $configuration = new self;
@@ -305,13 +313,18 @@ class ComputerConfiguration extends CommonDropdown {
          $computer->getFromDB($computers_id);
          echo "<tr>";
    
-         // display massive actions checkboxes
+         // displays massive actions checkboxes
          echo "<td>";
          Html::showMassiveActionCheckBox($classname, $ccompconf_comps_id);
          echo "</td>";
 
          echo "<td>".$computer->getLink(array('comments' => true))."</td>";
-
+         
+         // displays inherited configuration  
+         if ($this->fields['viewchilds']) {
+            echo "<td></td>";
+         }
+      
          // check if current computer match saved criterias
          if (isset($criteria_computers[$computers_id])) {
             $pic = "greenbutton.png";
@@ -322,7 +335,7 @@ class ComputerConfiguration extends CommonDropdown {
          }
          echo "<td><img src='".$CFG_GLPI['root_doc']."/pics/$pic' title='$title'></td>";
 
-         //for mismatch computers, display the configuration who trigger
+         //for mismatch computers, displays the configuration who trigger
          echo "<td>";
          if (!isset($criteria_computers[$computers_id])) {
             if (isset($computers_mismatch[$computers_id])) {
@@ -382,15 +395,40 @@ class ComputerConfiguration extends CommonDropdown {
 
    }
 
+   static function getAncestors($computerconfigurations_id) {
+      $compconf_compconf = new ComputerConfiguration_ComputerConfiguration;
+      $found_ancestors = $compconf_compconf->find("computerconfigurations_id_1 = ".
+                                                $computerconfigurations_id);
+      $ancestors_id = array();
+      foreach ($found_ancestors as $ancestor) {
+         $ancestors_id[] = $ancestor['computerconfigurations_id_2'];
+      }
+      return $ancestors_id;
+   }
+
+   static function getChilds($computerconfigurations_id) {
+      $compconf_compconf = new ComputerConfiguration_ComputerConfiguration;
+      $found_childs = $compconf_compconf->find("computerconfigurations_id_2 = ".
+                                                $computerconfigurations_id);
+      $childs_id = array();
+      foreach ($found_childs as $child) {
+         $childs_id[] = $child['computerconfigurations_id_1'];
+      }
+      return $childs_id;
+   }
+
    /**
     * Retrieve the id of computers associated to this configuration
     * @param  int $computerconfigurations_id : id of the configuration
-    * @param  string $filter: - none : no filter
+    * @param  string $filter: - none : no filter (default)
     *                         - match: computers who match criteria,
     *                         - notmatch : computers who not match criteria]
+    * @param  bool $getchilds : retrieve also computers in childs configuration
     * @return array : array of computers_id 
     */
-   static function getListofComputersID($computerconfigurations_id, $filter = 'none') {
+   static function getListofComputersID($computerconfigurations_id, $filter = 'none', 
+                                        $getchilds = false) {
+
       $compconf_comp = new ComputerConfiguration_Computer;
       $found_comp = $compconf_comp->find("computerconfigurations_id = $computerconfigurations_id");
       $listofcomputers_id = array();
@@ -398,6 +436,19 @@ class ComputerConfiguration extends CommonDropdown {
          $listofcomputers_id[$comp['id']] = $comp['computers_id'];
       }
 
+      // get computers associated to child configurations
+      if ($getchilds) {
+         $conf_childs = self::getChilds($computerconfigurations_id);
+         foreach ($conf_childs as $child_configuration) {
+            $computers_id_child = self::getListofComputersID($child_configuration['computerconfigurations_id_1'], 
+                                                             $filter, $getchilds);
+
+            // merge computer of child configuration with computer of current configuration
+            $listofcomputers_id = array_merge($listofcomputers_id, $computers_id_child);
+         }
+      }
+
+      // apply filter param
       if ($filter === "none") {
          return $listofcomputers_id;
       }
@@ -453,19 +504,16 @@ class ComputerConfiguration extends CommonDropdown {
       }
 
       // find all inheritances for this configuration
-      $compconf_compconf = new ComputerConfiguration_ComputerConfiguration;
-      $found_inheritance = $compconf_compconf->find("computerconfigurations_id_1 = ".
-                                                     $computerconfigurations_id);
-      foreach ($found_inheritance as $compconf_id => $option) {
+      $conf_ancestors = self::getAncestors($computerconfigurations_id);
+      foreach ($conf_ancestors as $ancestors_id) {
          // get all computer for current inheritance
-         $computers_inheritance = self::getComputerFromCriteria($option['computerconfigurations_id_2'], 
-                                                                $computers_mismatch);
+         $computers_inheritance = self::getComputerFromCriteria($ancestors_id, $computers_mismatch);
 
          // populate computer_mismatch to reference which rule mismatch each computer
          $computers_diff = array_diff($computers_list, $computers_inheritance);
          foreach ($computers_diff as $computers_id) {
             if (!isset($computers_mismatch[$computers_id])) {
-               $computers_mismatch[$computers_id] = $option['computerconfigurations_id_2'];
+               $computers_mismatch[$computers_id] = $ancestors_id;
             }
          }
 

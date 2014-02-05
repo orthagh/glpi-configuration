@@ -593,6 +593,7 @@ CREATE TABLE `glpi_computerconfigurations` (
   `entities_id` int(11) NOT NULL DEFAULT '0',
   `is_recursive` int(11) NOT NULL DEFAULT '0',
   `name` varchar(255) default NULL,
+  `viewchilds` TINYINT(1) NOT NULL DEFAULT '0',
   `date_mod` datetime DEFAULT NULL,
   `comment` LONGTEXT DEFAULT NULL,
   `criteria` LONGTEXT DEFAULT NULL,
@@ -617,6 +618,7 @@ CREATE TABLE `glpi_computerconfigurations_computers` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `computerconfigurations_id` int(11) NOT NULL DEFAULT '0',
   `computers_id` int(11) NOT NULL DEFAULT '0',
+  `is_dynamic` TINYINT(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `computerconfigurations_id` (`computerconfigurations_id`),
   KEY `computers_id` (`computers_id`)
