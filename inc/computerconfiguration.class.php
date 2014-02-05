@@ -164,6 +164,10 @@ class ComputerConfiguration extends CommonDropdown {
       return true;
    }
 
+   /**
+    * transform current configuration's criteria from url form to array
+    * @return [array] 
+    */
    function getCriteria() {
       if (!empty($this->fields['criteria'])) {
          parse_str($this->fields['criteria'], $criteria);
@@ -171,6 +175,11 @@ class ComputerConfiguration extends CommonDropdown {
       }
       return array();
    }
+
+   /**
+    * transform current configuration's metacriteria from url form to array
+    * @return [array] 
+    */
    function getMetaCriteria() {
       if (!empty($this->fields['metacriteria'])) {
          parse_str($this->fields['metacriteria'], $metacriteria);
