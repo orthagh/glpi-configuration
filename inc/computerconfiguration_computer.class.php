@@ -38,7 +38,10 @@ if (!defined('GLPI_ROOT')) {
 /**
  * ComputerConfiguration class
 **/
-class ComputerConfiguration_Computer extends CommonDBTM {
+class ComputerConfiguration_Computer extends CommonDBChild {
+   // From CommonDBChild
+   static public $itemtype = "ComputerConfiguration";
+   static public $items_id = "computerconfigurations_id";
 
    //TODO : define a right for this item
    static function canCreate() {
