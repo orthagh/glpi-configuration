@@ -84,9 +84,8 @@ class ComputerConfiguration extends CommonDropdown {
    function getTabNameForItem(CommonGLPI $item, $withtemplate=0) {
       switch ($item->getType()) {
          case __CLASS__:
-            $ong = array();
-            $ong[1] = _n('Criterion', 'Criteria', 2);
-            return $ong;
+            $nb = count($item->getCriteria()) + count($item->getMetaCriteria());
+            return self::createTabEntry(_n('Criterion', 'Criteria', $nb), $nb);
       }
       return '';
    }
@@ -165,6 +164,21 @@ class ComputerConfiguration extends CommonDropdown {
       return true;
    }
 
+   function getCriteria() {
+      if (!empty($this->fields['criteria'])) {
+         parse_str($this->fields['criteria'], $criteria);
+         return $criteria;
+      }
+      return array();
+   }
+   function getMetaCriteria() {
+      if (!empty($this->fields['metacriteria'])) {
+         parse_str($this->fields['metacriteria'], $metacriteria);
+         return $metacriteria;
+      }
+      return array();
+   }
+
 
    /**
     * Displays tab content
@@ -175,18 +189,11 @@ class ComputerConfiguration extends CommonDropdown {
       global $CFG_GLPI;
 
       $itemtype = "Computer";
-
       $p = array();
       
       // load saved criterias
-      if (!empty($this->fields['criteria'])) {
-         parse_str($this->fields['criteria'], $criteria);
-         $p['criteria'] = $criteria;
-      }
-      if (!empty($this->fields['metacriteria'])) {
-         parse_str($this->fields['metacriteria'], $metacriteria);
-         $p['metacriteria'] = $metacriteria;
-      }
+      $p['criteria'] = $this->getCriteria();
+      $p['metacriteria'] = $this->getMetaCriteria();
 
       //manage sessions
       $glpisearch_session = $_SESSION['glpisearch'];
