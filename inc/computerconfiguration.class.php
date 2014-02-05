@@ -154,7 +154,7 @@ class ComputerConfiguration extends CommonDropdown {
       echo "</td>";
       echo "</tr>";
 
-      echo "<tr class='tab_bg_2'><td>".__('View computer of childs configurations')."</td>";
+      echo "<tr class='tab_bg_2'><td>".__('View computers of childs configurations')."</td>";
       echo "<td>";
       Dropdown::showYesNo('viewchilds', $this->fields["viewchilds"]);
       echo "</td>";
@@ -274,11 +274,17 @@ class ComputerConfiguration extends CommonDropdown {
       $criteria_computers = self::getComputerFromCriteria($this->getID(), $computers_mismatch);
 
       // search and displays all computers associated to this configuration (and check if they match criteria)
-      $computers_id_list = self::getListofComputersID($this->getID(), "none", 
+      $computers_id_list = self::getListOfComputersID($this->getID(), "none", 
                                                       $this->fields['viewchilds']);
 
-      $rand = mt_rand();
 
+      // retrieve list of association computers <=> configuration for childs
+      if ($this->fields['viewchilds']) {
+         $computers_id_list_childs = self::getListOfComputersOfChildsConfiguration($this->getID());
+      }
+
+      // init massiveactions
+      $rand = mt_rand();
       $classname = "ComputerConfiguration_Computer";
       $massiveactionparams
          = array('container'        => 'mass'.$classname.$rand,
@@ -293,7 +299,7 @@ class ComputerConfiguration extends CommonDropdown {
       echo "<th width='10'>".Html::getCheckAllAsCheckbox('mass'.$classname.$rand)."</th>";
       echo "<th>".__('name')."</th>";
       if ($this->fields['viewchilds']) {
-         echo "<th>".__('inherited from the configuration ')." :</th>";
+         echo "<th>".__('viewed from the configuration ')." :</th>";
       }
       echo "<th width='10'>".__('State')."</th>";
       echo "<th>".__('does not match the configuration')." :</th>";
@@ -313,7 +319,13 @@ class ComputerConfiguration extends CommonDropdown {
          
          // displays inherited configuration  
          if ($this->fields['viewchilds']) {
-            echo "<td></td>";
+            if (isset($computers_id_list_childs[$computers_id])) {
+               //get configuration name
+               $configuration->getFromDB($computers_id_list_childs[$computers_id]);
+
+               // displays configuration name
+               echo "<td>".$configuration->getLink(array('comments' => true))."</td>";
+            } else echo "<td></td>";
          }
       
          // check if current computer match saved criterias
@@ -417,7 +429,7 @@ class ComputerConfiguration extends CommonDropdown {
     * @param  bool $getchilds : retrieve also computers in childs configuration
     * @return array : array of computers_id 
     */
-   static function getListofComputersID($computerconfigurations_id, $filter = 'none', 
+   static function getListOfComputersID($computerconfigurations_id, $filter = 'none', 
                                         $getchilds = false) {
 
       $compconf_comp = new ComputerConfiguration_Computer;
@@ -431,7 +443,7 @@ class ComputerConfiguration extends CommonDropdown {
       if ($getchilds) {
          $conf_childs = self::getChilds($computerconfigurations_id);
          foreach ($conf_childs as $childs_id) {
-            $computers_id_child = self::getListofComputersID($childs_id, $filter, $getchilds);
+            $computers_id_child = self::getListOfComputersID($childs_id, $filter, $getchilds);
 
             // merge computer of child configuration with computer of current configuration
             $listofcomputers_id = array_merge($listofcomputers_id, $computers_id_child);
@@ -453,6 +465,36 @@ class ComputerConfiguration extends CommonDropdown {
       }
       
       return false;
+   }
+
+   /**
+    * // retrieve list of association computers <=> configuration for childs
+    * @param  [int] $computerconfigurations_id, id of the configuration
+    * @return [array] return list of computer associated to configuration (ex array(conputers_id => conf_id))                          
+    */
+   static function getListOfComputersOfChildsConfiguration($computerconfigurations_id) {
+      $listofcomputers_id = array();
+
+      $conf_childs = self::getChilds($computerconfigurations_id);
+      foreach ($conf_childs as $childs_id) {
+         // use recursivity
+         $listofcomputers_id = self::getListOfComputersOfChildsConfiguration($childs_id);
+
+         // get list of computer for the current configuration
+         $computers_id_child = self::getListOfComputersID($childs_id, "none", false);
+         if (count($computers_id_child) > 0) {
+            // fill list with computers_id in keys and configurations_id in value
+            $computers_id_child_tmp = array();
+            foreach ($computers_id_child as $computers_id) {
+               $computers_id_child_tmp[$computers_id] = $childs_id;
+            }
+            
+            // merge computers list from recursivity with current computer list
+            $listofcomputers_id = $listofcomputers_id + $computers_id_child_tmp;
+         }
+      }
+
+      return $listofcomputers_id;
    }
 
    /**
