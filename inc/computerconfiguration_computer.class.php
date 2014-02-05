@@ -67,9 +67,9 @@ class ComputerConfiguration_Computer extends CommonDBTM {
    function getTabNameForItem(CommonGLPI $item, $withtemplate=0) {
       switch ($item->getType()) {
          case "ComputerConfiguration":
-            $compconf_comp = new self;
-            $found_comp = $compconf_comp->find("computerconfigurations_id = ".$item->getId());
-            $nb = count($found_comp);
+            $listofcomputers_id = ComputerConfiguration::getListOfComputersID($item->getID(), 'none', 
+                                                                              $item->fields['viewchilds']);
+            $nb = count($listofcomputers_id);
             return self::createTabEntry(self::getTypeName($nb), $nb);
       }
       return '';
