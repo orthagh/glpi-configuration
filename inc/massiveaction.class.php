@@ -996,6 +996,7 @@ class MassiveAction {
                                                        array $ids) {
       global $CFG_GLPI;
 
+
       $action = $ma->getAction();
 
       switch ($action) {

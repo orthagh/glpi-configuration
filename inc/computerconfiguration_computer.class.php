@@ -39,6 +39,27 @@ if (!defined('GLPI_ROOT')) {
  * ComputerConfiguration class
 **/
 class ComputerConfiguration_Computer extends CommonDBTM {
+
+   //TODO : define a right for this item
+   static function canCreate() {
+      return true;
+   }
+   static function canUpdate() {
+      return true;
+   }
+   static function canDelete() {
+      return true;
+   }
+   function canPurgeItem() {
+      return true;
+   }
+   static function canPurge() {
+      return true;
+   }
+   static function canView() {
+      return true;
+   }
+   
    static function getTypeName($nb=0) {
       return _n('Computer', 'Computers', $nb);
    }

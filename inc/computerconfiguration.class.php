@@ -62,6 +62,9 @@ class ComputerConfiguration extends CommonDropdown {
    static function canDelete() {
       return true;
    }
+   function canPurgeItem() {
+      return true;
+   }
    static function canPurge() {
       return true;
    }
@@ -277,16 +280,33 @@ class ComputerConfiguration extends CommonDropdown {
 
       // search and display all computers associated to this configuration (and check if they match criteria)
       $computers_id_list = self::getListofComputersID($this->getID());
+
+      $rand = mt_rand();
+
+      $classname = "ComputerConfiguration_Computer";
+      $massiveactionparams
+         = array('container'        => 'mass'.$classname.$rand,
+                 'specific_actions' => array('MassiveAction'.MassiveAction::CLASS_ACTION_SEPARATOR.
+                                                'purge' => _x('button', 'Delete permanently')));
+
+      Html::openMassiveActionsForm('mass'.$classname.$rand);
+      Html::showMassiveActions($massiveactionparams);
       echo "<table class='tab_cadre_fixehov'>";
       echo "<tr>";
+      echo "<th width='10'>".Html::getCheckAllAsCheckbox('mass'.$classname.$rand)."</th>";
       echo "<th>".__('name')."</th>";
       echo "<th>".__('Results')."</th>";
       echo "<th>".__('Result details')."</th>";
       echo "</tr>";
       $computer = new Computer;
-      foreach ($computers_id_list as $computers_id) {
+      foreach ($computers_id_list as $ccompconf_comps_id => $computers_id) {
          $computer->getFromDB($computers_id);
          echo "<tr>";
+   
+         echo "<td>";
+         Html::showMassiveActionCheckBox($classname, $ccompconf_comps_id);
+         echo "</td>";
+
          echo "<td>".$computer->getLink(array('comments' => true))."</td>";
 
          // check if current computer match saved criterias
@@ -302,7 +322,9 @@ class ComputerConfiguration extends CommonDropdown {
          echo "<td></td>";
          echo "</tr>";
       }
-      echo "</table>";    
+      echo "</table>";  
+      $massiveactionparams['ontop'] =false;
+      Html::showMassiveActions($massiveactionparams);  
    }
 
    function prepareInputForAdd($input) {
@@ -359,7 +381,7 @@ class ComputerConfiguration extends CommonDropdown {
       $found_comp = $compconf_comp->find("computerconfigurations_id = $computerconfigurations_id");
       $listofcomputers_id = array();
       foreach ($found_comp as $comp) {
-         $listofcomputers_id[$comp['computers_id']] = $comp['computers_id'];
+         $listofcomputers_id[$comp['id']] = $comp['computers_id'];
       }
 
       if ($filter === "none") {
@@ -368,7 +390,7 @@ class ComputerConfiguration extends CommonDropdown {
 
       $computers_criteria = self::getComputerFromCriteria($computerconfigurations_id);
       if ($filter === "match") {
-         return $computers_criteria;
+         return array_intersect($listofcomputers_id, $computers_criteria);
       }
 
       if ($filter === "notmatch") {
@@ -384,8 +406,8 @@ class ComputerConfiguration extends CommonDropdown {
     * @return [array]                            [list of computers_is]
     */
    static function getComputerFromCriteria($computerconfigurations_id) {
-      $compconf_comp = new self;
-      $compconf_comp->getFromDB($computerconfigurations_id);
+      $configuration = new self;
+      $configuration->getFromDB($computerconfigurations_id);
       
       // default parameter for search engine
       $p['sort']         = '';
@@ -397,12 +419,12 @@ class ComputerConfiguration extends CommonDropdown {
       $p['no_search']    = false;
 
       // load saved criterias
-      if (!empty($compconf_comp->fields['criteria'])) {
-         parse_str($compconf_comp->fields['criteria'], $criteria);
+      if (!empty($configuration->fields['criteria'])) {
+         parse_str($configuration->fields['criteria'], $criteria);
          $p['criteria'] = $criteria;
       }
-      if (!empty($compconf_comp->fields['metacriteria'])) {
-         parse_str($compconf_comp->fields['metacriteria'], $metacriteria);
+      if (!empty($configuration->fields['metacriteria'])) {
+         parse_str($configuration->fields['metacriteria'], $metacriteria);
          $p['metacriteria'] = $metacriteria;
       }
 
