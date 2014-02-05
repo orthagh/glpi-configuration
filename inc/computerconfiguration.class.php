@@ -519,24 +519,15 @@ class ComputerConfiguration extends CommonDropdown {
       $p['sort']         = '';
       $p['list_limit']   = 999999999999; // how to get all ?
       $p['is_deleted']   = 0;
-      $p['criteria']     = array();
-      $p['metacriteria'] = array();
       $p['all_search']   = false;
       $p['no_search']    = false;
 
       // load saved criterias
-      if (!empty($configuration->fields['criteria'])) {
-         parse_str($configuration->fields['criteria'], $criteria);
-         $p['criteria'] = $criteria;
-      }
-      if (!empty($configuration->fields['metacriteria'])) {
-         parse_str($configuration->fields['metacriteria'], $metacriteria);
-         $p['metacriteria'] = $metacriteria;
-      }
+      $p['criteria'] = $this->getCriteria();
+      $p['metacriteria'] = $this->getMetaCriteria();
 
       // get all computers who match criteria (return only id column)
       $datas = Search::getDatas("Computer", $p, array(1));
-
       $computers_list = array();
       foreach ($datas['data']['items'] as $computers_id => $row_id) {
          $computers_list[$computers_id] = $computers_id;
