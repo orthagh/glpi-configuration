@@ -315,7 +315,7 @@ class ComputerConfiguration extends CommonDropdown {
 
       foreach ($conf_ancestors as $ancestors_id) {
          $configuration->getFromDB($ancestors_id);
-         echo $configuration->getLink(array('comments' => true));
+         echo $configuration->getLink();
 
          //recursive show of parent criteria
          $configuration->showCriteria(false);
