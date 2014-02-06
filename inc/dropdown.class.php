@@ -930,8 +930,7 @@ class Dropdown {
          $nb += count($dp);
       }
       $step = ($nb > 15 ? ($nb/3) : $nb);
-
-      echo "<table class='tab_glpi'><tr class='top'><td width='33% class='center'>";
+      echo "<table class='tab_glpi'><tr class='top'><td width='33%' class='center'>";
       echo "<table class='tab_cadre'>";
       $i = 1;
 
@@ -949,7 +948,7 @@ class Dropdown {
             $i++;
          }
 
-         if ($i >= $step) {
+         if ($i >= $step && $i < $nb) {
             echo "</table></td><td width='25'>&nbsp;</td><td><table class='tab_cadre'>";
             $step += $step;
          }
@@ -1777,22 +1776,22 @@ class Dropdown {
       $output .= Html::jsAdaptDropdown($field_id, array('width' => $param["width"]));
 
       if ($param["multiple"]) {
+         // Hack for All / None because select2 does not provide it
          $select   = __('All');
          $deselect = __('None');
-         $output  .= "<div class='invisible' id='selectall_$field_id'>";
+         $output  .= "<div class='invisible' id='selectallbuttons_$field_id'>";
+         $output  .= "<div class='select2-actionable-menu'>";
          $output  .= "<a class='vsubmit floatleft' ".
                       "onclick=\"selectAll('$field_id');$('#$field_id').select2('close');\">$select".
                      "</a> ";
          $output  .= "<a class='vsubmit floatright' onclick=\"deselectAll('$field_id');\">$deselect".
-                     "</a></div>";
-         $output  .= "<script type='text/javascript'>\n";
+                     "</a>";
+         $output  .= "</div></div>";
 
-         /// TODO : try to find a cleaner solution : remove / add each time is not so good
-         $output .= "$('#$field_id').on('open', function() {
-            $('.select2-actionable-menu').remove();
-            $('.select2-drop-multi').append('<div class=select2-actionable-menu>'+$('#selectall_$field_id').html()+'</div>');
+         $js = "$('#$field_id').on('select2-open', function() {
+            $('.select2-drop-multi').html($('#selectallbuttons_$field_id').html());
          });";
-         $output .= "</script>\n";
+         $output .= Html::scriptBlock($js);
       }
       $output .= Ajax::commonDropdownUpdateItem($param, false);
 

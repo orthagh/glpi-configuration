@@ -1561,18 +1561,6 @@ class Toolbox {
 
       $filename = "/ajax/common.tabs.php";
 
-      /// To keep for plugins
-      /// TODO drop also for plugins.
-      /// MoYo : test to drop it : plugin dev ?
-//       if ($plug = isPluginItemType($itemtype)) {
-//          $dir      = "/plugins/".strtolower($plug['plugin']);
-//          $item     = strtolower($plug['class']);
-//          $tempname = $dir."/ajax/$item.tabs.php";
-//          if (file_exists(GLPI_ROOT.$tempname)) {
-//             $filename = $tempname;
-//          }
-//       }
-
       return ($full ? $CFG_GLPI['root_doc'] : '').$filename;
    }
 
@@ -2420,7 +2408,7 @@ class Toolbox {
     * Check if the given object is of the type $class_name. Can be identical or a subclass.
     * This method emulates PHP 5.3.9: is_a with allow_string == true
     *
-    * @TODO: remove when prerequisite > 5.3.9 !
+    * @todo: remove when prerequisite > 5.3.9 !
     *
     * @since version 0.85
     *

@@ -701,6 +701,7 @@ class Profile extends CommonDBTM {
       } else {
          echo "</table>\n";
       }
+      echo "</div>";
    }
 
 
@@ -741,16 +742,13 @@ class Profile extends CommonDBTM {
       $this->displayRightsChoiceMatrix($rights, $matrix_options);
 
       if ($canedit) {
-         echo "<tr class='tab_bg_1'>";
-         echo "<td colspan='4' class='center'>";
+         echo "<div class='center'>";
          echo "<input type='hidden' name='id' value='".$this->fields['id']."'>";
-         echo "<input type='submit' name='update' value=\"".__s('Save')."\" class='submit'>";
-         echo "</td></tr>\n";
-         echo "</table>\n";
+         echo "<input type='submit' name='update' value=\""._sx('button','Save')."\" class='submit'>";
+         echo "</div>\n";
          Html::closeForm();
-      } else {
-         echo "</table>\n";
       }
+      echo "</div>";
    }
 
 
@@ -2133,6 +2131,7 @@ class Profile extends CommonDBTM {
     * @param $values    array    of values to display
     * @param $name      integer  name of the dropdown
     * @param $current   integer  value in database (sum of rights)
+    * @param $options
    **/
    static function dropdownRights(array $values, $name, $current, $options=array()) {
 

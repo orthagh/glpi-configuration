@@ -39,7 +39,7 @@ if (!defined('GLPI_ROOT')) {
 /**
  * Class that manages all the massive actions
  *
- * @TODO: all documentation !
+ * @todo all documentation !
  *
  * @since version 0.85
 **/
@@ -558,8 +558,8 @@ class MassiveAction {
          } else if ($canpurge) {
             $actions[$self_pref.'purge'] = _x('button', 'Delete permanently');
             if ($item instanceof CommonDropdown) {
-               $actions[$self_pref.'purge_but_item_linked'] = _x('button',
-                                                               'Delete permanently even if linked items');;
+               $actions[$self_pref.'purge_but_item_linked']
+                     = _x('button', 'Delete permanently even if linked items');
             }
          }
 

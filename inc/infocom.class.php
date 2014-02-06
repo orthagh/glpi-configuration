@@ -963,11 +963,11 @@ class Infocom extends CommonDBChild {
 
          } else { // getFromDBforDevice
             $canedit = ($ic->canEdit($ic->fields['id']) && ($withtemplate != 2));
+            echo "<div class='spaced'>";
             if ($canedit) {
                echo "<form name='form_ic' method='post' action='".$CFG_GLPI["root_doc"].
                      "/front/infocom.form.php'>";
             }
-            echo "<div class='spaced'>";
             echo "<table class='tab_cadre".(!strpos($_SERVER['PHP_SELF'],
                                                     "infocoms-show")?"_fixe":"")."'>";
 
@@ -1053,7 +1053,6 @@ class Infocom extends CommonDBChild {
             echo "<td>".__('Value')."</td>";
             echo "<td><input type='text' name='value' $option value='".
                    Html::formatNumber($ic->fields["value"], true)."' size='14'></td>";
-            echo "</td>";
             echo "<td>".__('Date of last physical inventory')."</td><td>";
             Html::showDateField("inventory_date",
                                 array('value'      => $ic->fields["inventory_date"],
@@ -1172,7 +1171,6 @@ class Infocom extends CommonDBChild {
                self::dropdownAlert(array('name'    => "alert",
                                          'value'   => $ic->fields["alert"]));
                Alert::displayLastAlert('Infocom', $ic->fields['id']);
-               echo "</td>";
             } else {
                echo "</td><td colspan='2'>";
             }
@@ -1190,11 +1188,12 @@ class Infocom extends CommonDBChild {
                                                                       'Delete permanently')."\"
                       class='submit'>";
                echo "</td></tr>";
-               echo "</table></div>";
+               echo "</table>";
                Html::closeForm();
             } else {
-               echo "</table></div>";
+               echo "</table>";
             }
+            echo "</div>";
          }
       }
    }

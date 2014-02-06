@@ -137,7 +137,7 @@ class Entity extends CommonTreeDropdown {
 
 
   /**
-   * @Since version 0.84
+   * @since version 0.84
    **/
    static function canUpdate() {
 
@@ -433,7 +433,6 @@ class Entity extends CommonTreeDropdown {
 
 
    function getSearchOptions() {
-      /// TODO lots of specific values may be passed to standard ones.
 
       $tab                     = array();
       $tab['common']           = __('Characteristics');
@@ -1569,7 +1568,6 @@ class Entity extends CommonTreeDropdown {
          echo self::getSpecificValueToDisplay('use_licenses_alert', $tid);
          echo "</font>";
       }
-      echo "</td>";
       echo "</td></tr>";
       echo "<tr class='tab_bg_1'><td>" . __('Send license alarms before')."</td><td>";
       Alert::dropdownIntegerNever('send_licenses_alert_before_delay',

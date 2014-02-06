@@ -1128,8 +1128,6 @@ class Reminder extends CommonDBTM {
       $ID      = $this->fields['id'];
       $canedit = $this->canEdit($ID);
 
-      echo "<div class='center'>";
-
       $rand = mt_rand();
 
       $nb = count($this->users) + count($this->groups) + count($this->profiles)
@@ -1169,8 +1167,7 @@ class Reminder extends CommonDBTM {
                     'container'
                         => 'mass'.__CLASS__.$rand,
                     'specific_actions'
-                        => array('MassiveAction'.MassiveAction::CLASS_ACTION_SEPARATOR.'delete'
-                                    => _x('button', 'Delete permanently')) );
+                        => array('delete' => _x('button', 'Delete permanently')) );
 
          if ($this->fields['users_id'] != Session::getLoginUserID()) {
             $massiveactionparams['confirm']
