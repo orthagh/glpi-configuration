@@ -213,7 +213,9 @@ class ComputerConfiguration extends CommonDropdown {
       $p = Search::manageParams($itemtype, $p);
 
       if ($formcontrol) {
-         $this->showParentCriteria();
+         if (count(self::getAncestors($this->getID())) > 0) {
+            $this->showParentCriteria();
+         }
 
          //show generic search form (duplicated from Search class)
          echo "<form name='searchformComputerConfigurationCriteria' method='post'>";
@@ -312,8 +314,10 @@ class ComputerConfiguration extends CommonDropdown {
          $configuration->getFromDB($ancestors_id);
          echo $configuration->getLink(array('comments' => true));
 
+         //recursive show of parent criteria
          $configuration->showCriteria(false);
 
+         //display criteria form (without controls)
          $configuration->showParentCriteria($level+1);
       }
       
