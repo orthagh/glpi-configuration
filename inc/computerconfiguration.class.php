@@ -362,12 +362,26 @@ class ComputerConfiguration extends CommonDropdown {
       // (and check if they match criteria)
       $computers_id_list = self::getListOfComputersID($this->getID(), "none", 
                                                       $this->fields['viewchilds']);
+      $computers_id_list_keys = array_keys($computers_id_list);
 
 
       // retrieve list of association computers <=> configuration for childs
       if ($this->fields['viewchilds']) {
          $computers_id_list_childs = self::getListOfComputersOfChildsConfiguration($this->getID());
       }
+
+      
+      // init pager
+      $number = count($computers_id_list);
+      $start  = (isset($_REQUEST['start']) ? intval($_REQUEST['start']) : 0);
+      if ($start >= $number) {
+         $start = 0;
+      }
+      Html::printAjaxPager(sprintf(__('%1$s (%2$s)'), ComputerConfiguration_Computer::getTypeName(2), __('D=Dynamic')),
+                              $start, $number);
+
+      Session::initNavigateListItems("ComputerConfiguration_Computer", sprintf(__('%1$s = %2$s'),
+                                                   self::getTypeName(1), $this->getName()));
 
       // init massiveactions
       $rand = mt_rand();
@@ -392,13 +406,17 @@ class ComputerConfiguration extends CommonDropdown {
       echo "</tr>";
       $computer = new Computer;
       $configuration = new self;
-      foreach ($computers_id_list as $ccompconf_comps_id => $computers_id) {
+      for ($i=$start, $j=0 ; ($i < $number) && ($j < $_SESSION['glpilist_limit']) ; $i++, $j++) {
+      //foreach ($computers_id_list as $compconf_comps_id => $computers_id) {
+         $compconf_comps_id = $computers_id_list_keys[$i];
+         $computers_id = $computers_id_list[$compconf_comps_id];
          $computer->getFromDB($computers_id);
+
          echo "<tr>";
    
          // displays massive actions checkboxes
          echo "<td>";
-         Html::showMassiveActionCheckBox($classname, $ccompconf_comps_id);
+         Html::showMassiveActionCheckBox($classname, $compconf_comps_id);
          echo "</td>";
 
          echo "<td>".$computer->getLink(array('comments' => true))."</td>";
