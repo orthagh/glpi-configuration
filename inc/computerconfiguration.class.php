@@ -128,7 +128,7 @@ class ComputerConfiguration extends CommonDropdown {
       echo "</textarea></td></tr>\n";
 
 
-      echo "<tr class='tab_bg_2'><td>".__('Parent configurations')."</td>";
+      echo "<tr class='tab_bg_2'><td>".__('Parent configurations (Inheritance)')."</td>";
       echo "<td>";
       // find all inheritances for this configuration
       $actives = array();
@@ -377,10 +377,10 @@ class ComputerConfiguration extends CommonDropdown {
       echo "<th width='10'>".Html::getCheckAllAsCheckbox('mass'.$classname.$rand)."</th>";
       echo "<th>".__('Name')."</th>";
       if ($this->fields['viewchilds']) {
-         echo "<th>".__('viewed from the configuration ')." :</th>";
+         echo "<th>".__('associated to the configuration')."</th>";
       }
-      echo "<th width='10'>".__('State')."</th>";
-      echo "<th>".__('does not match the configuration')." :</th>";
+      echo "<th width='10'>"._x('item', 'State')."</th>";
+      echo "<th>".__(' mismatches the configuration')."</th>";
       echo "</tr>";
       $computer = new Computer;
       $configuration = new self;
