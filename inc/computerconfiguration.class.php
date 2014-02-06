@@ -128,7 +128,7 @@ class ComputerConfiguration extends CommonDropdown {
       echo "</textarea></td></tr>\n";
 
 
-      echo "<tr class='tab_bg_2'><td>".__('Inheritance')."</td>";
+      echo "<tr class='tab_bg_2'><td>".__('Parent configurations')."</td>";
       echo "<td>";
       // find all inheritances for this configuration
       $actives = array();
@@ -156,7 +156,7 @@ class ComputerConfiguration extends CommonDropdown {
       echo "</td>";
       echo "</tr>";
 
-      echo "<tr class='tab_bg_2'><td>".__('View computers of childs configurations in computers tabs')."</td>";
+      echo "<tr class='tab_bg_2'><td>".__('View computers of children configurations')."</td>";
       echo "<td>";
       Dropdown::showYesNo('viewchilds', $this->fields["viewchilds"]);
       echo "</td>";
