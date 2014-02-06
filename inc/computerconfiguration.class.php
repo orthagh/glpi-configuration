@@ -277,7 +277,8 @@ class ComputerConfiguration extends CommonDropdown {
       if ($formcontrol) {
          // add new button to search form (to store and preview)
          echo "<div class='center'>";
-         echo "<input type='submit' value=\" "._sx('button', 'Save')." \" class='submit' name='update'>&nbsp;";
+         echo "<input type='submit' value=\" "._sx('button', 'Save').
+              " \" class='submit' name='update'>&nbsp;";
          echo "<input type='submit' value=\" ".__('Preview')." \" class='submit' name='preview'>";
          echo "</div>";
       }
@@ -298,13 +299,15 @@ class ComputerConfiguration extends CommonDropdown {
     */
    function showParentCriteria($level = 0) {
       if ($level == 0) {
-         echo "<input type'button' id='toggleParentCriteria' value='".__("Displays parent criteria")."' class='submit'><br />";
+         echo "<input type'button' id='toggleParentCriteria' value='".
+                  __("Displays parent criteria")."' class='submit'><br />";
          echo Html::scriptBlock("
             $('#toggleParentCriteria').click(function() {
                $('#parent_criteria_0').toggle();
             });
          ");
-         echo "<div id='parent_criteria_$level' style='display:none; border:1px solid #D0D99D; width:970px' class='tab_cadre_fixe'>";
+         echo "<div id='parent_criteria_$level' style='display:none; border:1px solid #D0D99D; 
+                                                       width:970px' class='tab_cadre_fixe'>";
       }
    
       $conf_ancestors = self::getAncestors($this->getID());
@@ -355,7 +358,8 @@ class ComputerConfiguration extends CommonDropdown {
       $computers_mismatch = array();
       $criteria_computers = self::getComputerFromCriteria($this->getID(), $computers_mismatch);
 
-      // search and displays all computers associated to this configuration (and check if they match criteria)
+      // search and displays all computers associated to this configuration 
+      // (and check if they match criteria)
       $computers_id_list = self::getListOfComputersID($this->getID(), "none", 
                                                       $this->fields['viewchilds']);
 
