@@ -440,8 +440,7 @@ class Computer_SoftwareVersion extends CommonDBRelation {
                           'specific_actions'
                            => array(__CLASS__.MassiveAction::CLASS_ACTION_SEPARATOR.'move_version'
                                           => _x('button', 'Move'),
-                                    'MassiveAction'.MassiveAction::CLASS_ACTION_SEPARATOR.'purge'
-                                          => _x('button', 'Delete permanently')));
+                                    'purge' => _x('button', 'Delete permanently')));
                // Options to update version
                $massiveactionparams['extraparams']['options']['move']['softwares_id'] = $softwares_id;
                if ($crit=='softwares_id') {
@@ -725,7 +724,7 @@ class Computer_SoftwareVersion extends CommonDBRelation {
                                        'toadd'      => array('-1' =>  __('All categories')),
                                        'emptylabel' => __('Uncategorized software'),
                                        'on_change'  => 'reloadTab("start=0&criterion="+this.value)'));
-      echo "</td></tr></table>";
+      echo "</td></tr></table></div>";
       $number = $DB->numrows($result);
       $start  = (isset($_REQUEST['start']) ? intval($_REQUEST['start']) : 0);
       if ($start >= $number) {
@@ -747,8 +746,7 @@ class Computer_SoftwareVersion extends CommonDBRelation {
                        'container'
                          => 'mass'.__CLASS__.$rand,
                        'specific_actions'
-                         => array('MassiveAction'.MassiveAction::CLASS_ACTION_SEPARATOR.'purge'
-                                     => _x('button', 'Delete permanently')));
+                         => array('purge' => _x('button', 'Delete permanently')));
 
             Html::showMassiveActions($massiveactionparams);
          }
@@ -775,7 +773,6 @@ class Computer_SoftwareVersion extends CommonDBRelation {
          $header_end .= "</tr>\n";
          echo $header_begin.$header_top.$header_end;
          
-         // TODO review it : do it in one request
          for ($row=0 ; $data=$DB->fetch_assoc($result) ; $row++) {
 
             if (($row >= $start) && ($row < ($start + $_SESSION['glpilist_limit']))) {
@@ -792,20 +789,7 @@ class Computer_SoftwareVersion extends CommonDBRelation {
                $installed[] = $licid;
             }
          }
-/*         echo "<tr>";
-         if ($canedit) {
-            echo "<th width='10'>";
-            Html::checkAllAsCheckbox('mass'.__CLASS__.$rand);
-            echo "</th>";
-         }
-         echo "<th>" . __('Name') . "</th><th>" . __('Status') . "</th>";
-         echo "<th>" .__('Version')."</th><th>" . __('License') . "</th>";
-         if (isset($data['is_dynamic'])) {
-            echo "<th>".__('Automatic inventory')."</th>";
-         }
-         echo "<th>".SoftwareCategory::getTypeName(1)."</th>";
-         echo "</tr>\n";
-*/
+
          echo $header_begin.$header_bottom.$header_end;
          echo "</table>";
          if ($canedit) {
@@ -871,8 +855,7 @@ class Computer_SoftwareVersion extends CommonDBRelation {
             $actions = array('Computer_SoftwareLicense'.MassiveAction::CLASS_ACTION_SEPARATOR.
                                 'install' => _x('button', 'Install'));
             if (SoftwareLicense::canUpdate()) {
-               $actions['MassiveAction'.MassiveAction::CLASS_ACTION_SEPARATOR.'purge']
-                     = _x('button', 'Delete permanently');
+               $actions['purge'] = _x('button', 'Delete permanently');
             }
 
             $massiveactionparams = array('num_displayed'    => $number,
@@ -988,8 +971,8 @@ class Computer_SoftwareVersion extends CommonDBRelation {
             $link      = $link_item."?id=".$licdata['id'];
             $comment   = "<table><tr><td>".__('Name')."</td><td>".$licdata['name']."</td></tr>".
                          "<tr><td>".__('Serial number')."</td><td>".$licdata['serial']."</td></tr>".
-                         "<tr><td>". __('Comments').'</td><td>'.$licdata['comment'].'</td></tr>".
-                         "</table>';
+                         "<tr><td>". __('Comments').'</td><td>'.$licdata['comment']."</td></tr>".
+                         "</table>";
 
             Html::showToolTip($comment, array('link' => $link));
             echo "<br>";
@@ -1003,7 +986,6 @@ class Computer_SoftwareVersion extends CommonDBRelation {
 
          echo "</td>";
 
-         echo "</td>";
          if (isset($data['is_dynamic'])) {
             echo "<td class='center'>".Dropdown::getYesNo($data['is_dynamic'])."</td>";
          }
@@ -1072,7 +1054,7 @@ class Computer_SoftwareVersion extends CommonDBRelation {
                            Dropdown::getDropdownName("glpi_softwarelicensetypes",
                                                      $data["softwarelicensetypes_id"]));
       }
-      echo "</td></td><td class='b'>" .$data["name"]." - ". $serial;
+      echo "</td><td class='b'>" .$data["name"]." - ". $serial;
 
       $comment = "<table><tr><td>".__('Name')."</td>"."<td>".$data['name']."</td></tr>".
                  "<tr><td>".__('Serial number')."</td><td>".$data['serial']."</td></tr>".

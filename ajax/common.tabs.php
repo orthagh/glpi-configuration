@@ -33,7 +33,7 @@
 
 include ('../inc/includes.php');
 
-if (isset($_POST['full_page_tab'])) {
+if (isset($_GET['full_page_tab'])) {
    Html::header('Only tab for debug', $_SERVER['PHP_SELF']);
 } else {
    header("Content-Type: text/html; charset=UTF-8");
@@ -87,12 +87,10 @@ foreach ($notvalidoptions as $key) {
 CommonGLPI::displayStandardTab($item, $_GET['_glpi_tab'],$_GET["withtemplate"], $options);
 
 
-if (isset($_POST['full_page_tab'])) {
+if (isset($_GET['full_page_tab'])) {
    echo "<div class='center' id='debugajax'>";
-   Html::showSimpleForm($_SERVER['REQUEST_URI'], 'full_page_tab', 'Reload this tab', $_POST);
+   echo "<a href='".htmlentities($_SERVER['REQUEST_URI'])."' class='vsubmit'>Reload</a>";
    echo "</div>";
-
-   Html::footer();
 
    // I think that we should display this warning, because tabs are not prepare
    // for being used full space ...
@@ -105,6 +103,9 @@ if (isset($_POST['full_page_tab'])) {
       echo "</script>";
       $_SESSION['glpi_warned_about_full_page_tab'] = true;
    }
+   
+   Html::footer();
+
 
 } else {
    Html::ajaxFooter();

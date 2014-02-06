@@ -458,7 +458,7 @@ class Html {
    /**
     * Redirection to Login page
     *
-    * @param $params : param to add to URL
+    * @param $params       param to add to URL (default '')
     * @since version 0.85
     *
     * @return nothing
@@ -686,7 +686,7 @@ class Html {
                               active: false
                               });");
 
-         echo "</div>";
+         echo "</div></div>";
       }
    }
 
@@ -1786,11 +1786,10 @@ class Html {
          echo "<div class='center' id='debugajax'>";
          echo "<a class='debug-float' href=\"javascript:showHideDiv('see_ajaxdebug$rand','','','');\">
                 AJAX DEBUG</a>";
-         if (!isset($_POST['full_page_tab'])
+         if (!isset($_GET['full_page_tab'])
              && strstr($_SERVER['REQUEST_URI'], '/ajax/common.tabs.php')) {
             echo "&nbsp;&nbsp;&nbsp;&nbsp;";
-            Html::showSimpleForm($_SERVER['REQUEST_URI'], 'full_page_tab',
-                                 'Display only tab for debug', $_POST);
+            echo "<a href='".$_SERVER['REQUEST_URI']."&full_page_tab=1' class='vsubmit'>Display only tab for debug</a>";
          }
          echo "</div>";
          echo "<div id='see_ajaxdebug$rand' name='see_ajaxdebug$rand' style=\"display:none;\">";
@@ -2516,6 +2515,7 @@ class Html {
     *
     * @param $itemtype    Massive action itemtype
     * @param $id          ID of the item
+    * @param $options
     *
     * @return get checkbox
    **/
@@ -2539,6 +2539,7 @@ class Html {
     *
     * @param $itemtype    Massive action itemtype
     * @param $id          ID of the item
+    * @param $options
     *
     * @return show checkbox
    **/
@@ -2587,7 +2588,7 @@ class Html {
     * @since 0.84 (before Search::displayMassiveActions)
     * @since version 0.85 only 1 parameter (in 0.84 $itemtype required)
     *
-    * @TODO: replace 'hidden' by data-glpicore-ma-tags ?
+    * @todo replace 'hidden' by data-glpicore-ma-tags ?
     *
     * @param $options   array    of parameters
     * must contains :
@@ -2813,24 +2814,24 @@ class Html {
          }
       }
 
-      $output = "<input id='_showdate".$p['rand']."' type='text' size='10' name='_$name' ".
+      $output = "<input id='showdate".$p['rand']."' type='text' size='10' name='_$name' ".
                   "value='".self::convDate($p['value'])."'>";
       $output .= Html::hidden($name, array('value' => $p['value'],
-                                           'id'    => "showdate".$p['rand'],
+                                           'id'    => "hiddendate".$p['rand'],
                                            'size'  => 10));
       if ($p['maybeempty']) {
-         $output .= "<img src='".$CFG_GLPI['root_doc']."/pics/reset.png' id='resetdate".$p['rand']."'>";
+         $output .= "<img src='".$CFG_GLPI['root_doc']."/pics/reset.png' alt=\"".__('Clear')."\" id='resetdate".$p['rand']."'>";
       }
 
       $js = '';
       if ($p['maybeempty']) {
          $js .= "$('#resetdate".$p['rand']."').click(function(){
-                  $('#_showdate".$p['rand']."').val('');
                   $('#showdate".$p['rand']."').val('');
+                  $('#hiddendate".$p['rand']."').val('');
                   });";
       }
-      $js .= "$( '#_showdate".$p['rand']."' ).datepicker({
-                  altField: '#showdate".$p['rand']."',
+      $js .= "$( '#showdate".$p['rand']."' ).datepicker({
+                  altField: '#hiddendate".$p['rand']."',
                   altFormat: 'yy-mm-dd',
                   firstDay: 1,
                   showOtherMonths: true,
@@ -3023,23 +3024,23 @@ class Html {
          $p['value'] = $date_value.' '.$hour_value;
       }
 
-      $output  = "<input id='_showdate".$p['rand']."' type='text' name='_$name' value='".
+      $output  = "<input id='showdate".$p['rand']."' type='text' name='_$name' value='".
                    self::convDateTime($p['value'])."'>";
-      $output .= Html::hidden($name, array('value' => $p['value'], 'id' => "showdate".$p['rand']));
+      $output .= Html::hidden($name, array('value' => $p['value'], 'id' => "hiddendate".$p['rand']));
       if ($p['maybeempty']) {
-         $output .= "<img src='".$CFG_GLPI['root_doc']."/pics/reset.png' id='resetdate".$p['rand']."'>";
+         $output .= "<img src='".$CFG_GLPI['root_doc']."/pics/reset.png' alt=\"".__('Clear')."\" id='resetdate".$p['rand']."'>";
       }
 
       $js = "";
       if ($p['maybeempty']) {
          $js .= "$('#resetdate".$p['rand']."').click(function(){
-                  $('#_showdate".$p['rand']."').val('');
                   $('#showdate".$p['rand']."').val('');
+                  $('#hiddendate".$p['rand']."').val('');
                   });";
       }
 
-      $js .= "$( '#_showdate".$p['rand']."' ).datetimepicker({
-                  altField: '#showdate".$p['rand']."',
+      $js .= "$( '#showdate".$p['rand']."' ).datetimepicker({
+                  altField: '#hiddendate".$p['rand']."',
                   altFormat: 'yy-mm-dd',
                   altTimeFormat: 'HH:mm',
                   pickerTimeFormat : 'HH:mm',
@@ -3831,7 +3832,7 @@ class Html {
                 "\" title=\"".__s('Next')."\"></a></th>";
          echo "<th class='right'><a href='javascript:reloadTab(\"start=$end\");'>
                <img src='".$CFG_GLPI["root_doc"]."/pics/last.png' alt=\"".__s('End').
-                "\" title=\"".__s('End')."\"></th>";
+                "\" title=\"".__s('End')."\"></a></th>";
       }
 
       // End pager
@@ -3863,8 +3864,8 @@ class Html {
             $rand     = mt_rand();
             echo "</td><td class='top'>";
             if ($jsexpand && $is_array) {
-               echo "<a class='pointer' onclick=\"javafile:showHideDiv('content$key$rand','','','')\">";
-                    "=></a>";
+               echo "<a class='pointer' href=\"javascript:showHideDiv('content$key$rand','','','')\">";
+               echo "=></a>";
             } else {
                echo "=>";
             }
@@ -3885,7 +3886,7 @@ class Html {
                   if (is_object($val)) {
                      print_r($val);
                   } else {
-                     echo $val;
+                     echo htmlentities($val);
                   }
                }
             }
@@ -4553,12 +4554,12 @@ class Html {
     *
     * @since version 0.85
     *
-    * @param $text               The content to be wrapped by <a> tags.
+    * @param $text               The content to be wrapped by a tags.
     * @param $url                URL parameter
     * @param $options   Array    of HTML attributes:
     *     - `confirm` JavaScript confirmation message.
     *     - `confirmaction` optional action to do on confirmation
-    * @return string An `<a />` element.
+    * @return string An a` element.
    **/
    static function link($text, $url, $options=array()) {
 
@@ -4601,6 +4602,7 @@ class Html {
     * @return string A generated hidden input
    **/
    static function hidden($fieldName, $options=array()) {
+
       if ((isset($options['value'])) && (is_array($options['value']))) {
          $result = '';
          foreach ($options['value'] as $key => $value) {
@@ -4613,6 +4615,7 @@ class Html {
       return sprintf('<input type="hidden" name="%1$s" %2$s>',
                      Html::cleanInputText($fieldName), Html::parseAttributes($options));
    }
+
 
    /**
     * Creates a text input field.
@@ -4631,7 +4634,7 @@ class Html {
    }
 
    /**
-    * Creates a submit button element. This method will generate `<input />` elements that
+    * Creates a submit button element. This method will generate input elements that
     * can be used to submit, and reset forms by using $options. Image submits can be created by supplying an
     * image option
     *
@@ -4778,13 +4781,13 @@ class Html {
 
 
    /**
-    * Returns one or many `<script>` tags depending on the number of scripts given.
+    * Returns one or many script tags depending on the number of scripts given.
     *
     * @since version 0.85
     *
     * @param $url String of javascript file to include
     *
-    * @return String of `<script />` tags
+    * @return String of script tags
    **/
    static function script($url) {
       return sprintf('<script type="text/javascript" src="%1$s"></script>', $url);
@@ -4799,7 +4802,7 @@ class Html {
     * @param $url       String   of javascript file to include
     * @param $options   Array    of HTML attributes.
     *
-    * @return string CSS <link /> tag
+    * @return string CSS link tag
    **/
    static function css($url, $options=array()) {
 
@@ -4860,7 +4863,7 @@ class Html {
       $out .= "<span class='b'>".__('Drag and drop your file here, or').'</span><br>';
       $out .= "<input id='fileupload$randupload' type='file' name='".$p['name']."[]' data-url='".
                 $CFG_GLPI["root_doc"]."/front/fileupload.php?name=".$p['name'].
-                "&showfilesize=".$p['showfilesize']."'>";
+                "&amp;showfilesize=".$p['showfilesize']."'>";
 
       $script  = self::fileScript($p)."\n uploadFile();";
       $out    .= Html::scriptBlock($script);

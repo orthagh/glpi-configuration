@@ -864,12 +864,13 @@ class Rule extends CommonDBTM {
             printf(__('Last update on %s'), Html::convDateTime($this->fields["date_mod"]));
          }
       }
-      echo"</td></tr>\n";
-
       if ($canedit) {
          echo "<input type='hidden' name='ranking' value='".$this->fields["ranking"]."'>";
          echo "<input type='hidden' name='sub_type' value='".get_class($this)."'>";
+      }
+      echo "</td></tr>\n";
 
+      if ($canedit) {
          if ($ID > 0) {
             if ($plugin = isPluginItemType($this->getType())) {
                $url = $CFG_GLPI["root_doc"]."/plugins/".strtolower($plugin['plugin']);
@@ -2730,10 +2731,8 @@ class Rule extends CommonDBTM {
                = array('num_displayed'
                            => $nb,
                        'specific_actions'
-                           => array('MassiveAction'.MassiveAction::CLASS_ACTION_SEPARATOR.'update'
-                                       => _x('button', 'Update'),
-                                    'MassiveAction'.MassiveAction::CLASS_ACTION_SEPARATOR.'purge'
-                                       => _x('button', 'Delete permanently')));
+                           => array('update' => _x('button', 'Update'),
+                                    'purge'  => _x('button', 'Delete permanently')));
                   //     'extraparams'
                 //           => array('rule_class_name' => $this->getRuleClassName()));
             Html::showMassiveActions($massiveactionparams);
@@ -2974,8 +2973,18 @@ class Rule extends CommonDBTM {
             default:
                if ($item instanceof Rule) {
                   $ong    = array();
-                  $ong[1] = _n('Criterion', 'Criteria', 2);
-                  $ong[2] = _n('Action', 'Actions', 2);
+                  $nbcriteria = 0;
+                  $nbaction   = 0;
+                  if ($_SESSION['glpishow_count_on_tabs']) {
+                        $nbcriteria = countElementsInTable(getTableForItemType($item->getRuleCriteriaClass()),
+                                                                        "`".$item->getRuleIdField()."` = '".$item->getID()."'");
+                        $nbaction   = countElementsInTable(getTableForItemType($item->getRuleActionClass()),
+                                                                        "`".$item->getRuleIdField()."` = '".$item->getID()."'");
+                                                                              
+                     }
+
+                  $ong[1] = self::createTabEntry(_n('Criterion', 'Criteria', $nbcriteria), $nbcriteria);
+                  $ong[2] = self::createTabEntry(_n('Action', 'Actions', $nbaction), $nbaction);
                   return $ong;
                }
          }

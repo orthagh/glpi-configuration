@@ -402,16 +402,24 @@ class NetworkPortInstantiation extends CommonDBChild {
 
       $macs_with_items = self::getItemsByMac($value);
 
+      if (count($macs_with_items)) {
+         foreach ($macs_with_items as $key => $tab) {
+            if (isset($tab[0])
+                && ($tab[0]->getEntityID() != $entity
+                    || $tab[0]->isDeleted()
+                    || $tab[0]->isTemplate())) {
+               unset($macs_with_items[$key]);
+            }
+         }
+      }
+      
       if (count($macs_with_items) == 1) {
          $mac_with_items = $macs_with_items[0];
          $item           = $mac_with_items[0];
-
-         if ($item->getEntityID() == $entity) {
-            $result = array("id"       => $item->getID(),
-                            "itemtype" => $item->getType());
-            unset($macs_with_items);
-            return $result;
-         }
+         $result = array("id"       => $item->getID(),
+                           "itemtype" => $item->getType());
+         unset($macs_with_items);
+         return $result;
       }
 
       return array();
@@ -442,7 +450,7 @@ class NetworkPortInstantiation extends CommonDBChild {
    function showNetworkCardField(NetworkPort $netport, $options=array(), $recursiveItems) {
       global $DB;
 
-      echo "<td>" . __('Network card') . "</td>\n</td>";
+      echo "<td>" . __('Network card') . "</td>\n";
       echo "<td>";
 
       if (count($recursiveItems)  > 0) {
@@ -468,7 +476,6 @@ class NetworkPortInstantiation extends CommonDBChild {
                         WHERE link.`items_id` = '".$lastItem->getID()."'
                               AND link.`itemtype` = '".$lastItem->getType()."'
                               AND device.`id` = link.`devicenetworkcards_id`";
-            // TODO : add checking the type of network card !
 
             // Add the javascript to update each field
             echo "\n<script type=\"text/javascript\">

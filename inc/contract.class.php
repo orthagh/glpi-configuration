@@ -197,7 +197,7 @@ class Contract extends CommonDBTM {
                                              'unit'  => 'month'));
       if (!empty($this->fields["begin_date"])) {
          echo " -> ".Infocom::getWarrantyExpir($this->fields["begin_date"],
-                                 $this->fields["duration"], 0, true);
+                                               $this->fields["duration"], 0, true);
       }
       echo "</td>";
       echo "</tr>";
@@ -380,7 +380,7 @@ class Contract extends CommonDBTM {
       $tab[129]['name']           = sprintf(__('%1$s - %2$s'), __('Contract'), __('Type'));
       $tab[129]['datatype']       = 'dropdown';
       $tab[129]['massiveaction']  = false;
-      $tab[129]['joinparams']     = array('beforejoin' => array('table'      => 'glpi_contracts',
+      $tab[129]['joinparams']     = array('beforejoin' => array('table' => 'glpi_contracts',
                                           'joinparams' => $joinparams));
 
       $tab[130]['table']         = 'glpi_contracts';
@@ -891,21 +891,21 @@ class Contract extends CommonDBTM {
                                       'value'      => '>-30',
                                       'searchtype' => 'contains');
 
-      echo "<td><a href=\"".$CFG_GLPI["root_doc"]."/front/contract.php?".Toolbox::append_params($options)."\">".
+      echo "<td><a href=\"".$CFG_GLPI["root_doc"]."/front/contract.php?".Toolbox::append_params($options,'&amp;')."\">".
                  __('Contracts expired in the last 30 days')."</a> </td>";
       echo "<td class='numeric'>".$contract0."</td></tr>";
       echo "<tr class='tab_bg_2'>";
 
       $options['criteria'][0]['value'] = 0;
       $options['criteria'][1]['value'] = '<7';
-      echo "<td><a href=\"".$CFG_GLPI["root_doc"]."/front/contract.php?".Toolbox::append_params($options)."\">".
+      echo "<td><a href=\"".$CFG_GLPI["root_doc"]."/front/contract.php?".Toolbox::append_params($options,'&amp;')."\">".
                  __('Contracts expiring in less than 7 days')."</a></td>";
       echo "<td class='numeric'>".$contract7."</td></tr>";
       echo "<tr class='tab_bg_2'>";
 
       $options['criteria'][0]['value'] = '>6';
       $options['criteria'][1]['value'] = '<30';
-      echo "<td><a href=\"".$CFG_GLPI["root_doc"]."/front/contract.php?".Toolbox::append_params($options)."\">".
+      echo "<td><a href=\"".$CFG_GLPI["root_doc"]."/front/contract.php?".Toolbox::append_params($options,'&amp;')."\">".
                  __('Contracts expiring in less than 30 days')."</a></td>";
       echo "<td class='numeric'>".$contract30."</td></tr>";
       echo "<tr class='tab_bg_2'>";
@@ -915,7 +915,7 @@ class Contract extends CommonDBTM {
       $options['criteria'][1]['field'] = 13;
       $options['criteria'][1]['value'] = '<7';
 
-      echo "<td><a href=\"".$CFG_GLPI["root_doc"]."/front/contract.php?".Toolbox::append_params($options)."\">".
+      echo "<td><a href=\"".$CFG_GLPI["root_doc"]."/front/contract.php?".Toolbox::append_params($options,'&amp;')."\">".
                  __('Contracts where notice begins in less than 7 days')."</a></td>";
       echo "<td class='numeric'>".$contractpre7."</td></tr>";
       echo "<tr class='tab_bg_2'>";
@@ -923,7 +923,7 @@ class Contract extends CommonDBTM {
 
       $options['criteria'][0]['value'] = '>6';
       $options['criteria'][1]['value'] = '<30';
-      echo "<td><a href=\"".$CFG_GLPI["root_doc"]."/front/contract.php?".Toolbox::append_params($options)."\">".
+      echo "<td><a href=\"".$CFG_GLPI["root_doc"]."/front/contract.php?".Toolbox::append_params($options,'&amp;')."\">".
                  __('Contracts where notice begins in less than 30 days')."</a></td>";
       echo "<td class='numeric'>".$contractpre30."</td></tr>";
       echo "</table>";

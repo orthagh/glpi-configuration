@@ -63,7 +63,7 @@ class RuleAction extends CommonDBChild {
    /**
     * @since version 0.84.3
     *
-    * @see inc/CommonDBTM::post_getFromDB()
+    * @see CommonDBTM::post_getFromDB()
     */
    function post_getFromDB() {
 
@@ -254,7 +254,6 @@ class RuleAction extends CommonDBChild {
             if (isset($values['rules_id'])
                 && !empty($values['rules_id'])
                 && $generic_rule->getFromDB($values['rules_id'])) {
-               // TODO missing 'field' added r21245
                return self::dropdownActions(array('subtype'     => $generic_rule->fields["sub_type"],
                                                   'name'        => $name,
                                                   'value'       => $values[$field],

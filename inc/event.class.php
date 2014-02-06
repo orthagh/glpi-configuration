@@ -270,7 +270,8 @@ class Event extends CommonDBTM {
          echo "<td class='center'>";
          self::displayItemLogID($type, $items_id);
          echo "</td><td class='center'>".Html::convDateTime($date)."</td>";
-         echo "<td class='center'>".$logService[$service]."</td><td>".$message."</td></tr>";
+         echo "<td class='center'>".(isset($logService[$service])?$logService[$service]:'');
+         echo "</td><td>".$message."</td></tr>";
 
          $i++;
       }
@@ -296,7 +297,7 @@ class Event extends CommonDBTM {
       list($logItemtype, $logService) = self::logArray();
 
       // Columns of the Table
-      $items = array("type" => array(__('Source'), ""),
+      $items = array("type"     => array(__('Source'), ""),
                      "items_id" => array(__('ID'), ""),
                      "date"     => array(__('Date'), ""),
                      "service"  => array(__('Service'), "width='8%'"),
