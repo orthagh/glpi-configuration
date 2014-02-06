@@ -197,7 +197,7 @@ class ComputerConfiguration extends CommonDropdown {
     * This function adapted from Search::showGenericSearch with controls removed
     * @return nothing, displays a seach form
     */
-   function showCriteria() {
+   function showCriteria($formcontrol = true) {
       global $CFG_GLPI;
 
       $itemtype = "Computer";
@@ -212,13 +212,17 @@ class ComputerConfiguration extends CommonDropdown {
       unset($_SESSION['glpisearch']);
       $p = Search::manageParams($itemtype, $p);
 
-      //show generic search form (duplicated from Search class)
-      echo "<form name='searchformComputerConfigurationCriteria' method='post'>";
-      echo "<input type='hidden' name='id' value='".$this->getID()."'>";   
-      
-      // add tow hidden fields to permit delete of (meta)criteria
-      echo "<input type='hidden' name='criteria' value=''>";     
-      echo "<input type='hidden' name='metacriteria' value=''>";
+      if ($formcontrol) {
+         $this->showParentCriteria();
+
+         //show generic search form (duplicated from Search class)
+         echo "<form name='searchformComputerConfigurationCriteria' method='post'>";
+         echo "<input type='hidden' name='id' value='".$this->getID()."'>";  
+
+         // add tow hidden fields to permit delete of (meta)criteria
+         echo "<input type='hidden' name='criteria' value=''>";     
+         echo "<input type='hidden' name='metacriteria' value=''>"; 
+      } 
 
       echo "<table class='tab_cadre_fixe'>";
       echo "<tr><th>"._n('Criterion', 'Criteria', 2)."</th></tr>";
@@ -268,17 +272,54 @@ class ComputerConfiguration extends CommonDropdown {
       echo "<input type='hidden' name='start' value='0'>";
       echo "</div>";
 
-      // add new button to search form (to store and preview)
-      echo "<div class='center'>";
-      echo "<input type='submit' value=\" "._sx('button', 'Save')." \" class='submit' name='update'>&nbsp;";
-      echo "<input type='submit' value=\" ".__('Preview')." \" class='submit' name='preview'>";
-      echo "</div>";
+      if ($formcontrol) {
+         // add new button to search form (to store and preview)
+         echo "<div class='center'>";
+         echo "<input type='submit' value=\" "._sx('button', 'Save')." \" class='submit' name='update'>&nbsp;";
+         echo "<input type='submit' value=\" ".__('Preview')." \" class='submit' name='preview'>";
+         echo "</div>";
+      }
+
       echo "</td></tr></table>";
 
       //restore search session variables
       $_SESSION['glpisearch'] = $glpisearch_session;
 
       Html::closeForm();
+   }
+
+
+   /**
+    * Displays tab content
+    * Show inherited criteria. The content is hidden by default
+    * @return nothing, displays a seach form
+    */
+   function showParentCriteria($level = 0) {
+      if ($level == 0) {
+         echo "<input type'button' id='toggleParentCriteria' value='".__("Displays parent criteria")."' class='submit'><br />";
+         echo Html::scriptBlock("
+            $('#toggleParentCriteria').click(function() {
+               $('#parent_criteria_0').toggle();
+            });
+         ");
+         echo "<div id='parent_criteria_$level' style='display:none; border:1px solid #D0D99D; width:970px' class='tab_cadre_fixe'>";
+      }
+   
+      $conf_ancestors = self::getAncestors($this->getID());
+      $configuration = new self;
+
+      foreach ($conf_ancestors as $ancestors_id) {
+         $configuration->getFromDB($ancestors_id);
+         echo $configuration->getLink(array('comments' => true));
+
+         $configuration->showCriteria(false);
+
+         $configuration->showParentCriteria($level+1);
+      }
+      
+      if ($level == 0) {
+         echo "</div>";
+      }
    }
 
    /**
