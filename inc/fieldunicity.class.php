@@ -94,8 +94,8 @@ class FieldUnicity extends CommonDropdown {
    function defineTabs($options=array()) {
 
       $ong          = array();
-      $ong['empty'] = $this->getTypeName(1);
-      $this->addStandardTab($this->getType(), $ong, $options);
+      $this->addDefaultFormTab($ong);
+      $this->addStandardTab(__CLASS__, $ong, $options);
       $this->addStandardTab('Log', $ong, $options);
 
       return $ong;
@@ -156,9 +156,9 @@ class FieldUnicity extends CommonDropdown {
       //Criteria already added : only display the selected itemtype
       if ($ID > 0) {
          if ($item = getItemForItemtype($this->fields['itemtype'])) {
-            echo $item->getTypeName().'--';
+            echo $item->getTypeName();
          }
-         echo "<input type='hidden' name='itemtype' value='".$this->fields['itemtype']."'";
+         echo "<input type='hidden' name='itemtype' value='".$this->fields['itemtype']."'>";
 
       } else {
          //Add criteria : display dropdown
@@ -237,7 +237,7 @@ class FieldUnicity extends CommonDropdown {
       global $DB;
 
 
-      echo "<span id='span_fields' name='span_fields'>";
+      echo "<span id='span_fields'>";
 
       if (!isset($unicity->fields['itemtype']) || !$unicity->fields['itemtype']) {
          echo  "</span>";
@@ -249,7 +249,7 @@ class FieldUnicity extends CommonDropdown {
       }
 
       $unicity_fields = explode(',', $unicity->fields['fields']);
-      echo "<span id='span_fields' name='span_fields'>";
+
       self::dropdownFields($unicity->fields['itemtype'],
                            array('values' => $unicity_fields,
                                  'name'   => '_fields'));
@@ -297,8 +297,9 @@ class FieldUnicity extends CommonDropdown {
                $values[$field['Field']] = $searchOption['name'];
             }
          }
-         $p['multiple'] = true;
+         $p['multiple'] = 1;
          $p['size']     = 15;
+
          return Dropdown::showFromArray($p['name'], $values, $p);
       }
       return false;
