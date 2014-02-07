@@ -231,11 +231,13 @@ class ComputerConfiguration extends CommonDropdown {
       echo "<tr><td>";
 
       echo "<div id='searchcriterias'>";
+      $nb_criteria = count($p['criteria']);
+      if ($nb_criteria == 0) $nb_criteria++;
       $nbsearchcountvar = 'nbcriteria'.strtolower($itemtype).mt_rand();
       $nbmetasearchcountvar = 'nbmetacriteria'.strtolower($itemtype).mt_rand();
       $searchcriteriatableid = 'criteriatable'.strtolower($itemtype).mt_rand();
       // init criteria count
-      $js = "var $nbsearchcountvar=".(count($p['criteria'])+1).";";
+      $js = "var $nbsearchcountvar=".$nb_criteria.";";
       $js .= "var $nbmetasearchcountvar=".count($p['metacriteria']).";";
       echo Html::scriptBlock($js);
 
@@ -246,7 +248,7 @@ class ComputerConfiguration extends CommonDropdown {
       echo "<table class='tab_format' id='$searchcriteriatableid'>";
 
       // Displays normal search parameters
-      for ($i=0 ; $i<=count($p['criteria']) ; $i++) {
+      for ($i=0 ; $i<$nb_criteria ; $i++) {
          $_POST['itemtype'] = $itemtype;
          $_POST['num'] = $i ;
          include(GLPI_ROOT.'/ajax/searchrow.php');
