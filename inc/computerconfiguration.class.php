@@ -246,7 +246,7 @@ class ComputerConfiguration extends CommonDropdown {
       echo "<table class='tab_format' id='$searchcriteriatableid'>";
 
       // Displays normal search parameters
-      for ($i=0 ; $i<count($p['criteria']) ; $i++) {
+      for ($i=0 ; $i<=count($p['criteria']) ; $i++) {
          $_POST['itemtype'] = $itemtype;
          $_POST['num'] = $i ;
          include(GLPI_ROOT.'/ajax/searchrow.php');
