@@ -235,7 +235,7 @@ class ComputerConfiguration extends CommonDropdown {
       $nbmetasearchcountvar = 'nbmetacriteria'.strtolower($itemtype).mt_rand();
       $searchcriteriatableid = 'criteriatable'.strtolower($itemtype).mt_rand();
       // init criteria count
-      $js = "var $nbsearchcountvar=".count($p['criteria']).";";
+      $js = "var $nbsearchcountvar=".(count($p['criteria'])+1).";";
       $js .= "var $nbmetasearchcountvar=".count($p['metacriteria']).";";
       echo Html::scriptBlock($js);
 
