@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -193,23 +193,23 @@ class Group_User extends CommonDBRelation{
          Html::showMassiveActions($massiveactionparams);
       }
       echo "<table class='tab_cadre_fixehov'>";
-      $header_begin = "<tr>";
-      $header_top = '';
+      $header_begin  = "<tr>";
+      $header_top    = '';
       $header_bottom = '';
-      $header_end = '';
+      $header_end    = '';
 
       if ($canedit && count($used)) {
-         $header_begin .= "<th width='10'>";
-         $header_top .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
+         $header_begin  .= "<th width='10'>";
+         $header_top    .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
          $header_bottom .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
-         $header_end .= "</th>";
+         $header_end    .= "</th>";
       }
       $header_end .= "<th>".Group::getTypeName(1)."</th>";
       $header_end .= "<th>".__('Dynamic')."</th>";
       $header_end .= "<th>".__('Manager')."</th>";
       $header_end .= "<th>".__('Delegatee')."</th></tr>";
       echo $header_begin.$header_top.$header_end;
-      
+
       $group = new Group();
       if (!empty($groups)) {
          Session::initNavigateListItems('Group',
@@ -242,15 +242,18 @@ class Group_User extends CommonDBRelation{
             echo "<td>".$group->getLink()."</td>";
             echo "<td class='center'>";
             if ($data['is_dynamic']) {
-               echo "<img src='".$CFG_GLPI["root_doc"]."/pics/ok.png' width='14' height='14' alt=\"".__('Dynamic')."\">";
+               echo "<img src='".$CFG_GLPI["root_doc"]."/pics/ok.png' width='14' height='14' alt=\"".
+                      __('Dynamic')."\">";
             }
             echo "<td class='center'>";
             if ($data['is_manager']) {
-               echo "<img src='".$CFG_GLPI["root_doc"]."/pics/ok.png' width='14' height='14' alt=\"".__('Manager')."\">";
+               echo "<img src='".$CFG_GLPI["root_doc"]."/pics/ok.png' width='14' height='14' alt=\"".
+                      __('Manager')."\">";
             }
             echo "</td><td class='center'>";
             if ($data['is_userdelegate']) {
-               echo "<img src='".$CFG_GLPI["root_doc"]."/pics/ok.png' width='14' height='14' alt=\"".__('Delegatee')."\">";
+               echo "<img src='".$CFG_GLPI["root_doc"]."/pics/ok.png' width='14' height='14' alt=\"".
+                      __('Delegatee')."\">";
             }
             echo "</td></tr>";
          }
@@ -471,16 +474,16 @@ class Group_User extends CommonDBRelation{
 
          echo "<table class='tab_cadre_fixehov'>";
 
-         $header_begin = "<tr>";
-         $header_top = '';
+         $header_begin  = "<tr>";
+         $header_top    = '';
          $header_bottom = '';
-         $header_end = '';
+         $header_end    = '';
 
          if ($canedit) {
-            $header_begin .= "<th width='10'>";
-            $header_top .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
+            $header_begin  .= "<th width='10'>";
+            $header_top    .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
             $header_bottom .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
-            $header_end .= "</th>";
+            $header_end    .= "</th>";
          }
          $header_end .= "<th>".User::getTypeName(1)."</th>";
          if ($tree) {
@@ -490,7 +493,7 @@ class Group_User extends CommonDBRelation{
          $header_end .= "<th>".__('Manager')."</th>";
          $header_end .= "<th>".__('Delegatee')."</th></tr>";
          echo $header_begin.$header_top.$header_end;
-         
+
          $tmpgrp = new Group();
 
          for ($i=$start, $j=0 ; ($i < $number) && ($j < $_SESSION['glpilist_limit']) ; $i++, $j++) {
@@ -513,15 +516,18 @@ class Group_User extends CommonDBRelation{
             }
             echo "</td><td class='center'>";
             if ($data['is_dynamic']) {
-               echo "<img src='".$CFG_GLPI["root_doc"]."/pics/ok.png' width='14' height='14' alt=\"".__('Dynamic')."\">";
+               echo "<img src='".$CFG_GLPI["root_doc"]."/pics/ok.png' width='14' height='14' alt=\"".
+                      __('Dynamic')."\">";
             }
             echo "</td><td class='center'>";
             if ($data['is_manager']) {
-               echo "<img src='".$CFG_GLPI["root_doc"]."/pics/ok.png' width='14' height='14' alt=\"".__('Manager')."\">";
+               echo "<img src='".$CFG_GLPI["root_doc"]."/pics/ok.png' width='14' height='14' alt=\"".
+                      __('Manager')."\">";
             }
             echo "</td><td class='center'>";
             if ($data['is_userdelegate']) {
-               echo "<img src='".$CFG_GLPI["root_doc"]."/pics/ok.png' width='14' height='14' alt=\"".__('Delegatee')."\">";
+               echo "<img src='".$CFG_GLPI["root_doc"]."/pics/ok.png' width='14' height='14' alt=\"".
+                      __('Delegatee')."\">";
             }
             echo "</tr>";
          }

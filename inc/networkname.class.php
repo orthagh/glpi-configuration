@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -115,7 +115,7 @@ class NetworkName extends FQDNLabel {
       }
       $this->displayRecursiveItems($recursiveItems, "Link");
       if (count($recursiveItems) > 0) {
-         echo " - <input type='submit' name='unaffect' value=\"" . __s('Dissociate') .
+         echo " - <input type='submit' name='unaffect' value=\"" . _sx('button', 'Dissociate') .
                    "\" class='submit'>";
       }
 
@@ -399,7 +399,7 @@ class NetworkName extends FQDNLabel {
       if ($name->getID() > 0) {
          echo "<a href='".$name->getLinkURL()."'>".self::getTypeName(1)."</a>";
          echo "<input type='hidden' name='NetworkName_id' value='".$name->getID()."'>&nbsp;\n";
-         Html::showSimpleForm($name->getFormURL(), 'unaffect', __s('Dissociate'),
+         Html::showSimpleForm($name->getFormURL(), 'unaffect', _sx('button', 'Dissociate'),
                               array('id' => $name->getID()),
                               $CFG_GLPI["root_doc"].'/pics/sub_dropdown.png');
       } else {
@@ -738,9 +738,9 @@ class NetworkName extends FQDNLabel {
             Html::showMassiveActions($massiveactionparams);
          }
 
-         $table->display(array('display_title_for_each_group' => false,
-                               'display_thead'                => false,
-                               'display_tfoot'                => false,
+         $table->display(array('display_title_for_each_group'          => false,
+                               'display_thead'                         => false,
+                               'display_tfoot'                         => false,
                                'display_header_on_foot_for_each_group' => true));
 
          if ($canedit && $number) {

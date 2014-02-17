@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -475,13 +475,13 @@ class Consumable extends CommonDBChild {
                       $where";
       $result = $DB->query($query);
       $number = $DB->numrows($result);
-      
+
       echo "<div class='spaced'>";
       if ($canedit && $number) {
          Html::openMassiveActionsForm('mass'.__CLASS__.$rand);
          $actions = array('delete' => _x('button', 'Delete permanently'),
                           'Infocom'.MassiveAction::CLASS_ACTION_SEPARATOR.'activate'
-                              => __('Enable the financial and administrative information'));
+                                   => __('Enable the financial and administrative information'));
          if ($show_old) {
             $actions['Consumable'.MassiveAction::CLASS_ACTION_SEPARATOR.'backtostock']
                      = __('Back to stock');
@@ -511,15 +511,15 @@ class Consumable extends CommonDBChild {
 
       if ($number) {
          $i = 0;
-         $header_begin = "<tr>";
-         $header_top = '';
+         $header_begin  = "<tr>";
+         $header_top    = '';
          $header_bottom = '';
-         $header_end = '';
+         $header_end    = '';
          if ($canedit) {
-            $header_begin .= "<th width='10'>";
-            $header_top .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
+            $header_begin  .= "<th width='10'>";
+            $header_top    .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
             $header_bottom .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
-            $header_end .= "</th>";
+            $header_end    .= "</th>";
          }
          $header_end .= "<th>".__('ID')."</th>";
          $header_end .= "<th>"._x('item', 'State')."</th>";

@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -78,7 +78,49 @@ class SoftwareLicense extends CommonDBTM {
       return $input;
    }
 
+   function prepareInputForUpdate($input) {
 
+      // Update number : compute validity indicator
+      if (isset($input['number'])) {
+         $input['is_valid'] = self::computeValidityIndicator($input['id'], $input['number']);
+      }
+
+      return $input;
+   }
+
+   /**
+    * Compute licence validity indicator.
+    * @param $ID ID of the licence
+    * @param $number licence count to check
+    * @since version 0.85
+    * @return validity indicator
+   **/
+   static function computeValidityIndicator($ID, $number = -1) {
+      if (($number >= 0)
+         && ($number < Computer_SoftwareLicense::countForLicense($ID, -1))) {
+         return 0;
+      }
+      // Default return 1
+      return 1;
+   }
+   
+   /**
+    * Update validity indicator of a specific license
+    * @param $ID ID of the licence
+    * @since version 0.85
+    * @return nothing
+   **/
+   static function updateValidityIndicator($ID) {
+      $lic = new self();
+      if ($lic->getFromDB($ID)) {
+         $valid = self::computeValidityIndicator($ID, $lic->fields['number']);
+         if ($valid != $lic->fields['is_valid']) {
+            $lic->update(array('id'       => $ID,
+                               'is_valid' => $valid));
+         }
+      }
+   }
+   
    /**
     * @since version 0.84
    **/
@@ -105,8 +147,19 @@ class SoftwareLicense extends CommonDBTM {
 
       // Add infocoms if exists for the licence
       Infocom::cloneItem('Software', $dupid, $this->fields['id'], $this->getType());
+      Software::updateValidityIndicator($this->fields["softwares_id"]);
    }
 
+   function post_updateItem($history=1) {
+      if (in_array("is_valid", $this->updates)) {
+         Software::updateValidityIndicator($this->fields["softwares_id"]);
+      }
+   }
+
+   function post_deleteFromDB() {
+      Software::updateValidityIndicator($this->fields["softwares_id"]);
+   }
+   
    /**
     * @since version 0.84
     *
@@ -225,6 +278,14 @@ class SoftwareLicense extends CommonDBTM {
                                            'max'   => 1000,
                                            'step'  => 1,
                                            'toadd' => array(-1 => __('Unlimited'))));
+      if ($ID > 0) {
+         echo "&nbsp;";
+         if ($this->fields['is_valid']) {
+            echo "<span class='green'>"._x('adjective', 'Valid').'<span>';
+         } else {
+            echo "<span class='red'>"._x('adjective', 'Invalid').'<span>';
+         }
+      }
       echo "</td></tr>\n";
 
       echo "<tr class='tab_bg_1'>";
@@ -251,7 +312,6 @@ class SoftwareLicense extends CommonDBTM {
 
       return true;
    }
-
 
    /**
     * Is the license may be recursive
@@ -289,7 +349,8 @@ class SoftwareLicense extends CommonDBTM {
 
       // Only use for History (not by search Engine)
       $tab                       = array();
-
+      $tab['common']             = __('Characteristics');
+      
       $tab[2]['table']           = $this->getTable();
       $tab[2]['field']           = 'name';
       $tab[2]['name']            = __('Name');
@@ -337,6 +398,11 @@ class SoftwareLicense extends CommonDBTM {
       $tab[8]['name']            = __('Expiration');
       $tab[8]['datatype']        = 'date';
 
+      $tab[9]['table']           = $this->getTable();
+      $tab[9]['field']           = 'is_valid';
+      $tab[9]['name']            = __('Valid');
+      $tab[9]['datatype']        = 'bool';
+      
       $tab[16]['table']          = $this->getTable();
       $tab[16]['field']          = 'comment';
       $tab[16]['name']           = __('Comments');
@@ -622,7 +688,7 @@ class SoftwareLicense extends CommonDBTM {
                              'buyname'   => __('Purchase version'),
                              'usename'   => __('Version in use'),
                              'expire'    => __('Expiration'));
-            if ($software->isRecursive()) {
+            if (!$software->isRecursive()) {
                unset($columns['entity']);
             }
             $sort_img = "<img src=\"" . $CFG_GLPI["root_doc"] . "/pics/" .
@@ -631,10 +697,10 @@ class SoftwareLicense extends CommonDBTM {
             echo "<table class='tab_cadre_fixehov'>";
 
 
-            $header_begin = "<tr><th>";
-            $header_top = Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
+            $header_begin  = "<tr><th>";
+            $header_top    = Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
             $header_bottom = Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
-            $header_end = '';
+            $header_end    = '';
 
             foreach ($columns as $key => $val) {
                // Non order column
@@ -679,7 +745,9 @@ class SoftwareLicense extends CommonDBTM {
                       (($data['number'] > 0) ?$data['number']:__('Unlimited'))."</td>";
                $nb_assoc   = Computer_SoftwareLicense::countForLicense($data['id']);
                $tot_assoc += $nb_assoc;
-               echo "<td class='numeric'>".$nb_assoc."</td>";
+               $color = ($data['is_valid']?'green':'red');
+               
+               echo "<td class='numeric $color'>".$nb_assoc."</td>";
                echo "<td>".$data['typename']."</td>";
                echo "<td>".$data['buyname']."</td>";
                echo "<td>".$data['usename']."</td>";
@@ -702,7 +770,8 @@ class SoftwareLicense extends CommonDBTM {
                    ($software->isRecursive()?4:3)."' class='right b'>".__('Total')."</td>";
             echo "<td class='numeric'>".(($tot > 0)?$tot."":__('Unlimited')).
                  "</td>";
-            echo "<td class='numeric'>".$tot_assoc."</td>";
+            $color = ($software->fields['is_valid']?'green':'red');
+            echo "<td class='numeric $color'>".$tot_assoc."</td>";
             echo "</tr>";
             echo "</table>\n";
 

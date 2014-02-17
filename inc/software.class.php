@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -196,7 +196,27 @@ class Software extends CommonDBTM {
       
    }
 
-
+   /**
+    * Update validity indicator of a specific software
+    * @param $ID ID of the licence
+    * @since version 0.85
+    * @return nothing
+   **/
+   static function updateValidityIndicator($ID) {
+      $soft = new self();
+      if ($soft->getFromDB($ID)) {
+         $valid = 1;
+         if (countElementsInTable('glpi_softwarelicenses',
+                                  "`softwares_id`='$ID' AND NOT `is_valid`") > 0) {
+            $valid = 0;
+         }
+         if ($valid != $soft->fields['is_valid']) {
+            $soft->update(array('id'       => $ID,
+                               'is_valid' => $valid));
+         }
+      }
+   }
+   
    /**
     * Print the Software form
     *
@@ -442,19 +462,13 @@ class Software extends CommonDBTM {
       $tab[2]['name']            = __('ID');
       $tab[2]['massiveaction']   = false;
       $tab[2]['datatype']        = 'number';
-
+      
       $tab+=Location::getSearchOptionsToAdd();
 
       $tab[16]['table']          = $this->getTable();
       $tab[16]['field']          = 'comment';
       $tab[16]['name']           = __('Comments');
       $tab[16]['datatype']       = 'text';
-
-      $tab[90]['table']          = $this->getTable();
-      $tab[90]['field']          = 'notepad';
-      $tab[90]['name']           = __('Notes');
-      $tab[90]['massiveaction']  = false;
-      $tab[90]['datatype']       = 'text';
 
       $tab[62]['table']          = 'glpi_softwarecategories';
       $tab[62]['field']          = 'completename';
@@ -503,6 +517,12 @@ class Software extends CommonDBTM {
       $tab[61]['name']           = __('Associable to a ticket');
       $tab[61]['datatype']       = 'bool';
 
+      $tab[63]['table']          = $this->getTable();
+      $tab[63]['field']          = 'is_valid';
+                                 //TRANS: Indicator to know is all licenses of the software are valids
+      $tab[63]['name']           = __('Valid licenses');
+      $tab[63]['datatype']       = 'bool';
+      
       $tab[80]['table']          = 'glpi_entities';
       $tab[80]['field']          = 'completename';
       $tab[80]['name']           = __('Entity');
@@ -520,6 +540,7 @@ class Software extends CommonDBTM {
       if (Session::getLoginUserID()) {
          $tab[72]['joinparams']  = array('jointype'   => 'child',
                                          'condition'  => "AND NEWTABLE.`is_deleted_computer` = '0'
+                                                          AND NEWTABLE.`is_deleted` = '0'
                                                           AND NEWTABLE.`is_template_computer` = '0'
                                                           ".getEntitiesRestrictRequest('AND', 'NEWTABLE'),
                                          'beforejoin' => array('table' => 'glpi_softwareversions',
@@ -571,6 +592,8 @@ class Software extends CommonDBTM {
                                           => array('table'      => 'glpi_softwareversions',
                                                    'joinparams' => array('jointype' => 'child')));
 
+      $tab += Notepad::getSearchOptionsToAdd();
+      
       $tab['license']            = _n('License', 'Licenses', 2);
 
       $licjoin       = array();
@@ -647,6 +670,14 @@ class Software extends CommonDBTM {
       $tab[166]['emptylabel']    = __('Never expire');
       $tab[166]['massiveaction'] = false;
       $tab[166]['joinparams']    = $licjoinexpire;
+      
+      $tab[167]['table']         = 'glpi_softwarelicenses';
+      $tab[167]['field']         =  'is_valid';
+      $tab[167]['name']          = _x('adjective', 'Valid');
+      $tab[167]['forcegroupby']  = true;
+      $tab[167]['datatype']      = 'bool';
+      $tab[167]['massiveaction'] = false;
+      $tab[167]['joinparams']    = $licjoinexpire;
 
       return $tab;
    }

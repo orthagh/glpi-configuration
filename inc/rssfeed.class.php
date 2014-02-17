@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -1009,21 +1009,21 @@ class RSSFeed extends CommonDBTM {
          Html::showMassiveActions($massiveactionparams);
       }
       echo "<table class='tab_cadre_fixehov'>";
-      $header_begin = "<tr>";
-      $header_top = '';
+      $header_begin  = "<tr>";
+      $header_top    = '';
       $header_bottom = '';
-      $header_end = '';      
+      $header_end    = '';
       if ($canedit && $nb) {
-         $header_begin .= "<th width='10'>";
-         $header_top .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
+         $header_begin  .= "<th width='10'>";
+         $header_top    .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
          $header_bottom .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
-         $header_end .= "</th>";
+         $header_end    .= "</th>";
       }
       $header_end .= "<th>".__('Type')."</th>";
       $header_end .= "<th>"._n('Recipient', 'Recipients', 2)."</th>";
       $header_end .= "</tr>";
       echo $header_begin.$header_top.$header_end;
-      
+
       // Users
       if (count($this->users)) {
          foreach ($this->users as $key => $val) {
@@ -1125,7 +1125,7 @@ class RSSFeed extends CommonDBTM {
             }
          }
       }
-      
+
       if ($nb) {
          echo $header_begin.$header_bottom.$header_end;
       }

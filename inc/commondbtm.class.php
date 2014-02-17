@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -3412,7 +3412,7 @@ class CommonDBTM extends CommonGLPI {
 
 
    function getUnallowedFieldsForUnicity() {
-      return array('alert', 'comment', 'date_mod', 'id', 'is_recursive', 'items_id', 'notepad');
+      return array('alert', 'comment', 'date_mod', 'id', 'is_recursive', 'items_id');
    }
 
 
@@ -4007,7 +4007,7 @@ class CommonDBTM extends CommonGLPI {
                $out = '';
                if (isset($searchoptions['htmltext']) && $searchoptions['htmltext']) {
                   $out = Html::initEditorSystem($name, '', false);
-               } 
+               }
                return $out."<textarea cols='45' rows='5' name='$name'>$value</textarea>";
 
             case "bool" :

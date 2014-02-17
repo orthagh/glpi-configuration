@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -310,13 +310,15 @@ class TicketTemplatePredefinedField extends CommonDBChild {
          echo self::getTypeName($DB->numrows($result));
          echo "</th></tr>";
          if ($numrows) {
-            $header_begin = "<tr>";
-            $header_top = '';
+            $header_begin  = "<tr>";
+            $header_top    = '';
             $header_bottom = '';
-            $header_end = '';
+            $header_end    = '';
             if ($canedit) {
-               $header_top .= "<th width='10'>".Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand)."</th>";
-               $header_bottom .= "<th width='10'>".Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand)."</th>";
+               $header_top    .= "<th width='10'>";
+               $header_top    .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand)."</th>";
+               $header_bottom .= "<th width='10'>";
+               $header_bottom .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand)."</th>";
             }
             $header_end .= "<th>".__('Name')."</th>";
             $header_end .= "<th>".__('Value')."</th>";

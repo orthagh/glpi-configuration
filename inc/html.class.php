@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -1149,7 +1149,7 @@ class Html {
          $menu['tools']['types']        = array('Project', 'Reminder', 'RSSFeed', 'KnowbaseItem',
                                                 'ReservationItem', 'Report', 'MigrationCleaner');
 
-         $menu['plugins']['title']      = __('Plugins');
+         $menu['plugins']['title']      = _n('Plugin', 'Plugins',2);
          $menu['plugins']['types']      = array();
 
          $menu['admin']['title']        = __('Administration');
@@ -1988,7 +1988,7 @@ class Html {
 
          asort($list);
          echo "<li id='menu5' onmouseover=\"javascript:menuAff('menu5','menu');\">";
-         echo "<a href='#' title=\"".__s('Plugins')."\" class='itemP'>". __('Plugins')."</a>";  // default none
+         echo "<a href='#' title=\""._sn('Plugin', 'Plugins', 2)."\" class='itemP'>". __('Plugins')."</a>";  // default none
          echo "<ul class='ssmenu'>";
 
          // list menu item
@@ -2513,13 +2513,13 @@ class Html {
     *
     * @since version 0.84
     *
-    * @param $itemtype    Massive action itemtype
-    * @param $id          ID of the item
-    * @param $options
+    * @param $itemtype             Massive action itemtype
+    * @param $id                   ID of the item
+    * @param $options      array
     *
     * @return get checkbox
    **/
-   static function getMassiveActionCheckBox($itemtype, $id, array $options = array()) {
+   static function getMassiveActionCheckBox($itemtype, $id, array $options=array()) {
 
       $options['checked']       = (isset($_SESSION['glpimassiveactionselected'][$itemtype][$id]));
       if (!isset($options['specific_tags']['data-glpicore-ma-tags'])) {
@@ -2537,13 +2537,13 @@ class Html {
     *
     * @since version 0.84
     *
-    * @param $itemtype    Massive action itemtype
-    * @param $id          ID of the item
-    * @param $options
+    * @param $itemtype             Massive action itemtype
+    * @param $id                   ID of the item
+    * @param $options      array
     *
     * @return show checkbox
    **/
-   static function showMassiveActionCheckBox($itemtype, $id, array $options = array()) {
+   static function showMassiveActionCheckBox($itemtype, $id, array $options=array()) {
       echo Html::getMassiveActionCheckBox($itemtype, $id, $options);
    }
 
@@ -2820,7 +2820,8 @@ class Html {
                                            'id'    => "hiddendate".$p['rand'],
                                            'size'  => 10));
       if ($p['maybeempty']) {
-         $output .= "<img src='".$CFG_GLPI['root_doc']."/pics/reset.png' alt=\"".__('Clear')."\" id='resetdate".$p['rand']."'>";
+         $output .= "<img src='".$CFG_GLPI['root_doc']."/pics/reset.png' alt=\"".__('Clear').
+                      "\" id='resetdate".$p['rand']."'>";
       }
 
       $js = '';
@@ -3028,7 +3029,8 @@ class Html {
                    self::convDateTime($p['value'])."'>";
       $output .= Html::hidden($name, array('value' => $p['value'], 'id' => "hiddendate".$p['rand']));
       if ($p['maybeempty']) {
-         $output .= "<img src='".$CFG_GLPI['root_doc']."/pics/reset.png' alt=\"".__('Clear')."\" id='resetdate".$p['rand']."'>";
+         $output .= "<img src='".$CFG_GLPI['root_doc']."/pics/reset.png' alt=\"".__('Clear').
+                      "\" id='resetdate".$p['rand']."'>";
       }
 
       $js = "";
@@ -3737,10 +3739,8 @@ class Html {
       $params = array('name'     => $name,
                       'root_doc' => $CFG_GLPI['root_doc'],
                       'rand'     => $rand,
-                      'maxsize'  => 500,
-                      'lang'     => array('pasteimage'   => sprintf(__('%1$s - %2$s'),
-                                                                    _sx('button', 'Paste image'),
-                                                                    __('500 pixels max')),
+//                      'maxsize'  => 500,
+                      'lang'     => array('pasteimage'   => _sx('button', 'Dans and drop or paste image'),
                                           'itemnotfound' => __('Item not found'),
                                           'toolarge'     => __('Item is too large'),
                                           'save'         => _sx('button', 'Save'),
@@ -4559,7 +4559,7 @@ class Html {
     * @param $options   Array    of HTML attributes:
     *     - `confirm` JavaScript confirmation message.
     *     - `confirmaction` optional action to do on confirmation
-    * @return string An a` element.
+    * @return string an `a` element.
    **/
    static function link($text, $url, $options=array()) {
 

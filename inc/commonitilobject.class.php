@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -1472,8 +1472,8 @@ abstract class CommonITILObject extends CommonDBTM {
     * create document if needed
     * create link from document to ITIL object
     *
-    * @param $donotif   Boolean  if we want to raise notification (default 1)
-    * @param $disablenotif
+    * @param $donotif         Boolean  if we want to raise notification (default 1)
+    * @param $disablenotif             (default 0)
     *
     * @return array of doc added name
    **/
@@ -3036,7 +3036,6 @@ abstract class CommonITILObject extends CommonDBTM {
    **/
    function showActorAddFormOnCreate($type, array $options) {
       global $CFG_GLPI;
-
       switch ($type) {
          case CommonITILActor::REQUESTER :
             $typename = 'requester';

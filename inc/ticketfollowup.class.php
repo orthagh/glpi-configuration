@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -233,8 +233,8 @@ class TicketFollowup  extends CommonDBTM {
    function prepareInputForUpdate($input) {
 
       // update writer if content change
-      if ($uid = Session::getLoginUserID() && isset($input['content'])
-         && ($input['content'] != $this->fields['content'])) {
+      if (($uid = Session::getLoginUserID())
+          && isset($input['content']) && ($input['content'] != $this->fields['content'])) {
          $input["users_id"] = $uid;
       }
       return $input;
@@ -710,7 +710,7 @@ class TicketFollowup  extends CommonDBTM {
          echo "<th class='b'>" . __('No followup for this ticket.')."</th></tr></table>";
       } else {
          echo "<table class='tab_cadre_fixehov'>";
-         
+
          $header = "<tr><th>".__('Type')."</th><th>" . __('Date') . "</th>";
          $header .= "<th>" . __('Description') . "</th>";//"<th>" . __('Duration') . "</th>";
          $header .= "<th>" . __('Writer') . "</th>";

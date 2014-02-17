@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -513,10 +513,7 @@ class Entity extends CommonTreeDropdown {
       $tab[16]['name']          = __('Comments');
       $tab[16]['datatype']      = 'text';
 
-      $tab[28]['table']         = $this->getTable();
-      $tab[28]['field']         = 'notepad';
-      $tab[28]['name']          = __('Notes');
-      $tab[28]['datatype']      = 'text';
+      $tab += Notepad::getSearchOptionsToAdd();
 
       $tab['advanced']         = __('Advanced information');
 

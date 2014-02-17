@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -848,7 +848,7 @@ class Profile extends CommonDBTM {
 
 
       $rights = array(array('itemtype'  => 'Contact',
-                            'label'     => _n('Contacts', 'Contacts', 2)." / ".
+                            'label'     => _n('Contact', 'Contacts', 2)." / ".
                                            _n('Supplier', 'Suppliers', 2),
                             'field'     => 'contact_enterprise'),
                       array('itemtype'  => 'Document',
@@ -2131,7 +2131,7 @@ class Profile extends CommonDBTM {
     * @param $values    array    of values to display
     * @param $name      integer  name of the dropdown
     * @param $current   integer  value in database (sum of rights)
-    * @param $options
+    * @param $options   array
    **/
    static function dropdownRights(array $values, $name, $current, $options=array()) {
 

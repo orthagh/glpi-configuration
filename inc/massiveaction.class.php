@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -200,7 +200,7 @@ class MassiveAction {
                         $POST['processor'] = $action[0];
                         $POST['action']    = $action[1];
                      } else {
-                        $POST['processor'] = '';
+                        $POST['processor'] = 'MassiveAction';
                         $POST['action']    = $POST['action'];
                      }
                   }
@@ -611,6 +611,7 @@ class MassiveAction {
       global $CFG_GLPI;
 
       $processor = $this->processor;
+
       if (!$processor::showMassiveActionsSubForm($this)) {
          $this->showDefaultSubForm();
       }

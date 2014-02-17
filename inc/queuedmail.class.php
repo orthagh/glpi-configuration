@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2012 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -656,13 +656,20 @@ class QueuedMail extends CommonDBTM {
 
    }
 
+
+   /**
+    * @since version 0.85
+    *
+    * @param $string
+    **/
    static function cleanHtml($string) {
+
       $begin_strip     = -1;
       $end_strip       = -1;
       $begin_match     = "/<body>/";
       $end_match       = "/<\/body>/";
-      $content        = explode("\n", $string);
-      $newstring = '';
+      $content         = explode("\n", $string);
+      $newstring       = '';
       foreach ($content as $ID => $val) {
          // Get last tag for end
          if ($begin_strip >= 0) {
@@ -671,7 +678,7 @@ class QueuedMail extends CommonDBTM {
                continue;
             }
          }
-         if ($begin_strip >= 0 && $end_strip < 0) {
+         if (($begin_strip >= 0) && ($end_strip < 0)) {
             $newstring .= $val;
          }
          // Get first tag for begin

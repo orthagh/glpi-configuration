@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -517,12 +517,6 @@ class NetworkEquipment extends CommonDBTM {
       $tab[16]['name']           = __('Comments');
       $tab[16]['datatype']       = 'text';
 
-      $tab[90]['table']          = $this->getTable();
-      $tab[90]['field']          = 'notepad';
-      $tab[90]['name']           = __('Notes');
-      $tab[90]['massiveaction']  = false;
-      $tab[90]['datatype']       = 'text';
-
       $tab[11]['table']          = 'glpi_networkequipmentfirmwares';
       $tab[11]['field']          = 'name';
       $tab[11]['name']           = _n('Firmware', 'Firmwares', 1);
@@ -572,6 +566,8 @@ class NetworkEquipment extends CommonDBTM {
       $tab[86]['field']          = 'is_recursive';
       $tab[86]['name']           = __('Child entities');
       $tab[86]['datatype']       = 'bool';
+
+      $tab += Notepad::getSearchOptionsToAdd();
 
       return $tab;
    }

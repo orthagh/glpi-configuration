@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -291,10 +291,10 @@ class Contract extends CommonDBTM {
       echo "</td><td width='20%'>";
       echo "<span class='small_space'>".__('Start')."</span>";
       echo "</td><td width='20%'>";
-      Dropdown::showHours("week_begin_hour", $this->fields["week_begin_hour"]);
+      Dropdown::showHours("week_begin_hour", array('value' => $this->fields["week_begin_hour"]));
       echo "</td><td width='20%'>";
       echo "<span class='small_space'>".__('End')."</span></td><td width='20%'>";
-      Dropdown::showHours("week_end_hour", $this->fields["week_end_hour"]);
+      Dropdown::showHours("week_end_hour", array('value' => $this->fields["week_end_hour"]));
       echo "</td></tr></table>";
       echo "</td></tr>";
 
@@ -306,11 +306,11 @@ class Contract extends CommonDBTM {
       echo "</td><td width='20%'>";
       echo "<span class='small_space'>".__('Start')."</span>";
       echo "</td><td width='20%'>";
-      Dropdown::showHours("saturday_begin_hour", $this->fields["saturday_begin_hour"]);
+      Dropdown::showHours("saturday_begin_hour", array('value' => $this->fields["saturday_begin_hour"]));
       echo "</td><td width='20%'>";
       echo "<span class='small_space'>".__('End')."</span>";
       echo "</td><td width='20%'>";
-      Dropdown::showHours("saturday_end_hour", $this->fields["saturday_end_hour"]);
+      Dropdown::showHours("saturday_end_hour", array('value' => $this->fields["saturday_end_hour"]));
       echo "</td></tr></table>";
       echo "</td></tr>";
 
@@ -322,11 +322,11 @@ class Contract extends CommonDBTM {
       echo "</td><td width='20%'>";
       echo "<span class='small_space'>".__('Start')."</span>";
       echo "</td><td width='20%'>";
-      Dropdown::showHours("monday_begin_hour", $this->fields["monday_begin_hour"]);
+      Dropdown::showHours("monday_begin_hour", array('value' => $this->fields["monday_begin_hour"]));
       echo "</td><td width='20%'>";
       echo "<span class='small_space'>".__('End')."</span>";
       echo "</td><td width='20%'>";
-      Dropdown::showHours("monday_end_hour", $this->fields["monday_end_hour"]);
+      Dropdown::showHours("monday_end_hour", array('value' => $this->fields["monday_end_hour"]));
       echo "</td></tr></table>";
       echo "</td></tr>";
 
@@ -691,11 +691,6 @@ class Contract extends CommonDBTM {
       $tab[16]['name']              = __('Comments');
       $tab[16]['datatype']          = 'text';
 
-      $tab[90]['table']             = $this->getTable();
-      $tab[90]['field']             = 'notepad';
-      $tab[90]['name']              = __('Notes');
-      $tab[90]['massiveaction']     = false;
-
       $tab[80]['table']             = 'glpi_entities';
       $tab[80]['field']             = 'completename';
       $tab[80]['name']              = __('Entity');
@@ -732,6 +727,8 @@ class Contract extends CommonDBTM {
                                              => array('table'      => 'glpi_contracts_suppliers',
                                                       'joinparams' => array('jointype' => 'child')));
 
+      $tab += Notepad::getSearchOptionsToAdd();
+      
       $tab['cost']                  = __('Cost');
 
       $tab[11]['table']             = 'glpi_contractcosts';
@@ -891,21 +888,24 @@ class Contract extends CommonDBTM {
                                       'value'      => '>-30',
                                       'searchtype' => 'contains');
 
-      echo "<td><a href=\"".$CFG_GLPI["root_doc"]."/front/contract.php?".Toolbox::append_params($options,'&amp;')."\">".
+      echo "<td><a href=\"".$CFG_GLPI["root_doc"]."/front/contract.php?".
+                 Toolbox::append_params($options,'&amp;')."\">".
                  __('Contracts expired in the last 30 days')."</a> </td>";
       echo "<td class='numeric'>".$contract0."</td></tr>";
       echo "<tr class='tab_bg_2'>";
 
       $options['criteria'][0]['value'] = 0;
       $options['criteria'][1]['value'] = '<7';
-      echo "<td><a href=\"".$CFG_GLPI["root_doc"]."/front/contract.php?".Toolbox::append_params($options,'&amp;')."\">".
+      echo "<td><a href=\"".$CFG_GLPI["root_doc"]."/front/contract.php?".
+                 Toolbox::append_params($options,'&amp;')."\">".
                  __('Contracts expiring in less than 7 days')."</a></td>";
       echo "<td class='numeric'>".$contract7."</td></tr>";
       echo "<tr class='tab_bg_2'>";
 
       $options['criteria'][0]['value'] = '>6';
       $options['criteria'][1]['value'] = '<30';
-      echo "<td><a href=\"".$CFG_GLPI["root_doc"]."/front/contract.php?".Toolbox::append_params($options,'&amp;')."\">".
+      echo "<td><a href=\"".$CFG_GLPI["root_doc"]."/front/contract.php?".
+                 Toolbox::append_params($options,'&amp;')."\">".
                  __('Contracts expiring in less than 30 days')."</a></td>";
       echo "<td class='numeric'>".$contract30."</td></tr>";
       echo "<tr class='tab_bg_2'>";
@@ -915,7 +915,8 @@ class Contract extends CommonDBTM {
       $options['criteria'][1]['field'] = 13;
       $options['criteria'][1]['value'] = '<7';
 
-      echo "<td><a href=\"".$CFG_GLPI["root_doc"]."/front/contract.php?".Toolbox::append_params($options,'&amp;')."\">".
+      echo "<td><a href=\"".$CFG_GLPI["root_doc"]."/front/contract.php?".
+                 Toolbox::append_params($options,'&amp;')."\">".
                  __('Contracts where notice begins in less than 7 days')."</a></td>";
       echo "<td class='numeric'>".$contractpre7."</td></tr>";
       echo "<tr class='tab_bg_2'>";
@@ -923,7 +924,8 @@ class Contract extends CommonDBTM {
 
       $options['criteria'][0]['value'] = '>6';
       $options['criteria'][1]['value'] = '<30';
-      echo "<td><a href=\"".$CFG_GLPI["root_doc"]."/front/contract.php?".Toolbox::append_params($options,'&amp;')."\">".
+      echo "<td><a href=\"".$CFG_GLPI["root_doc"]."/front/contract.php?".
+                 Toolbox::append_params($options,'&amp;')."\">".
                  __('Contracts where notice begins in less than 30 days')."</a></td>";
       echo "<td class='numeric'>".$contractpre30."</td></tr>";
       echo "</table>";

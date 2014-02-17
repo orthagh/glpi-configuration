@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -305,7 +305,6 @@ class RuleImportComputer extends Rule {
       $sql_where = '1';
       $sql_from  = '';
 
-      // TODO : why don't take care of Rule match attribute ?
       $needport = false;
       $needip   = false;
       foreach ($complex_criterias as $criteria) {

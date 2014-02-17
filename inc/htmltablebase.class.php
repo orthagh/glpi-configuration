@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -28,7 +28,7 @@
  */
 
 /** @file
-* @brief 
+* @brief
 */
 
 if (!defined('GLPI_ROOT')) {
@@ -67,7 +67,7 @@ abstract class HTMLTableBase  {
       if (!$header_object instanceof HTMLTableHeader) {
          throw new Exception('Implementation error: appendHeader requires HTMLTableHeader as parameter');
       }
-      $header_name = '';
+      $header_name    = '';
       $subHeader_name = '';
       $header_object->getHeaderAndSubHeaderName($header_name, $subHeader_name);
       if ($header_object->isSuperHeader()

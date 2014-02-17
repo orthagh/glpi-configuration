@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -35,7 +35,7 @@
 if (!defined('GLPI_ROOT')) {
    include ('../inc/includes.php');
 }
-toolbox::logdebug("post", $_POST);
+
 $link = new Group_Ticket();
 $item = new Ticket();
 

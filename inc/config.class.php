@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -657,7 +657,8 @@ class Config extends CommonDBTM {
       echo "<tr><th colspan='4'>" . __('Assistance') . "</th></tr>";
 
       echo "<tr class='tab_bg_2'>";
-      echo "<td>" . __('Step for the hours (minutes)') . "</td><td>";
+      echo "<td width='30%'>" . __('Step for the hours (minutes)') . "</td>";
+      echo "<td width='20%'>";
       Dropdown::showNumber('time_step', array('value' => $CFG_GLPI["time_step"],
                                               'min'   => 30,
                                               'max'   => 60,
@@ -667,10 +668,14 @@ class Config extends CommonDBTM {
                                                                10 => 10,
                                                                15 => 15,
                                                                20 => 20)));
-      echo "</td><td>" .__('Limit of the schedules for planning') . "</td><td>";
-      Dropdown::showHours('planning_begin', $CFG_GLPI["planning_begin"]);
+      echo "</td>";
+      echo "<td width='30%'>" .__('Limit of the schedules for planning') . "</td>";
+      echo "<td width='20%'>";
+      Dropdown::showHours('planning_begin', array('value' => $CFG_GLPI["planning_begin"],
+                                                  'width' => '40%'));
       echo "&nbsp;->&nbsp;";
-      Dropdown::showHours('planning_end', $CFG_GLPI["planning_end"]);
+      Dropdown::showHours('planning_end', array('value' => $CFG_GLPI["planning_end"],
+                                                'width' => '40%'));
       echo "</td></tr>";
 
       echo "<tr class='tab_bg_2'>";
@@ -726,7 +731,7 @@ class Config extends CommonDBTM {
       echo "<td class='b right' colspan='2'>".__('Impact')."</td>";
 
       for ($impact=5 ; $impact>=1 ; $impact--) {
-         echo "<td>".Ticket::getImpactName($impact).'&nbsp;';
+         echo "<td class='center'>".Ticket::getImpactName($impact).'<br>';
 
          if ($impact==3) {
             $isimpact[3] = 1;
@@ -773,7 +778,7 @@ class Config extends CommonDBTM {
 
             if ($isurgency[$urgency] && $isimpact[$impact]) {
                $bgcolor=$_SESSION["glpipriority_$pri"];
-               echo "<td bgcolor='$bgcolor'>";
+               echo "<td class='center' bgcolor='$bgcolor'>";
                Ticket::dropdownPriority(array('value' => $pri,
                                               'name'  => "_matrix_${urgency}_${impact}"));
                echo "</td>";
@@ -1715,7 +1720,8 @@ class Config extends CommonDBTM {
             $error = 2;
          } else {
             if ($fordebug) {
-               echo "<img src='".$CFG_GLPI['root_doc']."/pics/greenbutton.png' alt=\"".__s('OK')."\">$dir : OK\n";
+               echo "<img src='".$CFG_GLPI['root_doc']."/pics/greenbutton.png' alt=\"".__s('OK').
+                    "\">$dir : OK\n";
             } else {
                echo "<td><img src='".$CFG_GLPI['root_doc']."/pics/greenbutton.png' alt=\"".
                           __s('A file and a directory have be created and deleted - Perfect!')."\"
@@ -1734,7 +1740,8 @@ class Config extends CommonDBTM {
 
       if (error_log("Test\n", 3, GLPI_LOG_DIR."/php-errors.log")) {
          if ($fordebug) {
-            echo "<img src='".$CFG_GLPI['root_doc']."/pics/greenbutton.png' alt=\"".__s('OK')."\">".GLPI_LOG_DIR." : OK\n";
+            echo "<img src='".$CFG_GLPI['root_doc']."/pics/greenbutton.png' alt=\"".__s('OK')."\">".
+                   GLPI_LOG_DIR." : OK\n";
          } else {
             echo "<td><img src='".$CFG_GLPI['root_doc']."/pics/greenbutton.png' alt=\"".
                        __s('A file was created - Perfect!')."\" title=\"".

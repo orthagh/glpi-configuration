@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -345,9 +345,9 @@ class CalendarSegment extends CommonDBChild {
          echo "<input type='hidden' name='calendars_id' value='$ID'>";
          Dropdown::showFromArray('day', Toolbox::getDaysOfWeekArray());
          echo "</td><td class='center'>".__('Start').'</td><td>';
-         Dropdown::showHours("begin",date('H').":00");
+         Dropdown::showHours("begin", array('value' => date('H').":00"));
          echo "</td><td class='center'>".__('End').'</td><td>';
-         Dropdown::showHours("end",(date('H')+1).":00");
+         Dropdown::showHours("end",array('value' => (date('H')+1).":00"));
          echo "</td><td class='center'>";
             echo "<input type='submit' name='add' value=\""._sx('button', 'Add')."\" class='submit'>";
          echo "</td></tr>";

@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -675,12 +675,6 @@ class ProjectTask extends CommonDBChild {
       $tab[16]['name']              = __('Comments');
       $tab[16]['datatype']          = 'text';
 
-      $tab[90]['table']             = $this->getTable();
-      $tab[90]['field']             = 'notepad';
-      $tab[90]['name']              = __('Notes');
-      $tab[90]['massiveaction']     = false;
-      $tab[90]['datatype']          = 'text';
-
       $tab[80]['table']             = 'glpi_entities';
       $tab[80]['field']             = 'completename';
       $tab[80]['name']              = __('Entity');
@@ -690,6 +684,8 @@ class ProjectTask extends CommonDBChild {
       $tab[86]['field']             = 'is_recursive';
       $tab[86]['name']              = __('Child entities');
       $tab[86]['datatype']          = 'bool';
+
+      $tab += Notepad::getSearchOptionsToAdd();
 
       return $tab;
    }
@@ -804,7 +800,7 @@ class ProjectTask extends CommonDBChild {
             }
             $header .= "</tr>\n";
             echo $header;
-            
+
             while ($data=$DB->fetch_assoc($result)) {
                Session::addToNavigateListItems('ProjectTask',$data['id']);
                $rand = mt_rand();
@@ -946,19 +942,21 @@ class ProjectTask extends CommonDBChild {
          Html::showMassiveActions($massiveactionparams);
       }
       echo "<table class='tab_cadre_fixehov'>";
-      $header_begin = "<tr>";
-      $header_top = '';
+      $header_begin  = "<tr>";
+      $header_top    = '';
       $header_bottom = '';
-      $header_end = '';
+      $header_end    = '';
       if ($canedit && $nb) {
-         $header_top .= "<th width='10'>".Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand)."</th>";
-         $header_bottom .= "<th width='10'>".Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand)."</th>";
+         $header_top    .= "<th width='10'>".Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
+         $header_top    .= "</th>";
+         $header_bottom .= "<th width='10'>".Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
+         $header_bottom .= "</th>";
       }
       $header_end .= "<th>".__('Type')."</th>";
       $header_end .= "<th>"._n('Member', 'Members', 2)."</th>";
       $header_end .= "</tr>";
       echo $header_begin.$header_top.$header_end;
-      
+
       foreach (ProjectTaskTeam::$available_types as $type) {
          if (isset($task->team[$type]) && count($task->team[$type])) {
             if ($item = getItemForItemtype($type)) {

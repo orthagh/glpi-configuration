@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -72,6 +72,7 @@ class Ticket_Ticket extends CommonDBRelation {
       return parent::showMassiveActionsSubForm($ma);
    }
 
+
    /**
     * @since version 0.85
     *
@@ -110,7 +111,9 @@ class Ticket_Ticket extends CommonDBRelation {
             return;
       }
       parent::processMassiveActionsForOneItemtype($ma, $item, $ids);
-   }   
+   }
+
+
    /**
     * Get linked tickets to a ticket
     *

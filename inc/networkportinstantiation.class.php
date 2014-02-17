@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -412,12 +412,12 @@ class NetworkPortInstantiation extends CommonDBChild {
             }
          }
       }
-      
+
       if (count($macs_with_items) == 1) {
          $mac_with_items = $macs_with_items[0];
          $item           = $mac_with_items[0];
-         $result = array("id"       => $item->getID(),
-                           "itemtype" => $item->getType());
+         $result         = array("id"       => $item->getID(),
+                                 "itemtype" => $item->getType());
          unset($macs_with_items);
          return $result;
       }
@@ -785,7 +785,7 @@ class NetworkPortInstantiation extends CommonDBChild {
             if ($canedit
                 || $device2->canEdit($device2->fields["id"])) {
                echo "&nbsp;";
-               Html::showSimpleForm($oppositePort->getFormURL(), 'disconnect', __('Disconnect'),
+               Html::showSimpleForm($oppositePort->getFormURL(), 'disconnect', _x('button', 'Disconnect'),
                                     array('id' => $relations_id));
             }
 
@@ -811,7 +811,7 @@ class NetworkPortInstantiation extends CommonDBChild {
                                               'entity'      => $device1->fields["entities_id"],
                                               'entity_sons' => $device1->isRecursive()));
                } else {
-                  echo "<a href=\"".$netport->getFormURL()."?id=$ID\">". __('Connect')."</a>";
+                  echo "<a href=\"".$netport->getFormURL()."?id=$ID\">". _x('button', 'Connect')."</a>";
                }
             } else {
                echo "&nbsp;";
