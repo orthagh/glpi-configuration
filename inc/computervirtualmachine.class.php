@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -180,7 +180,7 @@ class ComputerVirtualMachine extends CommonDBChild {
       echo "<td>";
       VirtualMachineSystem::dropdown(array('value' => $this->fields['virtualmachinesystems_id']));
       echo "</td></tr>";
-      
+
       echo "<tr><td>".__('State of the virtual machine')."</td>";
       echo "<td>";
       VirtualMachineState::dropdown(array('value' => $this->fields['virtualmachinestates_id']));
@@ -311,11 +311,11 @@ class ComputerVirtualMachine extends CommonDBChild {
 
       if ($canedit) {
          echo "<div class='center firstbloc'>".
-            "<a class='vsubmit' href='computervirtualmachine.form.php?computers_id=$ID'>";
+                "<a class='vsubmit' href='computervirtualmachine.form.php?computers_id=$ID'>";
          _e('Add a virtual machine');
          echo "</a></div>\n";
       }
-      
+
       echo "<div class='center'>";
 
       $virtualmachines = getAllDatasFromTable('glpi_computervirtualmachines',
@@ -346,7 +346,7 @@ class ComputerVirtualMachine extends CommonDBChild {
          $header .= "<th>".__('Machine')."</th>";
          $header .= "</tr>";
          echo $header;
-         
+
          $vm = new self();
          foreach ($virtualmachines as $virtualmachine) {
             $vm->getFromDB($virtualmachine['id']);

@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -2022,7 +2022,7 @@ class Ticket extends CommonITILObject {
 
       $tab[131]['table']            = $this->getTable();
       $tab[131]['field']            = 'itemtype';
-      $tab[131]['name']             = __('Associated item type');
+      $tab[131]['name']             = _n('Associated item type', 'Associated item types',1);
       $tab[131]['datatype']         = 'itemtypename';
       $tab[131]['itemtype_list']    = 'ticket_types';
       $tab[131]['nosort']           = true;
@@ -2961,6 +2961,9 @@ class Ticket extends CommonITILObject {
                                                               => (($email == "")?0:1)),
                               'nodelegate'          => 1,
                               '_users_id_requester' => 0,
+                              '_users_id_observer'  => 0,
+                              '_users_id_observer_notif'
+                                                    => array('use_notification' => 1),
                               'name'                => '',
                               'content'             => '',
                               'itilcategories_id'   => 0,
@@ -3222,6 +3225,27 @@ class Ticket extends CommonITILObject {
          printf(__('%1$s%2$s'), __('Location'), $tt->getMandatoryMark('locations_id'));
          echo "</td><td>";
          Location::dropdown(array('value'  => $values["locations_id"]));
+         echo "</td></tr>";
+      }
+
+      if (!$tt->isHiddenField('_users_id_observer')
+            || $tt->isPredefinedField('_users_id_observer')) {
+         echo "<tr class='tab_bg_1'><td>".__('Watcher')."</td>";
+         echo "<td>";
+         $values['_right'] = "groups";
+         // Observer
+         if (!$tt->isHiddenField('_users_id_observer')) {
+           $this->showActorAddFormOnCreate(CommonITILActor::OBSERVER, $values);
+           echo '<hr>';
+         } else { // predefined value
+           if (isset($values["_users_id_observer"]) && $values["_users_id_observer"]) {
+               echo self::getActorIcon('user', CommonITILActor::OBSERVER)."&nbsp;";
+               echo Dropdown::getDropdownName("glpi_users", $values["_users_id_observer"]);
+               echo "<input type='hidden' name='_users_id_observer' value=\"".
+                     $values["_users_id_observer"]."\">";
+               echo '<hr>';
+           }
+         }
          echo "</td></tr>";
       }
 
@@ -5075,7 +5099,7 @@ class Ticket extends CommonITILObject {
    static function showListForItem(CommonDBTM $item) {
       global $DB, $CFG_GLPI;
 
-      if (!Session::haveRight(self::$rightname, self::READALL)) {
+      if (!Session::haveRightsAnd(self::$rightname, array(self::READALL, CREATE))) {
          return false;
       }
 
@@ -5202,18 +5226,21 @@ class Ticket extends CommonITILObject {
       echo "<table class='tab_cadre_fixehov'>";
 
       if ($number > 0) {
+         if (Session::haveRight(self::$rightname, self::READALL)) {
+            Session::initNavigateListItems('Ticket',
+            //TRANS : %1$s is the itemtype name, %2$s is the name of the item (used for headings of a list)
+                                           sprintf(__('%1$s = %2$s'), $item->getTypeName(1),
+                                                   $item->getName()));
 
-         Session::initNavigateListItems('Ticket',
-         //TRANS : %1$s is the itemtype name, %2$s is the name of the item (used for headings of a list)
-                                        sprintf(__('%1$s = %2$s'), $item->getTypeName(1),
-                                                $item->getName()));
-
-         echo "<tr class='noHover'><th colspan='$colspan'>";
-         $title = sprintf(_n('Last %d ticket', 'Last %d tickets', $number), $number);
-         $link = "<a href='".$CFG_GLPI["root_doc"]."/front/ticket.php?".
-                  Toolbox::append_params($options,'&amp;')."'>".__('Show all')."</a>";
-         $title = printf(__('%1$s (%2$s)'), $title, $link);
-         echo "</th></tr>";
+            echo "<tr class='noHover'><th colspan='$colspan'>";
+            $title = sprintf(_n('Last %d ticket', 'Last %d tickets', $number), $number);
+            $link = "<a href='".$CFG_GLPI["root_doc"]."/front/ticket.php?".
+                      Toolbox::append_params($options,'&amp;')."'>".__('Show all')."</a>";
+            $title = printf(__('%1$s (%2$s)'), $title, $link);
+            echo "</th></tr>";
+         } else {
+            echo "<tr><th>".__("You don't have right to see all tickets")."</th></tr>";
+         }
 
       } else {
          echo "<tr><th>".__('No ticket found.')."</th></tr>";
@@ -5230,7 +5257,8 @@ class Ticket extends CommonITILObject {
       }
 
       // Ticket list
-      if ($number > 0) {
+      if (($number > 0)
+          && Session::haveRight(self::$rightname, self::READALL)) {
          self::commonListHeader(Search::HTML_OUTPUT);
 
          while ($data = $DB->fetch_assoc($result)) {
@@ -5253,7 +5281,8 @@ class Ticket extends CommonITILObject {
          }
       }
 
-      if (count($restrict)) {
+      if (count($restrict)
+          && Session::haveRight(self::$rightname, self::READALL)) {
          $query = "SELECT ".self::getCommonSelect()."
                    FROM `glpi_tickets` ".self::getCommonLeftJoin()."
                    WHERE ".implode(' OR ', $restrict).
@@ -5798,7 +5827,8 @@ class Ticket extends CommonITILObject {
                 && ($ok || empty($mime))) {
                // Replace tags by image in textarea
                $img = "<img alt='".$image['tag']."' src='".$CFG_GLPI['root_doc'].
-                        "/front/document.send.php?docid=".$id."&tickets_id=".$this->fields['id']."'/>";
+                        "/front/document.send.php?docid=".$id."&tickets_id=".$this->fields['id']."'
+                        width='300'/>";
 
                // Replace tag by the image
                $content_text = preg_replace('/'.Document::getImageTag($image['tag']).'/',
@@ -5809,14 +5839,15 @@ class Ticket extends CommonITILObject {
                                            '&gt;&lt;', $content_text);
 
                // If the tag is from another ticket : link document to ticket
-               if($image['tickets_id'] != $this->fields['id']){
-                  $docitem = new Document_Item();
-                  $docitem->add(array('documents_id'  => $image['id'],
-                                      '_do_notif'     => false,
-                                      '_disablenotif' => true,
-                                      'itemtype'      => $this->getType(),
-                                      'items_id'      => $this->fields['id']));
-               }
+               /// TODO : comment maybe not used
+//                if($image['tickets_id'] != $this->fields['id']){
+//                   $docitem = new Document_Item();
+//                   $docitem->add(array('documents_id'  => $image['id'],
+//                                       '_do_notif'     => false,
+//                                       '_disablenotif' => true,
+//                                       'itemtype'      => $this->getType(),
+//                                       'items_id'      => $this->fields['id']));
+//                }
 
             } else {
                // Remove tag

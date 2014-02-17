@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -551,7 +551,7 @@ abstract class CommonDropdown extends CommonDBTM {
                               'entity' => $this->getEntityID(),
                               'used'   => array($ID)));
       }
-      echo "<input type='hidden' name='id' value='$ID'/>";
+      echo "<input type='hidden' name='id' value='$ID' />";
       echo "</td><td>";
       echo "<input class='submit' type='submit' name='replace' value=\""._sx('button','Replace')."\">";
       echo "</td><td>";

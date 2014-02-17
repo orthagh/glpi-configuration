@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -44,8 +44,21 @@ class Computer_SoftwareLicense extends CommonDBRelation {
    static public $itemtype_2 = 'SoftwareLicense';
    static public $items_id_2 = 'softwarelicenses_id';
 
+   function post_addItem() {
 
+      SoftwareLicense::updateValidityIndicator($this->fields['softwarelicenses_id']);
+      
+      parent::post_addItem();
+   }
+   
+   function post_deleteFromDB() {
 
+      SoftwareLicense::updateValidityIndicator($this->fields['softwarelicenses_id']);
+
+      parent::post_deleteFromDB();
+   }
+
+   
    /**
     * Get search function for the class
     *
@@ -188,8 +201,8 @@ class Computer_SoftwareLicense extends CommonDBRelation {
     * Get number of installed licenses of a license
     *
     * @param $softwarelicenses_id   license ID
-    * @param $entity                to search for computer in (default = all active entities)
-    *                               (default '')
+    * @param $entity                to search for computer in (default = all entities)
+    *                               (default '') -1 means no entity restriction
     *
     * @return number of installations
    **/
@@ -203,8 +216,11 @@ class Computer_SoftwareLicense extends CommonDBRelation {
                 WHERE `glpi_computers_softwarelicenses`.`softwarelicenses_id` = '$softwarelicenses_id'
                       AND `glpi_computers`.`is_deleted` = '0'
                       AND `glpi_computers`.`is_template` = '0'
-                      AND `glpi_computers_softwarelicenses`.`is_deleted` = '0'" .
-                      getEntitiesRestrictRequest('AND', 'glpi_computers','',$entity);
+                      AND `glpi_computers_softwarelicenses`.`is_deleted` = '0'";
+                      
+      if ($entity != -1) {
+         $query .= getEntitiesRestrictRequest('AND', 'glpi_computers', '', $entity);
+      }
 
       $result = $DB->query($query);
 
@@ -436,8 +452,8 @@ class Computer_SoftwareLicense extends CommonDBRelation {
                            => 'mass'.__CLASS__.$rand,
                           'specific_actions'
                            => array(__CLASS__.MassiveAction::CLASS_ACTION_SEPARATOR.'move_license'
-                                          => _x('button', 'Move'),
-                                    'delete' => _x('button', 'Delete permanently')));
+                                             => _x('button', 'Move'),
+                                    'purge' => _x('button', 'Delete permanently')));
                // Options to update license
                $massiveactionparams['extraparams']['options']['move']['used'] = array($searchID);
                $massiveactionparams['extraparams']['options']['move']['softwares_id']
@@ -446,7 +462,7 @@ class Computer_SoftwareLicense extends CommonDBRelation {
                Html::showMassiveActions($massiveactionparams);
             }
 
-            $soft = new Software();
+            $soft       = new Software();
             $soft->getFromDB($license->fields['softwares_id']);
             $showEntity = ($license->isRecursive());
             $linkUser   = User::canView();
@@ -474,15 +490,15 @@ class Computer_SoftwareLicense extends CommonDBRelation {
             $sort_img = "<img src=\"" . $CFG_GLPI["root_doc"] . "/pics/" .
                           (($order == "DESC") ? "puce-down.png" : "puce-up.png") ."\" alt='' title=''>";
 
-            $header_begin = "<tr>";
-            $header_top = '';
+            $header_begin  = "<tr>";
+            $header_top    = '';
             $header_bottom = '';
-            $header_end = '';
+            $header_end    = '';
             if ($canedit) {
-               $header_begin .= "<th width='10'>";
-               $header_top .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
+               $header_begin  .= "<th width='10'>";
+               $header_top    .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
                $header_bottom .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
-               $header_end .= "</th>";
+               $header_end    .= "</th>";
             }
 
             foreach ($columns as $key => $val) {
@@ -491,14 +507,14 @@ class Computer_SoftwareLicense extends CommonDBRelation {
                   $header_end .= "<th>$val</th>";
                } else {
                   $header_end .= "<th>".(($sort == "`$key`") ?$sort_img:"").
-                        "<a href='javascript:reloadTab(\"sort=$key&amp;order=".
-                           (($order == "ASC") ?"DESC":"ASC")."&amp;start=0\");'>$val</a></th>";
+                                 "<a href='javascript:reloadTab(\"sort=$key&amp;order=".
+                                 (($order == "ASC") ?"DESC":"ASC")."&amp;start=0\");'>$val</a></th>";
                }
             }
 
             $header_end .= "</tr>\n";
             echo $header_begin.$header_top.$header_end;
-            
+
             do {
                Session::addToNavigateListItems('Computer',$data["cID"]);
 
@@ -578,7 +594,7 @@ class Computer_SoftwareLicense extends CommonDBRelation {
     *
     * @return nothing
    **/
-   static function GetLicenseForInstallation($computers_id, $softwareversions_id) {
+   static function getLicenseForInstallation($computers_id, $softwareversions_id) {
       global $DB;
 
       $lic = array();

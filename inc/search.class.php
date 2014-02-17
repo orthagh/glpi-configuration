@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -88,6 +88,7 @@ class Search {
       $data = self::prepareDatasForSearch($itemtype, $params);
       self::constructSQL($data);
       self::constructDatas($data);
+//       Html::printCleanArray($data);
       self::displayDatas($data);
    }
 
@@ -194,11 +195,9 @@ class Search {
       $data['search']['all_search']  = false;
       $data['search']['view_search'] = false;
       // If no research limit research to display item and compute number of item using simple request
-      $data['search']['no_search'] = true;
+      $data['search']['no_search']   = true;
 
       $data['toview'] = array();
-
-
       if (!$forcetoview) {
          $data['toview'] = self::addDefaultToView($itemtype);
 
@@ -979,7 +978,7 @@ class Search {
          $data['data']['warning']
             = "For compatibility keep raw data  (ITEM_X, META_X) at the top for the moment. Will be drop in next version";
 
-         $data['data']['rows'] = array();
+         $data['data']['rows']  = array();
          $data['data']['items'] = array();
 
          self::$output_type = $data['display_type'];
@@ -1052,7 +1051,7 @@ class Search {
                   } else {
                      $newrow[$key] = $val;
                      // Add id to items list
-                     if ($key=='id') {
+                     if ($key == 'id') {
                         $data['data']['items'][$val] = $i;
                      }
                   }
@@ -1133,20 +1132,22 @@ class Search {
                   }
                }
             }
-            $search_config_top = "";
+            $search_config_top    = "";
             $search_config_bottom = "";
             if (!isset($_GET['_in_modal'])
-                  && Session::haveRightsOr('search_config', array(DisplayPreference::PERSONAL,
-                                                             DisplayPreference::GENERAL))) {
+                && Session::haveRightsOr('search_config', array(DisplayPreference::PERSONAL,
+                                                                DisplayPreference::GENERAL))) {
 
-               $search_config_top = $search_config_bottom =
-                   "<img alt=\"".__s('Select default items to show')."\" title=\"".
+               $search_config_top = $search_config_bottom
+                  = "<img alt=\"".__s('Select default items to show')."\" title=\"".
                         __s('Select default items to show')."\" src='".
                         $CFG_GLPI["root_doc"]."/pics/options_search.png' ";
 
-               $search_config_top .= " class='pointer' onClick=\"".Html::jsGetElementbyID('search_config_top').
+               $search_config_top    .= " class='pointer' onClick=\"";
+               $search_config_top    .= Html::jsGetElementbyID('search_config_top').
                                                       ".dialog('open');\">";
-               $search_config_bottom .= " class='pointer' onClick=\"".Html::jsGetElementbyID('search_config_bottom').
+               $search_config_bottom .= " class='pointer' onClick=\"";
+               $search_config_bottom .= Html::jsGetElementbyID('search_config_bottom').
                                                       ".dialog('open');\">";
                $search_config_top
                   .= Ajax::createIframeModalWindow('search_config_top',
@@ -3504,7 +3505,8 @@ class Search {
                   return " $LINK `glpi_computers_softwareversions`
                                     AS glpi_computers_softwareversions_$to_type
                               ON (`glpi_computers_softwareversions_$to_type`.`computers_id`
-                                       = `glpi_computers`.`id`)
+                                       = `glpi_computers`.`id`
+                                  AND `glpi_computers_softwareversions_$to_type`.`is_deleted` = '0')
                            $LINK `glpi_softwareversions` AS glpi_softwareversions_$to_type
                               ON (`glpi_computers_softwareversions_$to_type`.`softwareversions_id`
                                        = `glpi_softwareversions_$to_type`.`id`)
@@ -3590,7 +3592,8 @@ class Search {
                            $LINK `glpi_computers_softwareversions`
                                     AS glpi_computers_softwareversions_$to_type
                               ON (`glpi_computers_softwareversions_$to_type`.`softwareversions_id`
-                                       = `glpi_softwareversions_$to_type`.`id`)
+                                       = `glpi_softwareversions_$to_type`.`id`
+                                  AND `glpi_computers_softwareversions_$to_type`.`is_deleted` = '0')
                            $LINK `glpi_computers`
                               ON (`glpi_computers_softwareversions_$to_type`.`computers_id`
                                        = `glpi_computers`.`id` ".
@@ -4306,7 +4309,7 @@ class Search {
                                                                        'display' => false)));
 
                      } else {
-                        $out = $text;
+                        $out .= $text;
                      }
                   }
                }
@@ -4530,15 +4533,15 @@ class Search {
    /**
     * Completion of the URL $_GET values with the $_SESSION values or define default values
     *
-    * @param $itemtype        item type to manage
-    * @param $params          params to parse
-    * @param $usesession      Use datas save in session (true by default)
-    * @param $forcebookmark   force trying to load parameters from default bookmark:
-    *                         used for global search (false by default)
+    * @param $itemtype                 item type to manage
+    * @param $params          array    params to parse
+    * @param $usesession               Use datas save in session (true by default)
+    * @param $forcebookmark            force trying to load parameters from default bookmark:
+    *                                  used for global search (false by default)
     *
     * @return parsed params array
    **/
-   static function manageParams($itemtype, $params = array(), $usesession=true,
+   static function manageParams($itemtype, $params=array(), $usesession=true,
                                 $forcebookmark=false) {
       global $CFG_GLPI, $DB;
 
@@ -4935,7 +4938,7 @@ class Search {
             // Search options added by plugins
             $plugsearch = Plugin::getAddSearchOptions($itemtype);
             if (count($plugsearch)) {
-               $search[$itemtype] += array('plugins' => __('Plugins'));
+               $search[$itemtype] += array('plugins' => _n('Plugin','Plugins',2));
                $search[$itemtype] += $plugsearch;
             }
          }

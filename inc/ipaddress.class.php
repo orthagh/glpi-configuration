@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -923,8 +923,8 @@ class IPAddress extends CommonDBChild {
       if (count($addressesWithItems) == 1) {
          $addressWithItems = current($addressesWithItems);
          $item             = $addressWithItems[0];
-         $result = array("id"       => $item->getID(),
-                           "itemtype" => $item->getType());
+         $result           = array("id"       => $item->getID(),
+                                   "itemtype" => $item->getType());
          unset($addressesWithItems);
          return $result;
       }

@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -564,10 +564,11 @@ class RuleAction extends CommonDBChild {
                      $used = array();
                      if ($item = getItemForItemtype($options["sub_type"])) {
                         $rule_data = getAllDatasFromTable('glpi_ruleactions',
-                                                         "`action_type` = 'add_validation'
-                                                         AND `field` = 'users_id_validate'
-                                                         AND `".$item->getRuleIdField()."` = '".$options[$item->getRuleIdField()]."'");
-                        
+                                                          "`action_type` = 'add_validation'
+                                                           AND `field` = 'users_id_validate'
+                                                           AND `".$item->getRuleIdField()."`
+                                                            = '".$options[$item->getRuleIdField()]."'");
+
                         foreach ($rule_data as $data) {
                            $used[] = $data['value'];
                         }
@@ -583,9 +584,10 @@ class RuleAction extends CommonDBChild {
                      $used = array();
                      if ($item = getItemForItemtype($options["sub_type"])) {
                         $rule_data = getAllDatasFromTable('glpi_ruleactions',
-                                                         "`action_type` = 'add_validation'
-                                                         AND `field` = 'groups_id_validate'
-                                                         AND `".$item->getRuleIdField()."` = '".$options[$item->getRuleIdField()]."'");
+                                                          "`action_type` = 'add_validation'
+                                                           AND `field` = 'groups_id_validate'
+                                                           AND `".$item->getRuleIdField()."`
+                                                            = '".$options[$item->getRuleIdField()]."'");
 
                         foreach ($rule_data as $data) {
                            $used[] = $data['value'];

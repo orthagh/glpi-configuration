@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -117,7 +117,8 @@ class Link extends CommonDBTM {
 
       echo "<tr class='tab_bg_1'><td height='23'>".__('Valid tags')."</td>";
       echo "<td colspan='3'>[LOGIN], [ID], [NAME], [LOCATION], [LOCATIONID], [IP], [MAC], [NETWORK],
-                            [DOMAIN], [SERIAL], [OTHERSERIAL], [USER], [GROUP]</td></tr>";
+                            [DOMAIN], [SERIAL], [OTHERSERIAL], [USER], [GROUP], [REALNAME],
+                            [FIRSTNAME]</td></tr>";
 
       echo "<tr class='tab_bg_1'><td>".__('Name')."</td>";
       echo "<td colspan='3'>";
@@ -256,6 +257,15 @@ class Link extends CommonDBTM {
                                 Dropdown::getDropdownName("glpi_groups",
                                                           $item->getField('groups_id')), $link);
       }
+      if (strstr($link,"[REALNAME]")
+            && $item->isField('realname')) {
+         $link = str_replace("[REALNAME]",$item->getField('realname'),$link);
+      }
+      if (strstr($link,"[FIRSTNAME]")
+            && $item->isField('firstname')) {
+         $link = str_replace("[FIRSTNAME]",$item->getField('firstname'),$link);
+      }
+
 
       $replace_IP  = strstr($link,"[IP]");
       $replace_MAC = strstr($link,"[MAC]");
@@ -382,6 +392,11 @@ class Link extends CommonDBTM {
          return false;
       }
 
+      $restrict = $item->getEntityID();
+      if ($item->getType() == 'User') {
+         $restrict = Profile_User::getEntitiesForUser($item->getID());
+      }
+      
       $query = "SELECT `glpi_links`.`id`,
                        `glpi_links`.`link` AS link,
                        `glpi_links`.`name` AS name ,
@@ -392,7 +407,7 @@ class Link extends CommonDBTM {
                      ON `glpi_links`.`id` = `glpi_links_itemtypes`.`links_id`
                 WHERE `glpi_links_itemtypes`.`itemtype`='".$item->getType()."' " .
                       getEntitiesRestrictRequest(" AND", "glpi_links", "entities_id",
-                                                 $item->getEntityID(), true)."
+                                                 $restrict, true)."
                 ORDER BY name";
 
       $result = $DB->query($query);

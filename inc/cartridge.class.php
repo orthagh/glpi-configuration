@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -223,6 +223,8 @@ class Cartridge extends CommonDBChild {
 
    /**
     * send back to stock
+    *
+    * @since version 0.85 (before name was restore)
     */
    function backToStock(array $input, $history=1) {
       global $DB;
@@ -653,7 +655,7 @@ class Cartridge extends CommonDBChild {
             Html::openMassiveActionsForm('mass'.__CLASS__.$rand);
             $actions = array('purge' => _x('button', 'Delete permanently'),
                              'Infocom'.MassiveAction::CLASS_ACTION_SEPARATOR.'activate'
-                                       => __('Enable the financial and administrative information')
+                                     => __('Enable the financial and administrative information')
                              );
             if ($show_old) {
                $actions['Cartridge'.MassiveAction::CLASS_ACTION_SEPARATOR.'backtostock']
@@ -676,16 +678,16 @@ class Cartridge extends CommonDBChild {
          }
          $i = 0;
 
-         $header_begin = "<tr>";
-         $header_top = '';
+         $header_begin  = "<tr>";
+         $header_top    = '';
          $header_bottom = '';
-         $header_end = '';
+         $header_end    = '';
 
          if ($canedit && $number) {
-            $header_begin .= "<th width='10'>";
-            $header_top    = Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
-            $header_bottom = Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
-            $header_end .= "</th>";
+            $header_begin  .= "<th width='10'>";
+            $header_top     = Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
+            $header_bottom  = Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
+            $header_end    .= "</th>";
          }
          $header_end .= "<th>".__('ID')."</th>";
          $header_end .= "<th>"._x('item', 'State')."</th>";
@@ -933,22 +935,24 @@ class Cartridge extends CommonDBChild {
          Html::showMassiveActions($massiveactionparams);
       }
       echo "<table class='tab_cadre_fixehov'>";
+      echo "<tr class='noHover'>";
       if ($old == 0) {
-         echo "<tr class='noHover'><th colspan='".($canedit?'5':'4')."'>".__('Used cartridges')."</th></tr>";
+         echo "<th colspan='".($canedit?'5':'4')."'>".__('Used cartridges')."</th>";
       } else {
-         echo "<tr class='noHover'><th colspan='".($canedit?'8':'7')."'>".__('Worn cartridges')."</th></tr>";
+         echo "<th colspan='".($canedit?'8':'7')."'>".__('Worn cartridges')."</th>";
       }
+      echo "</tr>";
 
-      $header_begin = "<tr>";
-      $header_top = '';
+      $header_begin  = "<tr>";
+      $header_top    = '';
       $header_bottom = '';
-      $header_end = '';
+      $header_end    = '';
 
       if ($canedit) {
-         $header_begin .= "<th width='10'>";
-         $header_top .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
+         $header_begin  .= "<th width='10'>";
+         $header_top    .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
          $header_bottom .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
-         $header_end .= "</th>";
+         $header_end    .= "</th>";
       }
       $header_end .= "<th>".__('ID')."</th><th>"._n('Cartridge model','Cartridge models',1)."</th>";
       $header_end .= "<th>".__('Add date')."</th>";

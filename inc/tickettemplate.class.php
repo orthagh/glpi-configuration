@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -255,8 +255,9 @@ class TicketTemplate extends CommonDropdown {
                                                         'glpi_itilcategories'),
                       $ticket->getSearchOptionIDByField('field', 'type', 'glpi_tickets'),
                       $ticket->getSearchOptionIDByField('field', 'items_id', 'glpi_tickets'),
-                      $ticket->getSearchOptionIDByField('field', 'name', 'glpi_documents'));
-
+                      $ticket->getSearchOptionIDByField('field', 'name', 'glpi_documents'),
+                      66 // users_id_observer
+                      );
       return $fields;
    }
 

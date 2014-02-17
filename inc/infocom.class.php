@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -703,7 +703,7 @@ class Infocom extends CommonDBChild {
       $result = $DB->query($query);
       if ($DB->result($result,0,0) > 0) {
          $add  = "";
-         $text = __('Show');
+         $text = _x('button', 'Show');
       } else if (!Infocom::canUpdate()) {
          return false;
       }

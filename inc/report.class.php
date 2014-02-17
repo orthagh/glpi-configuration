@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -281,7 +281,7 @@ class Report extends CommonGLPI{
     * @param $networkport_prefix
     * @param $networkport_crit
     * @param $where_crit
-    * @param $order                  (default '')
+    * @param $order                 (default '')
     * @param $field                 (default '')
     * @param $extra                 (default '')
    **/

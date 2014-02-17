@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -463,10 +463,11 @@ abstract class CommonITILCost extends CommonDBChild {
 
       if ($result = $DB->query($query)) {
          echo "<table class='tab_cadre_fixehov'>";
+         echo "<tr class='noHover'>";
          if ($forproject) {
-            echo "<tr class='noHover'><th colspan='10'>"._n('Ticket cost', 'Ticket costs', $DB->numrows($result))."</th>";
+            echo "<th colspan='10'>"._n('Ticket cost', 'Ticket costs', $DB->numrows($result))."</th>";
          } else {
-            echo "<tr  class='noHover'><th colspan='7'>".self::getTypeName($DB->numrows($result))."</th>";
+            echo "<th colspan='7'>".self::getTypeName($DB->numrows($result))."</th>";
             echo "<th>".__('Item duration')."</th>";
             echo "<th>".CommonITILObject::getActionTime($item->fields['actiontime'])."</th>";
          }

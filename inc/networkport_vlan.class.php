@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -158,13 +158,15 @@ class NetworkPort_Vlan extends CommonDBRelation {
       }
       echo "<table class='tab_cadre_fixehov'>";
 
-      $header_begin = "<tr>";
-      $header_top = '';
+      $header_begin  = "<tr>";
+      $header_top    = '';
       $header_bottom = '';
-      $header_end = '';
+      $header_end    = '';
       if ($canedit && $number) {
-         $header_top .= "<th width='10'>".Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand)."</th>";
-         $header_bottom .= "<th width='10'>".Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand)."</th>";
+         $header_top    .= "<th width='10'>";
+         $header_top    .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand)."</th>";
+         $header_bottom .= "<th width='10'>";
+         $header_bottom .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand)."</th>";
       }
       $header_end .= "<th>".__('Name')."</th>";
       $header_end .= "<th>".__('Entity')."</th>";
@@ -172,7 +174,7 @@ class NetworkPort_Vlan extends CommonDBRelation {
       $header_end .= "<th>".__('ID TAG')."</th>";
       $header_end .= "</tr>";
       echo $header_begin.$header_top.$header_end;
-      
+
       $used = array();
       foreach ($vlans as $data) {
          echo "<tr class='tab_bg_1'>";
@@ -264,8 +266,8 @@ class NetworkPort_Vlan extends CommonDBRelation {
       $specificities = parent::getRelationMassiveActionsSpecificities();
 
       // Set the labels for add_item and remove_item
-      $specificities['button_labels']['add']    = __s('Associate');
-      $specificities['button_labels']['remove'] = __s('Dissociate');
+      $specificities['button_labels']['add']    = _sx('button', 'Associate');
+      $specificities['button_labels']['remove'] = _sx('button', 'Dissociate');
 
       return $specificities;
    }

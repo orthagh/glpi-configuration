@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -745,12 +745,6 @@ class Computer extends CommonDBTM {
       $tab[16]['name']           = __('Comments');
       $tab[16]['datatype']       = 'text';
 
-      $tab[90]['table']          = $this->getTable();
-      $tab[90]['field']          = 'notepad';
-      $tab[90]['name']           = __('Notes');
-      $tab[90]['massiveaction']  = false;
-      $tab[90]['datatype']       = 'text';
-
       $tab[7]['table']           = $this->getTable();
       $tab[7]['field']           = 'contact';
       $tab[7]['name']            = __('Alternate username');
@@ -813,6 +807,7 @@ class Computer extends CommonDBTM {
       $tab[80]['name']           = __('Entity');
       $tab[80]['datatype']       = 'dropdown';
 
+      $tab += Notepad::getSearchOptionsToAdd();
 
 
       $tab[50]['table']          = 'glpi_computerconfigurations';

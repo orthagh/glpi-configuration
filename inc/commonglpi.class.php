@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -126,6 +126,7 @@ class CommonGLPI {
     * @return array containing the onglets
    **/
    function defineTabs($options=array()) {
+
       $ong = array();
       $this->addDefaultFormTab($ong);
       return $ong;

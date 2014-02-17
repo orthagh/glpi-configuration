@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -3116,14 +3116,14 @@ class Transfer extends CommonDBTM {
       echo "<tr class='tab_bg_1'>";
       echo "<td>"._n('Network port', 'Network ports', 2)."</td><td>";
       $options = array(0 => _x('button', 'Delete permanently'),
-                       1 => __('Disconnect') ,
+                       1 => _x('button', 'Disconnect') ,
                        2 => __('Keep') );
       $params['value'] = $this->fields['keep_networklink'];
       Dropdown::showFromArray('keep_networklink',$options,$params);
       echo "</td>";
       echo "<td>"._n('Ticket', 'Tickets', 2)."</td><td>";
       $options = array(0 => _x('button', 'Delete permanently'),
-                       1 => __('Disconnect') ,
+                       1 => _x('button', 'Disconnect') ,
                        2 => __('Keep') );
       $params['value'] = $this->fields['keep_ticket'];
       Dropdown::showFromArray('keep_ticket',$options,$params);

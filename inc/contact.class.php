@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -358,7 +358,7 @@ class Contact extends CommonDBTM{
 
       $tab[8]['table']          = 'glpi_suppliers';
       $tab[8]['field']          = 'name';
-      $tab[8]['name']           = __('Associated suppliers');
+      $tab[8]['name']           = _n('Associated supplier', 'Associated suppliers', 2);
       $tab[8]['forcegroupby']   = true;
       $tab[8]['datatype']       = 'itemlink';
       $tab[8]['joinparams']     = array('beforejoin'
@@ -370,13 +370,6 @@ class Contact extends CommonDBTM{
       $tab[16]['name']          = __('Comments');
       $tab[16]['datatype']      = 'text';
 
-      $tab[90]['table']         = $this->getTable();
-      $tab[90]['field']         = 'notepad';
-      $tab[90]['name']          = __('Notes');
-      $tab[90]['massiveaction'] = false;
-      $tab[90]['datatype']      = 'text';
-
-
       $tab[80]['table']         = 'glpi_entities';
       $tab[80]['field']         = 'completename';
       $tab[80]['name']          = __('Entity');
@@ -387,6 +380,8 @@ class Contact extends CommonDBTM{
       $tab[86]['field']         = 'is_recursive';
       $tab[86]['name']          = __('Child entities');
       $tab[86]['datatype']      = 'bool';
+
+      $tab += Notepad::getSearchOptionsToAdd();
 
       return $tab;
    }

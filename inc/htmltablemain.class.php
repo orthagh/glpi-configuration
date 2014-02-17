@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -177,13 +177,13 @@ class HTMLTableMain extends HTMLTableBase {
     * Display the table itself
     *
     * @param $params    array of possible options:
-    *    'html_id'                       the global HTML ID of the table
-    *    'display_thead'                 display the header before the first group
-    *    'display_tfoot'                 display the header at the end of the table
-    *    'display_header_for_each_group' display the header of each group
-    *    'display_header_on_foot_for_each_group' repeat group header on foot of group
-    *    'display_super_for_each_group'  display the super header befor each group
-    *    'display_title_for_each_group'  display the title of each group
+    *    'html_id'                                the global HTML ID of the table
+    *    'display_thead'                          display the header before the first group
+    *    'display_tfoot'                          display the header at the end of the table
+    *    'display_header_for_each_group'          display the header of each group
+    *    'display_header_on_foot_for_each_group'  repeat group header on foot of group
+    *    'display_super_for_each_group'           display the super header befor each group
+    *    'display_title_for_each_group'           display the title of each group
     *
     * @return nothing (display only)
    **/
@@ -226,7 +226,8 @@ class HTMLTableMain extends HTMLTableBase {
       }
 
       if (!empty($this->title)) {
-         echo "\t\t<tr class='noHover'><th colspan='$totalNumberOfColumn'>".$this->title."</th></tr>\n";
+         echo "\t\t<tr class='noHover'><th colspan='$totalNumberOfColumn'>".$this->title.
+              "</th></tr>\n";
       }
 
       if ($totalNumberOfRow == 0) {

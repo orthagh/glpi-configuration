@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -403,7 +403,7 @@ abstract class CommonDBChild extends CommonDBConnexity {
 
       // Check item exists
       if (static::$mustBeAttached
-         && !$this->getItemFromArray(static::$itemtype, static::$items_id,$input)) {
+          && !$this->getItemFromArray(static::$itemtype, static::$items_id,$input)) {
          return false;
       }
 

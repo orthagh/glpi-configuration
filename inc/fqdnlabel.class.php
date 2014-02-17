@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -242,8 +242,8 @@ abstract class FQDNLabel extends CommonDBChild {
       if (count($labels_with_items) == 1) {
          $label_with_items = current($labels_with_items);
          $item             = $label_with_items[0];
-         $result = array("id"       => $item->getID(),
-                           "itemtype" => $item->getType());
+         $result           = array("id"       => $item->getID(),
+                                   "itemtype" => $item->getType());
          unset($labels_with_items);
          return $result;
       }

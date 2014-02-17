@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -179,21 +179,22 @@ class Profile_User extends CommonDBRelation {
 
       if ($num > 0) {
          echo "<table class='tab_cadre_fixehov'>";
-         $header_begin = "<tr>";
-         $header_top = '';
+         $header_begin  = "<tr>";
+         $header_top    = '';
          $header_bottom = '';
-         $header_end = '';
+         $header_end    = '';
          if ($canedit) {
-            $header_begin .= "<th>";
-            $header_top .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
+            $header_begin  .= "<th>";
+            $header_top    .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
             $header_bottom .= Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
-            $header_end .= "</th>";
+            $header_end    .= "</th>";
          }
          $header_end .= "<th>"._n('Entity', 'Entities', 2)."</th>";
-         $header_end .= "<th>".sprintf(__('%1$s (%2$s)'), self::getTypeName(2), __('D=Dynamic, R=Recursive'));
+         $header_end .= "<th>".sprintf(__('%1$s (%2$s)'), self::getTypeName(2),
+                                       __('D=Dynamic, R=Recursive'));
          $header_end .= "</th></tr>";
          echo $header_begin.$header_top.$header_end;
-         
+
          while ($data = $DB->fetch_assoc($result)) {
             echo "<tr class='tab_bg_1'>";
             if ($canedit) {
@@ -749,6 +750,35 @@ class Profile_User extends CommonDBRelation {
       return $entities;
    }
 
+   /**
+    * retrieve the entities associated to a user
+    *
+    * @param $users_id     Integer  ID of the user
+    * @param $child        Boolean  when true, include child entity when recursive right
+    *                               (false by default)
+    *
+    * @return Array of entity ID
+   **/
+   static function getEntitiesForUser($users_id, $child=false) {
+      global $DB;
+
+      $query = "SELECT `entities_id`, `is_recursive`
+                FROM `glpi_profiles_users`
+                WHERE `users_id` = '$users_id'";
+
+      $entities = array();
+      foreach ($DB->request($query) as $data) {
+         if ($child
+             && $data['is_recursive']) {
+            foreach (getSonsOf('glpi_entities', $data['entities_id']) as $id) {
+               $entities[$id] = $id;
+            }
+         } else {
+            $entities[$data['entities_id']] = $data['entities_id'];
+         }
+      }
+      return $entities;
+   }   
 
    /**
     * Get entities for which a user have a right

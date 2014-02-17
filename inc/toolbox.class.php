@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -393,9 +393,10 @@ class Toolbox {
          $value          = str_replace($complete, $cleancomplete, $value);
       }
 
-      $config             = array('safe'=>1);
-      $config["elements"] = "*+iframe";
-      $value              = htmLawed($value, $config);
+      $config                      = array('safe'=>1);
+      $config["elements"]          = "*+iframe";
+      $config["direct_list_nest"]  = 1;
+      $value                       = htmLawed($value, $config);
 
       return $value;
    }

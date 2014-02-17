@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -1677,7 +1677,7 @@ function update084to085() {
       $migration->addKey('glpi_states', $field);
    }
 
-   
+
    // glpi_domains by entity
    $migration->addField('glpi_domains', 'entities_id', 'integer', array('after' => 'name'));
    $migration->addField('glpi_domains', 'is_recursive', 'bool', array('update' => '1',
@@ -2000,7 +2000,8 @@ function update084to085() {
                                                      AND `rights` & ".Change::READALL);
       ProfileRight::updateProfileRightAsOtherRight('project',
                                                     CREATE ." | ". UPDATE ." | ". DELETE ." | ". PURGE ." | ".READNOTE ." | ".UPDATENOTE,
-                                                    "`name` = 'change' AND `rights` & (".CREATE ." | ". UPDATE ." | ". DELETE ." | ". PURGE.')');
+                                                    "`name` = 'change'
+                                                      AND `rights` & (".CREATE ." | ". UPDATE ." | ". DELETE ." | ". PURGE.')');
    }
    if (countElementsInTable("glpi_profilerights", "`name` = 'projecttask'") == 0) {
       ProfileRight::addProfileRights(array('projecttask'));
@@ -2663,7 +2664,7 @@ function update084to085() {
    $migration->addField("glpi_locations", "latitude", "string");
    $migration->addField("glpi_locations", "longitude", "string");
    $migration->addField("glpi_locations", "altitude", "string");
-   
+
    // Add fixed columns as variables :
    $ADDTODISPLAYPREF['CartridgeItem']   = array(9);
    $ADDTODISPLAYPREF['ConsumableItem']  = array(9);
@@ -2671,41 +2672,45 @@ function update084to085() {
 
 
    // for licence validity
-   if ($migration->addField("glpi_softwarelicenses", "valid", "bool", array("value" => 1))) {
+   if ($migration->addField("glpi_softwarelicenses", "is_valid", "bool", array("value" => 1))) {
       $migration->migrationOneTable("glpi_softwarelicenses");
 
-      $queryl = "SELECT `id`, `entities_id`, `number`
+      // Force all entities
+      if (!isset($_SESSION['glpishowallentities'])) {
+         $_SESSION['glpishowallentities'] = 0;
+      }
+      $savesession = $_SESSION['glpishowallentities'];
+      $_SESSION['glpishowallentities'] = 1;
+      
+      $queryl = "SELECT `id`, `number`
                  FROM `glpi_softwarelicenses`";
 
       foreach ($DB->request($queryl) AS $datal) {
-         toolbox::logdebug("id", $datal['id'], "number", $datal['number'], "compté", Computer_SoftwareLicense::countForLicense($datal['id'],
-                                                                           $datal['entities_id']));
-         if (($datal['number'] < Computer_SoftwareLicense::countForLicense($datal['id'],
-                                                                           $datal['entities_id']))
-             && ($datal['number'] >= 0)) {
+         if (($datal['number'] >= 0)
+            && ($datal['number'] < Computer_SoftwareLicense::countForLicense($datal['id'], -1))) {
 
             $queryl2 = "UPDATE `glpi_softwarelicenses`
-                        SET `valid` = 0
+                        SET `is_valid` = 0
                         WHERE `id` = '".$datal['id']."'";
 
             $DB->queryOrDie($queryl2, "0.85 update softwarelicense");
          }
       }
+      $_SESSION['glpishowallentities'] = $savesession;
    }
 
-   if ($migration->addField("glpi_softwares", "valid", "bool", array("value" => 1))) {
+   if ($migration->addField("glpi_softwares", "is_valid", "bool", array("value" => 1))) {
       $migration->migrationOneTable("glpi_softwares");
 
-      $querys = "SELECT `glpi_softwares`.`id` AS id, `glpi_softwarelicenses`.`valid` AS licvalid,
-                        `glpi_softwarelicenses`.`softwares_id`
+      $querys = "SELECT `glpi_softwares`.`id`
                  FROM `glpi_softwares`
                  LEFT JOIN `glpi_softwarelicenses`
-                     ON `glpi_softwarelicenses`.`softwares_id` = `glpi_softwares`.`id`
-                 WHERE `glpi_softwarelicenses`.`valid` = 0";
+                     ON (`glpi_softwarelicenses`.`softwares_id` = `glpi_softwares`.`id`)
+                 WHERE `glpi_softwarelicenses`.`is_valid` = 0";
 
       foreach ($DB->request($querys) AS $datas) {
          $querys2 = "UPDATE `glpi_softwares`
-                     SET `valid` = 0
+                     SET `is_valid` = 0
                      WHERE `id` = '".$datas['id']."'";
 
          $DB->queryOrDie($querys2, "0.85 update software");
@@ -2826,7 +2831,7 @@ function update084to085() {
             if (isset($options['glpisearchcount2'])) {
                unset($options['glpisearchcount2']);
             }
-            
+
 
             $query2 = "UPDATE `glpi_bookmarks`
                        SET `query` = '".addslashes(Toolbox::append_params($options))."'
@@ -2840,6 +2845,19 @@ function update084to085() {
    //TRANS: %s is the table or item to migrate
    $migration->displayMessage(sprintf(__('Data migration - %s'), 'glpi_displaypreferences'));
 
+
+   // Clean display prefs
+   // Notepad
+   $query = "UPDATE `glpi_displaypreferences`
+             SET `num` = 90
+             WHERE `itemtype` = 'Entity'
+                   AND `num` = 28";
+   $DB->query($query);
+   $query = "UPDATE `glpi_displaypreferences`
+             SET `num` = 200
+             WHERE `num` = 90";
+   $DB->query($query);
+   
    $migration->updateDisplayPrefs($ADDTODISPLAYPREF, $DELFROMDISPLAYPREF);
 
    // must always be at the end

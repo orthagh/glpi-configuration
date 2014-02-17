@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -348,7 +348,8 @@ class ProjectCost extends CommonDBChild {
       $total = 0;
       if ($result = $DB->query($query)) {
          echo "<table class='tab_cadre_fixehov'>";
-         echo "<tr class='noHover'><th colspan='5'>".self::getTypeName($DB->numrows($result))."</th></tr>";
+         echo "<tr class='noHover'><th colspan='5'>".self::getTypeName($DB->numrows($result)).
+              "</th></tr>";
 
          if ($DB->numrows($result)) {
             echo "<tr><th>".__('Name')."</th>";
@@ -412,6 +413,6 @@ class ProjectCost extends CommonDBChild {
       echo "<div class='b'>";
       printf(__('%1$s: %2$s'), __('Total cost'),$total+$ticketcost);
       echo "</div>";
-   }  
+   }
 }
 ?>

@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -464,12 +464,6 @@ class Monitor extends CommonDBTM {
       $tab[16]['name']           = __('Comments');
       $tab[16]['datatype']       = 'text';
 
-      $tab[90]['table']          = $this->getTable();
-      $tab[90]['field']          = 'notepad';
-      $tab[90]['name']           = __('Notes');
-      $tab[90]['massiveaction']  = false;
-      $tab[90]['datatype']       = 'text';
-
       $tab[11]['table']          = $this->getTable();
       $tab[11]['field']          = 'size';
       $tab[11]['name']           = __('Size');
@@ -546,6 +540,8 @@ class Monitor extends CommonDBTM {
       $tab[82]['name']           = __('Global management');
       $tab[82]['datatype']       = 'bool';
       $tab[82]['massiveaction']  = false;
+
+      $tab += Notepad::getSearchOptionsToAdd();
 
       return $tab;
    }

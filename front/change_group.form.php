@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -37,6 +37,7 @@ if (!defined('GLPI_ROOT')) {
 }
 
 $link = new Change_Group();
+$item = new Change();
 
 Session ::checkLoginUser();
 
@@ -46,7 +47,14 @@ if (isset($_POST['delete'])) {
 
    Event::log($link->fields['changes_id'], "change", 4, "maintain",
               sprintf(__('%s deletes an actor'), $_SESSION["glpiname"]));
-   Html::redirect($CFG_GLPI["root_doc"]."/front/change.form.php?id=".$link->fields['changes_id']);
+
+   if ($item->can($link->fields["changes_id"],'r')) {
+      Html::redirect($CFG_GLPI["root_doc"]."/front/change.form.php?id=".$link->fields['changes_id']);
+   }
+   Session::addMessageAfterRedirect(__('You have been redirected because you no longer have access to this item'),
+                                    true, ERROR);
+
+   Html::redirect($CFG_GLPI["root_doc"]."/front/change.php");
 }
 
 Html::displayErrorAndDie('Lost');

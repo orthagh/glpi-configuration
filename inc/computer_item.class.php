@@ -3,7 +3,7 @@
  * @version $Id$
  -------------------------------------------------------------------------
  GLPI - Gestionnaire Libre de Parc Informatique
- Copyright (C) 2003-2013 by the INDEPNET Development Team.
+ Copyright (C) 2003-2014 by the INDEPNET Development Team.
 
  http://indepnet.net/   http://glpi-project.org
  -------------------------------------------------------------------------
@@ -300,8 +300,8 @@ class Computer_Item extends CommonDBRelation{
       $specificities['only_remove_all_at_once']                   = true;
 
       // Set the labels for add_item and remove_item
-      $specificities['button_labels']['add']                      = __s('Connect');
-      $specificities['button_labels']['remove']                   = __s('Disconnect');
+      $specificities['button_labels']['add']                      = _sx('button', 'Connect');
+      $specificities['button_labels']['remove']                   = _sx('button', 'Disconnect');
 
       return $specificities;
    }
@@ -423,14 +423,16 @@ class Computer_Item extends CommonDBRelation{
             Html::showMassiveActions($massiveactionparams);
          }
          echo "<table class='tab_cadre_fixehov'>";
-         $header_begin = "<tr>";
-         $header_top = '';
+         $header_begin  = "<tr>";
+         $header_top    = '';
          $header_bottom = '';
-         $header_end = '';
-         
+         $header_end    = '';
+
          if ($canedit) {
-            $header_top .= "<th width='10'>".Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand)."</th>";
-            $header_bottom .= "<th width='10'>".Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand)."</th>";
+            $header_top    .= "<th width='10'>".Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
+            $header_top    .= "</th>";
+            $header_bottom .= "<th width='10'>".Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
+            $header_bottom .=  "</th>";
          }
 
          $header_end .= "<th>".__('Type')."</th>";
@@ -477,7 +479,7 @@ class Computer_Item extends CommonDBRelation{
             echo "</tr>";
          }
          echo $header_begin.$header_bottom.$header_end;
-         
+
          echo "</table>";
          if ($canedit && $number) {
             $massiveactionparams['ontop'] = false;
@@ -567,14 +569,16 @@ class Computer_Item extends CommonDBRelation{
       echo "<table class='tab_cadre_fixehov'>";
 
       if ($number > 0) {
-         $header_begin = "<tr>";
-         $header_top = '';
+         $header_begin  = "<tr>";
+         $header_top    = '';
          $header_bottom = '';
-         $header_end = '';
+         $header_end    = '';
 
          if ($canedit) {
-            $header_top .= "<th width='10'>".Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand)."</th>";
-            $header_bottom .= "<th width='10'>".Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand)."</th>";
+            $header_top    .= "<th width='10'>".Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
+            $header_top    .= "</th>";
+            $header_bottom .= "<th width='10'>".Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
+            $header_bottom .= "</th>";
          }
 
          $header_end .= "<th>".__('Name')."</th>";
@@ -586,7 +590,7 @@ class Computer_Item extends CommonDBRelation{
          $header_end .= "<th>".__('Inventory number')."</th>";
          $header_end .= "</tr>";
          echo $header_begin.$header_top.$header_end;
-         
+
          foreach ($compids as $key => $compid) {
             $comp->getFromDB($compid);
 
