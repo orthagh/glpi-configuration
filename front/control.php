@@ -34,5 +34,27 @@
 
 include ('../inc/includes.php');
 
-Html::redirect ($CFG_GLPI['root_doc'] . "/front/fieldunicity.php");
+Session::checkCentralAccess();
+
+Html::header(Control::getTypeName(2), $_SERVER['PHP_SELF'], "config", "control", -1);
+
+echo "<table class='tab_cadre'>";
+echo "<tr><th>" . __('Rule type') . "</th></tr>";
+
+if (Session::haveRight("config", READ)) {
+   echo "<tr class='tab_bg_1'><td class='center b'>";
+   echo "<a href='".$CFG_GLPI['root_doc']."/front/fieldunicity.php'>".__('Fields unicity')."</a>";
+   echo "</td></tr>";
+}
+
+if (Session::haveRight("config", READ)) {
+   echo "<tr class='tab_bg_1'><td class='center b'>";
+   echo "<a href='".$CFG_GLPI['root_doc']."/front/computerconfiguration.php'>".
+        _n('Computer Configuration', 'Computer Configurations', 2)."</a>";
+   echo "</td></tr>";
+}
+
+echo "</table>";
+
+Html::footer();
 ?>
