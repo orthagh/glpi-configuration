@@ -5346,6 +5346,9 @@ INSERT INTO `glpi_profilerights` VALUES ('655','7','ticketcost','31');
 INSERT INTO `glpi_profilerights` VALUES ('659','1','change','0');
 INSERT INTO `glpi_profilerights` VALUES ('660','2','change','1057');
 INSERT INTO `glpi_profilerights` VALUES ('658','7','ticketvalidation','15384');
+INSERT INTO `glpi_profilerights` VALUES ('750','3','rule_compconf','23');
+INSERT INTO `glpi_profilerights` VALUES ('751','4','rule_compconf','23');
+INSERT INTO `glpi_profilerights` VALUES ('752','5','rule_compconf','23');
 
 ### Dump table glpi_profiles
 
