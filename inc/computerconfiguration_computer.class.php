@@ -56,6 +56,11 @@ class ComputerConfiguration_Computer extends CommonDBChild {
                                                                               $item->fields['viewchilds']);
             $nb = count($listofcomputers_id);
             return self::createTabEntry(self::getTypeName($nb), $nb);
+
+         case "Computer":
+            $found_comp = $this->find("computers_id = ".$item->getID());
+            $nb = count($found_comp);
+            return self::createTabEntry(ComputerConfiguration::getTypeName($nb), $nb);
       }
       return '';
    }
@@ -65,8 +70,70 @@ class ComputerConfiguration_Computer extends CommonDBChild {
          case "ComputerConfiguration" :
             $item->showComputers();
             return true;
+
+         case "Computer":
+            self::showForComputer($item->getID());
+            return true;
       }
       return false;
+   }
+
+   static function showForComputer($computers_id) {
+      $self = new self;
+      $found_comp = $self->find("computers_id = $computers_id");
+
+      // init pager
+      $number = count($found_comp);
+      $start  = (isset($_REQUEST['start']) ? intval($_REQUEST['start']) : 0);
+      if ($start >= $number) {
+         $start = 0;
+      }
+      Html::printAjaxPager(sprintf(__('%1$s (%2$s)'), ComputerConfiguration_Computer::getTypeName(2), __('D=Dynamic')),
+                              $start, $number);
+
+      Session::initNavigateListItems("ComputerConfiguration_Computer", sprintf(__('%1$s = %2$s'),
+                                                   self::getTypeName(1), 
+                                                   ComputerConfiguration::getTypeName($number)));
+
+      // display top massive actions
+      $rand = mt_rand();
+      $classname = "ComputerConfiguration_Computer";
+      $massiveactionparams
+         = array('container'        => 'mass'.$classname.$rand,
+                 'specific_actions' => array('MassiveAction'.MassiveAction::CLASS_ACTION_SEPARATOR.
+                                                'purge' => _x('button', 'Delete permanently')));
+
+      Html::openMassiveActionsForm('mass'.$classname.$rand);
+      Html::showMassiveActions($massiveactionparams);
+
+      // show configuration list
+      echo "<table class='tab_cadre_fixehov'>";
+      echo "<tr>";
+      echo "<th width='10'>".Html::getCheckAllAsCheckbox('mass'.$classname.$rand)."</th>";
+      echo "<th>".__('associated to the configuration')."</th>";
+      echo "<th width='10'>"._x('item', 'State')."</th>";
+      echo "<th>".__(' mismatches the configuration')."</th>";
+      echo "</tr>";
+      $compconf_comp = new ComputerConfiguration;
+      for ($i=$start, $j=0 ; ($i < $number) && ($j < $_SESSION['glpilist_limit']) ; $i++, $j++) {
+         $current_line = array_shift($found_comp);
+         $compconf_comp->getFromDB($current_line['computerconfigurations_id']);
+
+         echo "<tr>";
+         echo "<td>";
+         Html::showMassiveActionCheckBox($classname, $current_line['id']);
+         echo "</td>";
+
+         echo "<td>".$compconf_comp->getLink(array('comments' => false))."</td>";
+         echo "<td width='10'></td>";
+         echo "<td></td>";
+         echo "</tr>";
+      }
+      echo "</table>";  
+
+      // display bottom massive actions
+      $massiveactionparams['ontop'] =false;
+      Html::showMassiveActions($massiveactionparams);  
    }
 
    /**
