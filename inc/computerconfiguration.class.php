@@ -352,7 +352,8 @@ class ComputerConfiguration extends CommonDBTM {
    function showComputers() {
       global $CFG_GLPI;
       
-      // get all computers who match criteria (with inheritance)
+      // send criteria to search engin to retrieve list of all computers 
+      // who match these criteria (with inheritance)
       $computers_mismatch = array();
       $criteria_computers = self::getComputerFromSearchCriteria($this->getID(), $computers_mismatch);
 
