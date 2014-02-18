@@ -333,7 +333,7 @@ class ComputerConfiguration extends CommonDBTM {
     */
    function showChildsConfigurations() {
       $configuration = new self;
-      $childs_configuration = self::getChilds($this->getID());
+      $childs_configuration = self::getChildren($this->getID());
       echo "<table class='tab_cadre_fixehov'>";
       echo "<tr>";
       echo "<th>".__('Name')."</th>";
@@ -525,7 +525,7 @@ class ComputerConfiguration extends CommonDBTM {
     * @param  [integer] $computerconfigurations_id
     * @return [array], list of child configurations_id (ex array(incremental_index => configurations_id))
     */
-   static function getChilds($computerconfigurations_id) {
+   static function getChildren($computerconfigurations_id) {
       $compconf_compconf = new ComputerConfiguration_ComputerConfiguration;
       $found_childs = $compconf_compconf->find("computerconfigurations_id_2 = ".
                                                 $computerconfigurations_id);
@@ -543,11 +543,11 @@ class ComputerConfiguration extends CommonDBTM {
     * @param  string $filter: - none : no filter (default)
     *                         - match: computers who match criteria,
     *                         - notmatch : computers who not match criteria]
-    * @param  bool $getchilds : retrieve also computers in childs configuration
+    * @param  bool $getChildren : retrieve also computers in childs configuration
     * @return array : array of computers_id (ex array(computerconfigurations_computers_id => computers_id))
     */
    static function getListOfComputersID($computerconfigurations_id, $filter = 'none', 
-                                        $getchilds = false) {
+                                        $getChildren = false) {
 
       $compconf_comp = new ComputerConfiguration_Computer;
       $found_comp = $compconf_comp->find("computerconfigurations_id = $computerconfigurations_id");
@@ -557,10 +557,10 @@ class ComputerConfiguration extends CommonDBTM {
       }
 
       // get computers associated to child configurations
-      if ($getchilds) {
-         $conf_childs = self::getChilds($computerconfigurations_id);
+      if ($getChildren) {
+         $conf_childs = self::getChildren($computerconfigurations_id);
          foreach ($conf_childs as $childs_id) {
-            $computers_id_child = self::getListOfComputersID($childs_id, $filter, $getchilds);
+            $computers_id_child = self::getListOfComputersID($childs_id, $filter, $getChildren);
 
             // merge computer of child configuration with computer of current configuration
             $listofcomputers_id = array_merge($listofcomputers_id, $computers_id_child);
@@ -592,7 +592,7 @@ class ComputerConfiguration extends CommonDBTM {
    static function getListOfComputersOfChildsConfiguration($computerconfigurations_id) {
       $listofcomputers_id = array();
 
-      $conf_childs = self::getChilds($computerconfigurations_id);
+      $conf_childs = self::getChildren($computerconfigurations_id);
       foreach ($conf_childs as $childs_id) {
          // use recursivity
          $listofcomputers_id = self::getListOfComputersOfChildsConfiguration($childs_id);
