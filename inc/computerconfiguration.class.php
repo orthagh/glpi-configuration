@@ -272,6 +272,7 @@ class ComputerConfiguration extends CommonDBTM {
 
       Html::closeForm();
 
+      //show parent criteria
       if ($formcontrol) {
          if (count(self::getAncestors($this->getID())) > 0) {
             echo "<div id='parent_criteria'>";
@@ -297,7 +298,7 @@ class ComputerConfiguration extends CommonDBTM {
    function showParentCriteria($level = 0) {
       if ($level == 0) {
          echo "<input type'button' id='toggleParentCriteria' value='".
-                  __("Displays parent criteria")."' class='submit'><br />";
+                  __("Show/Hide parent criteria")."' class='submit'><br />";
          echo Html::scriptBlock("
             $('#toggleParentCriteria').click(function() {
                $('#parent_criteria_0').toggle();
