@@ -49,7 +49,7 @@ class ComputerConfiguration_ComputerConfiguration extends CommonDBRelation {
       switch ($item->getType()) {
          case "ComputerConfiguration":
             $ong = array();
-            $nb = count(ComputerConfiguration::getChilds($item->getID()));
+            $nb = count(ComputerConfiguration::getChildren($item->getID()));
             $ong[1] = self::createTabEntry(_n('Child configuration', 'Children Configurations', $nb), $nb);
             return $ong;
       }

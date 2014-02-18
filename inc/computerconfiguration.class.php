@@ -367,6 +367,8 @@ class ComputerConfiguration extends CommonDBTM {
       if ($this->fields['viewchilds']) {
          $computers_id_list_childs = self::getListOfComputersOfChildsConfiguration($this->getID());
       }
+      Html::printCleanArray($computers_id_list);
+
 
       
       // init pager
@@ -518,6 +520,11 @@ class ComputerConfiguration extends CommonDBTM {
       return $ancestors_id;
    }
 
+   /**
+    * return children of specified configuration
+    * @param  [integer] $computerconfigurations_id
+    * @return [array], list of child configurations_id (ex array(incremental_index => configurations_id))
+    */
    static function getChilds($computerconfigurations_id) {
       $compconf_compconf = new ComputerConfiguration_ComputerConfiguration;
       $found_childs = $compconf_compconf->find("computerconfigurations_id_2 = ".
@@ -530,13 +537,14 @@ class ComputerConfiguration extends CommonDBTM {
    }
 
    /**
-    * Retrieve the id of computers associated to this configuration
+    * Retrieve the id of computers associated to this configuration 
+    *    indexed by glpi_computerconfigurations_computers.id
     * @param  int $computerconfigurations_id : id of the configuration
     * @param  string $filter: - none : no filter (default)
     *                         - match: computers who match criteria,
     *                         - notmatch : computers who not match criteria]
     * @param  bool $getchilds : retrieve also computers in childs configuration
-    * @return array : array of computers_id 
+    * @return array : array of computers_id (ex array(computerconfigurations_computers_id => computers_id))
     */
    static function getListOfComputersID($computerconfigurations_id, $filter = 'none', 
                                         $getchilds = false) {
@@ -578,8 +586,8 @@ class ComputerConfiguration extends CommonDBTM {
 
    /**
     * // retrieve list of association computers <=> configuration for childs
-    * @param  [int] $computerconfigurations_id, id of the configuration
-    * @return [array] return list of computer associated to configuration (ex array(conputers_id => conf_id))                          
+    * @param  int $computerconfigurations_id, id of the configuration
+    * @return array : return list of computer associated to configuration (ex array(computers_id => conf_id))                          
     */
    static function getListOfComputersOfChildsConfiguration($computerconfigurations_id) {
       $listofcomputers_id = array();
@@ -611,7 +619,7 @@ class ComputerConfiguration extends CommonDBTM {
     * @param  int $computerconfigurations_id :id of the configuration
     * @param  array $computers_mismatch : output param who reference wich configuration 
     *                                       from inheritance mismatch each computer
-    * @return array : list of computers_id
+    * @return array : list of computers_id (ex array(computers_id => computers_id))
     */
    static function getComputerFromCriteria($computerconfigurations_id, &$computers_mismatch = array()) {
       $configuration = new self;

@@ -119,6 +119,9 @@ class ComputerConfiguration_Computer extends CommonDBChild {
          $current_line = array_shift($found_comp);
          $compconf_comp->getFromDB($current_line['computerconfigurations_id']);
 
+         //check if computer match criteria of associated configuration
+         $computers_id_list = ComputerConfiguration::getListOfComputersID($current_line['computerconfigurations_id'], "none");
+
          echo "<tr>";
          echo "<td>";
          Html::showMassiveActionCheckBox($classname, $current_line['id']);
@@ -126,7 +129,9 @@ class ComputerConfiguration_Computer extends CommonDBChild {
 
          echo "<td>".$compconf_comp->getLink(array('comments' => false))."</td>";
          echo "<td width='10'></td>";
-         echo "<td></td>";
+         echo "<td>";
+         Html::printCleanArray($computers_id_list);
+         echo "</td>";
          echo "</tr>";
       }
       echo "</table>";  
