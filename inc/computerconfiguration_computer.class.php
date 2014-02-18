@@ -131,4 +131,23 @@ class ComputerConfiguration_Computer extends CommonDBChild {
 
       parent::processMassiveActionsForOneItemtype($ma, $item, $ids);
    }
+
+
+   static function linkComputerWithConfigurations($computers_id, $affect_configuration) {
+      $compconf_comp = new self;
+
+      //delete old dynamic links
+      $found_compconf_comps = $compconf_comp->find("is_dynamic = 1 
+                                                    AND computers_id = $computers_id");
+      foreach ($found_compconf_comps as $found_compconf_comp) {
+         $compconf_comp->delete(array('id' => $found_compconf_comp['id']));
+      }
+
+      // add new link
+      foreach ($affect_configuration as $computerconfigurations_id) {
+         $compconf_comp->add(array('computerconfigurations_id' => $computerconfigurations_id, 
+                                   'computers_id'              => $computers_id, 
+                                   'is_dynamic'                => true));
+      }
+   }
 }

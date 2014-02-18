@@ -128,10 +128,30 @@ class Computer extends CommonDBTM {
 
 
    /**
+    * @see CommonDBTM::prepareInputForUpdate()
+   **/
+   function prepareInputForUpdate($input) {
+      // retrieve links with computer configuration
+      $rules = new RuleComputerconfigurationCollection();
+      $input = $rules->processAllRules(Toolbox::stripslashes_deep($input),
+                                          Toolbox::stripslashes_deep($input));
+
+      return $input;
+   }
+
+
+   /**
     * @see CommonDBTM::post_updateItem()
    **/
    function post_updateItem($history=1) {
       global $DB, $CFG_GLPI;
+
+      // Add new links with computer configurations
+      if (isset($this->input["_affect_configuration"])) {
+         ComputerConfiguration_Computer::linkComputerWithConfigurations($this->getID(), 
+                                                                        $this->input["_affect_configuration"]);
+      }
+
 
       for ($i=0 ; $i<count($this->updates) ; $i++) {
          // Update contact of attached items
@@ -328,6 +348,11 @@ class Computer extends CommonDBTM {
       unset($input['id']);
       unset($input['withtemplate']);
 
+      // retrieve links with computer configuration
+      $rules = new RuleComputerconfigurationCollection();
+      $input = $rules->processAllRules(Toolbox::stripslashes_deep($input),
+                                          Toolbox::stripslashes_deep($input));
+
       return $input;
    }
 
@@ -362,6 +387,12 @@ class Computer extends CommonDBTM {
 
          // Add connected devices
          Computer_Item::cloneComputer($this->input["_oldID"], $this->fields['id']);
+      }
+
+      // Add new links with computer configurations
+      if (isset($this->input["_affect_configuration"])) {
+         ComputerConfiguration_Computer::linkComputerWithConfigurations($this->getID(), 
+                                                                        $this->input["_affect_configuration"]);
       }
    }
 
