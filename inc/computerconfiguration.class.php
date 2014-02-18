@@ -357,8 +357,7 @@ class ComputerConfiguration extends CommonDBTM {
       $computers_mismatch = array();
       $criteria_computers = self::getComputerFromSearchCriteria($this->getID(), $computers_mismatch);
 
-      // search and displays all computers associated to this configuration 
-      // (and check if they match criteria)
+      // search all computers associated to this configuration 
       $computers_id_list = self::getListOfComputersID($this->getID(), "none", 
                                                       $this->fields['viewchilds']);
       $computers_id_list_keys = array_keys($computers_id_list);
@@ -687,6 +686,20 @@ class ComputerConfiguration extends CommonDBTM {
       $criteria = http_build_query($criteria);
       $metacriteria = http_build_query($metacriteria);
       Html::redirect("computer.php?reset=reset&$criteria&$metacriteria");
+   }
+
+   static function isComputerMatchConfiguration($computers_id, $computerconfigurations_id, 
+                                                &$output = array()) {
+
+      // get all computers who match criteria (with inheritance)
+      // computer mismath return 
+      $computers_mismatch = array();
+      $criteria_computers = self::getComputerFromSearchCriteria($computerconfigurations_id, $computers_mismatch);
+
+      if (isset($computers_mismatch[$computers_id])) {
+         $output['mismatch_configuration'] = $computers_mismatch[$computers_id];
+         return false;
+      }
    }
 
 }

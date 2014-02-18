@@ -79,6 +79,8 @@ class ComputerConfiguration_Computer extends CommonDBChild {
    }
 
    static function showForComputer($computers_id) {
+      global $CFG_GLPI;
+
       $self = new self;
       $found_comp = $self->find("computers_id = $computers_id");
 
@@ -120,17 +122,30 @@ class ComputerConfiguration_Computer extends CommonDBChild {
          $compconf_comp->getFromDB($current_line['computerconfigurations_id']);
 
          //check if computer match criteria of associated configuration
-         $computers_id_list = ComputerConfiguration::getListOfComputersID($current_line['computerconfigurations_id'], "none");
-
+         $state = ComputerConfiguration::isComputerMatchConfiguration($computers_id, 
+                                                                      $current_line['computerconfigurations_id'],
+                                                                      $detail); 
+         
          echo "<tr>";
          echo "<td>";
          Html::showMassiveActionCheckBox($classname, $current_line['id']);
          echo "</td>";
 
          echo "<td>".$compconf_comp->getLink(array('comments' => false))."</td>";
-         echo "<td width='10'></td>";
+         if ($state) {
+            $pic = "greenbutton.png";
+            $title = __('Yes');
+         } else {
+            $pic = "redbutton.png";
+            $title = __('No');
+         }
+         echo "<td width='10'><img src='".$CFG_GLPI['root_doc']."/pics/$pic' title='$title'></td>";
+         echo "</td>";
          echo "<td>";
-         Html::printCleanArray($computers_id_list);
+         if (isset($detail['mismatch_configuration'])) {
+            $compconf_comp->getFromDB($detail['mismatch_configuration']);
+            echo $compconf_comp->getLink(array('comments' => false));
+         }
          echo "</td>";
          echo "</tr>";
       }
