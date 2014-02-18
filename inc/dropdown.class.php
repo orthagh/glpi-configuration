@@ -805,11 +805,6 @@ class Dropdown {
                                  'AutoUpdateSystem'   => _n('Update source', 'Update sources', 2)
                                 ),
 
-                    __('Computer')
-                         => array('ComputerConfiguration' => _n('Computer Configuration', 
-                                                                'Computer Configurations', 2)
-                                ),
-
                     __('Networking')
                         => array('NetworkInterface'         => _n('Network interface',
                                                                   'Network interfaces', 2),
