@@ -177,6 +177,7 @@ class ComputerConfiguration extends CommonDBTM {
    /**
     * Displays tab content
     * This function adapted from Search::showGenericSearch with controls removed
+    * @param  bool $formcontrol : display form buttons
     * @return nothing, displays a seach form
     */
    function showCriteria($formcontrol = true) {
@@ -195,9 +196,6 @@ class ComputerConfiguration extends CommonDBTM {
       $p = Search::manageParams($itemtype, $p);
 
       if ($formcontrol) {
-         if (count(self::getAncestors($this->getID())) > 0) {
-            $this->showParentCriteria();
-         }
 
          //show generic search form (duplicated from Search class)
          echo "<form name='searchformComputerConfigurationCriteria' method='post'>";
@@ -273,6 +271,12 @@ class ComputerConfiguration extends CommonDBTM {
       $_SESSION['glpisearch'] = $glpisearch_session;
 
       Html::closeForm();
+
+      if ($formcontrol) {
+         if (count(self::getAncestors($this->getID())) > 0) {
+            $this->showParentCriteria();
+         }
+      }
    }
 
 
