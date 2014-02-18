@@ -153,9 +153,20 @@ class ComputerConfiguration extends CommonDBTM {
     * transform current configuration's criteria from url form to array
     * @return [array] 
     */
-   function getCriteria() {
+   function getCriteria($get_ancestors = false) {
       if (!empty($this->fields['criteria'])) {
          parse_str($this->fields['criteria'], $criteria);
+
+         if ($get_ancestors) {
+            $ancestors = $this->getAncestors($this->getID());
+            $self = new self;
+            foreach ($ancestors as $ancestor ) {
+               $self->getFromDB($ancestor);
+               $ancestor_criteria = $self->getCriteria();
+               $criteria = array_merge($ancestor_criteria, $criteria);
+            }
+         }
+
          return $criteria;
       }
       return array();
@@ -165,9 +176,20 @@ class ComputerConfiguration extends CommonDBTM {
     * transform current configuration's metacriteria from url form to array
     * @return [array] 
     */
-   function getMetaCriteria() {
+   function getMetaCriteria($get_ancestors = false) {
       if (!empty($this->fields['metacriteria'])) {
          parse_str($this->fields['metacriteria'], $metacriteria);
+
+         if ($get_ancestors) {
+            $ancestors = $this->getAncestors($this->getID());
+            $self = new self;
+            foreach ($ancestors as $ancestor ) {
+               $self->getFromDB($ancestor);
+               $ancestor_metacriteria = $self->getMetaCriteria();
+               $metacriteria = array_merge($ancestor_metacriteria, $metacriteria);
+            }
+         }
+
          return $metacriteria;
       }
       return array();
@@ -352,10 +374,10 @@ class ComputerConfiguration extends CommonDBTM {
    function showComputers() {
       global $CFG_GLPI;
       
-      // send criteria to search engin to retrieve list of all computers 
+      /*// send criteria to search engin to retrieve list of all computers 
       // who match these criteria (with inheritance)
       $computers_mismatch = array();
-      $criteria_computers = self::getComputerFromSearchCriteria($this->getID(), $computers_mismatch);
+      $criteria_computers = self::getComputerFromSearchCriteria($this->getID(), $computers_mismatch);*/
 
       // search all computers associated to this configuration 
       $computers_id_list = self::getListOfComputersID($this->getID(), "none", 
@@ -404,10 +426,12 @@ class ComputerConfiguration extends CommonDBTM {
       $computer = new Computer;
       $configuration = new self;
       for ($i=$start, $j=0 ; ($i < $number) && ($j < $_SESSION['glpilist_limit']) ; $i++, $j++) {
-      //foreach ($computers_id_list as $compconf_comps_id => $computers_id) {
          $compconf_comps_id = $computers_id_list_keys[$i];
          $computers_id = $computers_id_list[$compconf_comps_id];
          $computer->getFromDB($computers_id);
+
+         $state = ComputerConfiguration::isComputerMatchConfiguration($computers_id, $this->getID(),
+                                                                      $detail); 
 
          echo "<tr>";
    
@@ -430,7 +454,7 @@ class ComputerConfiguration extends CommonDBTM {
          }
       
          // check if current computer match saved criterias
-         if (isset($criteria_computers[$computers_id])) {
+         if ($state) {
             $pic = "greenbutton.png";
             $title = __('Yes');
          } else {
@@ -439,16 +463,20 @@ class ComputerConfiguration extends CommonDBTM {
          }
          echo "<td><img src='".$CFG_GLPI['root_doc']."/pics/$pic' title='$title'></td>";
 
-         //for mismatch computers, displays the configuration who trigger
+         //for mismatch computers, displays the configuration who trigger (and criteria who mismatch)
          echo "<td>";
-         if (!isset($criteria_computers[$computers_id])) {
-            if (isset($computers_mismatch[$computers_id])) {
-               $computerconfigurations_id = $computers_mismatch[$computers_id];
-            } else {
-               $computerconfigurations_id = $this->getID();
+         if (isset($detail['mismatch_configuration'])) {
+            $configuration->getFromDB($detail['mismatch_configuration']);
+            echo $configuration->getLink(array('comments' => false));
+            if (isset($detail['mismatch_criteria'])) {
+               echo " (";
+               $out_criterion = "";
+               foreach ($detail['mismatch_criteria'] as $criterion) {
+                  $out_criterion.= $criterion['name'].", ";
+               }
+               $out_criterion = substr($out_criterion, 0, -2);
+               echo $out_criterion.")";
             }
-            $configuration->getFromDB($computerconfigurations_id);
-            echo $configuration->getLink(array('comments' => true));
          }
          echo "</td>";
          echo "</tr>";
@@ -688,18 +716,90 @@ class ComputerConfiguration extends CommonDBTM {
       Html::redirect("computer.php?reset=reset&$criteria&$metacriteria");
    }
 
+   
+   /**
+    * Check if a computer match configuration of note
+    * @param  integer  $computers_id,              id of computer
+    * @param  integer  $computerconfigurations_id, id of configuration
+    * @param  array   $detail,                     output paramater who can contains : 
+    *                                                 - mismatch_configuration : id of configuration who mismatch
+    * @return boolean                             
+    */
    static function isComputerMatchConfiguration($computers_id, $computerconfigurations_id, 
-                                                &$output = array()) {
+                                                &$detail = array()) {
+
+      $detail = array();
+
+      //get computer search options (for retrieve the name)
+      $computer_options = Search::getCleanedOptions("Computer");
 
       // get all computers who match criteria (with inheritance)
-      // computer mismath return 
       $computers_mismatch = array();
       $criteria_computers = self::getComputerFromSearchCriteria($computerconfigurations_id, $computers_mismatch);
 
       if (isset($computers_mismatch[$computers_id])) {
-         $output['mismatch_configuration'] = $computers_mismatch[$computers_id];
+         $detail['mismatch_configuration'] = $computers_mismatch[$computers_id];
+         $detail['mismatch_criteria'] = array();
+         $detail['mismatch_metacriteria'] = array();
+
+         $self = new self;
+         $self->getFromDB($computerconfigurations_id);
+         $criteria = $self->getCriteria(true);
+         $metacriteria = $self->getMetaCriteria(true);
+
+         foreach ($criteria as $criterion) {
+            if (!self::isComputerMatchCriterion($computers_id, $criterion)) {
+               $criterion['name'] = $computer_options[$criterion['field']]['name'];
+               $detail['mismatch_criteria'][] = $criterion;
+            }
+         }
+
+         foreach ($metacriteria as $metacriterion) {
+            if (!self::isComputerMatchMetaCriterion($computers_id, $metacriterion)) {
+               $metacriterion['name'] = $computer_options[$metacriterion['field']]['name'];
+               $detail['mismatch_metacriteria'][] = $metacriterion;
+            }
+         }
+
          return false;
+      } 
+
+      return true;
+   }
+
+
+   static function isComputerMatchCriterion($computers_id, $criterion) {
+      $p['sort']         = '';
+      $p['list_limit']   = 999999999999; // how to get all ?
+      $p['is_deleted']   = 0;
+      $p['all_search']   = false;
+      $p['no_search']    = false;
+
+      $p['criteria'] = array($criterion);
+
+      $datas = Search::getDatas("Computer", $p, array(1));
+      if (isset($datas['data']['items'][$computers_id])) {
+         return true;
       }
+
+      return false;
+   }
+
+   static function isComputerMatchCriterion($computers_id, $metacriterion) {
+      $p['sort']         = '';
+      $p['list_limit']   = 999999999999; // how to get all ?
+      $p['is_deleted']   = 0;
+      $p['all_search']   = false;
+      $p['no_search']    = false;
+
+      $p['metacriteria'] = array($metacriterion);
+
+      $datas = Search::getDatas("Computer", $p, array(1));
+      if (isset($datas['data']['items'][$computers_id])) {
+         return true;
+      }
+
+      return false;
    }
 
 }

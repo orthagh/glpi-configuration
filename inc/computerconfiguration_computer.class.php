@@ -116,12 +116,13 @@ class ComputerConfiguration_Computer extends CommonDBChild {
       echo "<th width='10'>"._x('item', 'State')."</th>";
       echo "<th>".__(' mismatches the configuration')."</th>";
       echo "</tr>";
-      $compconf_comp = new ComputerConfiguration;
+      $compconf = new ComputerConfiguration;
       for ($i=$start, $j=0 ; ($i < $number) && ($j < $_SESSION['glpilist_limit']) ; $i++, $j++) {
          $current_line = array_shift($found_comp);
-         $compconf_comp->getFromDB($current_line['computerconfigurations_id']);
+         $compconf->getFromDB($current_line['computerconfigurations_id']);
 
          //check if computer match criteria of associated configuration
+         $detail = array();
          $state = ComputerConfiguration::isComputerMatchConfiguration($computers_id, 
                                                                       $current_line['computerconfigurations_id'],
                                                                       $detail); 
@@ -131,7 +132,7 @@ class ComputerConfiguration_Computer extends CommonDBChild {
          Html::showMassiveActionCheckBox($classname, $current_line['id']);
          echo "</td>";
 
-         echo "<td>".$compconf_comp->getLink(array('comments' => false))."</td>";
+         echo "<td>".$compconf->getLink(array('comments' => false))."</td>";
          if ($state) {
             $pic = "greenbutton.png";
             $title = __('Yes');
@@ -143,8 +144,17 @@ class ComputerConfiguration_Computer extends CommonDBChild {
          echo "</td>";
          echo "<td>";
          if (isset($detail['mismatch_configuration'])) {
-            $compconf_comp->getFromDB($detail['mismatch_configuration']);
-            echo $compconf_comp->getLink(array('comments' => false));
+            $compconf->getFromDB($detail['mismatch_configuration']);
+            echo $compconf->getLink(array('comments' => false));
+            if (isset($detail['mismatch_criteria'])) {
+               echo " (";
+               $out_criterion = "";
+               foreach ($detail['mismatch_criteria'] as $criterion) {
+                  $out_criterion.= $criterion['name'].", ";
+               }
+               $out_criterion = substr($out_criterion, 0, -2);
+               echo $out_criterion.")";
+            }
          }
          echo "</td>";
          echo "</tr>";
