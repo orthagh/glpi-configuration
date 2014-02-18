@@ -475,9 +475,7 @@ class ComputerConfiguration extends CommonDBTM {
          $input['metacriteria'] = http_build_query($input['metacriteria']);
       }
 
-      if (isset($input['_inheritance'])) {
-         $input = $this->saveInheritance($input);
-      }
+      $this->saveInheritance($input);
 
       return $input;
    }
@@ -507,10 +505,12 @@ class ComputerConfiguration extends CommonDBTM {
                          WHERE computerconfigurations_id_1 = ".$input['id']);
 
       //add new inheritance
-      $compconf_compconf = new ComputerConfiguration_ComputerConfiguration;
-      foreach ($input['_inheritance'] as $inheritance_options) {
-         $compconf_compconf->add(array('computerconfigurations_id_1' => $input['id'], 
-                                       'computerconfigurations_id_2' => $inheritance_options));
+      if (isset($input['_inheritance'])) {
+         $compconf_compconf = new ComputerConfiguration_ComputerConfiguration;
+         foreach ($input['_inheritance'] as $inheritance_options) {
+            $compconf_compconf->add(array('computerconfigurations_id_1' => $input['id'], 
+                                          'computerconfigurations_id_2' => $inheritance_options));
+         }
       }
 
    }
