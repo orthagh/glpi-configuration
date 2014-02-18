@@ -367,9 +367,6 @@ class ComputerConfiguration extends CommonDBTM {
       if ($this->fields['viewchilds']) {
          $computers_id_list_childs = self::getListOfComputersOfChildsConfiguration($this->getID());
       }
-      Html::printCleanArray($computers_id_list);
-
-
       
       // init pager
       $number = count($computers_id_list);
@@ -485,6 +482,10 @@ class ComputerConfiguration extends CommonDBTM {
       return $input;
    }
 
+   /**
+    * Clean associated computer and inheritance on purge configuration
+    * @return nothing
+    */
    function cleanDBonPurge() {
       $compconf_comp = new ComputerConfiguration_Computer();
       $compconf_comp->cleanDBonItemDelete(__CLASS__, $this->fields['id']);
@@ -493,6 +494,11 @@ class ComputerConfiguration extends CommonDBTM {
       $compconf_compconf->cleanDBonItemDelete(__CLASS__, $this->fields['id']);
    }
 
+   /**
+    * Save the current inherintance for specified form POST 
+    * @param  [type] $input form POST
+    * @return nothing
+    */
    function saveInheritance($input) {
       global $DB;
 
@@ -509,6 +515,11 @@ class ComputerConfiguration extends CommonDBTM {
 
    }
 
+   /**
+    * return ancestor of specified configuration
+    * @param  [integer] $computerconfigurations_id
+    * @return [array], list of ancestors configurations_id (ex array(incremental_index => configurations_id))
+    */
    static function getAncestors($computerconfigurations_id) {
       $compconf_compconf = new ComputerConfiguration_ComputerConfiguration;
       $found_ancestors = $compconf_compconf->find("computerconfigurations_id_1 = ".
@@ -523,7 +534,7 @@ class ComputerConfiguration extends CommonDBTM {
    /**
     * return children of specified configuration
     * @param  [integer] $computerconfigurations_id
-    * @return [array], list of child configurations_id (ex array(incremental_index => configurations_id))
+    * @return [array], list of children configurations_id (ex array(incremental_index => configurations_id))
     */
    static function getChildren($computerconfigurations_id) {
       $compconf_compconf = new ComputerConfiguration_ComputerConfiguration;
