@@ -656,7 +656,7 @@ class ComputerConfiguration extends CommonDBTM {
    /**
     * Return list of computer who match configuration
     * @param  int $computerconfigurations_id :id of the configuration
-    * @param  array $computers_mismatch : output param who reference wich configuration 
+    * @param  array $computers_mismatch : output param who reference which configuration 
     *                                       from inheritance mismatch each computer
     * @return array : list of computers_id (ex array(computers_id => computers_id))
     */
@@ -737,8 +737,12 @@ class ComputerConfiguration extends CommonDBTM {
       $computers_mismatch = array();
       $criteria_computers = self::getComputerFromSearchCriteria($computerconfigurations_id, $computers_mismatch);
 
-      if (isset($computers_mismatch[$computers_id])) {
-         $detail['mismatch_configuration'] = $computers_mismatch[$computers_id];
+      if (!isset($criteria_computers[$computers_id])) {
+         if (isset($computers_mismatch[$computers_id])) {
+            $detail['mismatch_configuration'] = $computers_mismatch[$computers_id];
+         } else {
+            $detail['mismatch_configuration'] = $computerconfigurations_id;
+         }
          $detail['mismatch_criteria'] = array();
          $detail['mismatch_metacriteria'] = array();
 
@@ -756,10 +760,12 @@ class ComputerConfiguration extends CommonDBTM {
 
          foreach ($metacriteria as $metacriterion) {
             if (!self::isComputerMatchMetaCriterion($computers_id, $metacriterion)) {
-               $metacriterion['name'] = $computer_options[$metacriterion['field']]['name'];
+               $meta_options = Search::getCleanedOptions($metacriterion['itemtype']);
+               $metacriterion['name'] = $meta_options[$metacriterion['field']]['name'];
                $detail['mismatch_metacriteria'][] = $metacriterion;
             }
          }
+         Toolbox::logDebug($detail);
 
          return false;
       } 
@@ -785,13 +791,14 @@ class ComputerConfiguration extends CommonDBTM {
       return false;
    }
 
-   static function isComputerMatchCriterion($computers_id, $metacriterion) {
+   static function isComputerMatchMetaCriterion($computers_id, $metacriterion) {
       $p['sort']         = '';
       $p['list_limit']   = 999999999999; // how to get all ?
       $p['is_deleted']   = 0;
       $p['all_search']   = false;
       $p['no_search']    = false;
 
+      $p['criteria'] = array();
       $p['metacriteria'] = array($metacriterion);
 
       $datas = Search::getDatas("Computer", $p, array(1));
