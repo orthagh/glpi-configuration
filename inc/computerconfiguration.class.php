@@ -354,7 +354,7 @@ class ComputerConfiguration extends CommonDBTM {
       
       // get all computers who match criteria (with inheritance)
       $computers_mismatch = array();
-      $criteria_computers = self::getComputerFromCriteria($this->getID(), $computers_mismatch);
+      $criteria_computers = self::getComputerFromSearchCriteria($this->getID(), $computers_mismatch);
 
       // search and displays all computers associated to this configuration 
       // (and check if they match criteria)
@@ -583,7 +583,7 @@ class ComputerConfiguration extends CommonDBTM {
          return $listofcomputers_id;
       }
 
-      $computers_criteria = self::getComputerFromCriteria($computerconfigurations_id);
+      $computers_criteria = self::getComputerFromSearchCriteria($computerconfigurations_id);
       if ($filter === "match") {
          return array_intersect($listofcomputers_id, $computers_criteria);
       }
@@ -632,7 +632,7 @@ class ComputerConfiguration extends CommonDBTM {
     *                                       from inheritance mismatch each computer
     * @return array : list of computers_id (ex array(computers_id => computers_id))
     */
-   static function getComputerFromCriteria($computerconfigurations_id, &$computers_mismatch = array()) {
+   static function getComputerFromSearchCriteria($computerconfigurations_id, &$computers_mismatch = array()) {
       $configuration = new self;
       $configuration->getFromDB($computerconfigurations_id);
       
@@ -658,7 +658,7 @@ class ComputerConfiguration extends CommonDBTM {
       $conf_ancestors = self::getAncestors($computerconfigurations_id);
       foreach ($conf_ancestors as $ancestors_id) {
          // get all computer for current inheritance
-         $computers_inheritance = self::getComputerFromCriteria($ancestors_id, $computers_mismatch);
+         $computers_inheritance = self::getComputerFromSearchCriteria($ancestors_id, $computers_mismatch);
 
          // populate computer_mismatch to reference which rule mismatch each computer
          $computers_diff = array_diff($computers_list, $computers_inheritance);
@@ -687,7 +687,6 @@ class ComputerConfiguration extends CommonDBTM {
       $metacriteria = http_build_query($metacriteria);
       Html::redirect("computer.php?reset=reset&$criteria&$metacriteria");
    }
-
 
 }
 
