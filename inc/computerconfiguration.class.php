@@ -38,10 +38,12 @@ if (!defined('GLPI_ROOT')) {
 /**
  * ComputerConfiguration class
 **/
-class ComputerConfiguration extends CommonDropdown {
+class ComputerConfiguration extends CommonDBTM {
 
    // From CommonDBTM
    public $dohistory = true;
+   
+   static $rightname = 'config';
 
    /**
     * Name of the type
@@ -50,26 +52,6 @@ class ComputerConfiguration extends CommonDropdown {
    **/
    static function getTypeName($nb=0) {
       return _n('Computer Configuration', 'Computer Configurations', $nb);
-   }
-
-   //TODO : define a right for this item
-   static function canCreate() {
-      return true;
-   }
-   static function canUpdate() {
-      return true;
-   }
-   static function canDelete() {
-      return true;
-   }
-   function canPurgeItem() {
-      return true;
-   }
-   static function canPurge() {
-      return true;
-   }
-   static function canView() {
-      return true;
    }
 
    function defineTabs($options=array()) {

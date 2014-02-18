@@ -43,26 +43,8 @@ class ComputerConfiguration_Computer extends CommonDBChild {
    static public $itemtype = "ComputerConfiguration";
    static public $items_id = "computerconfigurations_id";
 
-   //TODO : define a right for this item
-   static function canCreate() {
-      return true;
-   }
-   static function canUpdate() {
-      return true;
-   }
-   static function canDelete() {
-      return true;
-   }
-   function canPurgeItem() {
-      return true;
-   }
-   static function canPurge() {
-      return true;
-   }
-   static function canView() {
-      return true;
-   }
-   
+   static $rightname = 'config';
+
    static function getTypeName($nb=0) {
       return _n('Computer', 'Computers', $nb);
    }

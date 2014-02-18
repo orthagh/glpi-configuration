@@ -69,7 +69,8 @@ if (isset($_POST["add"])) {
    $computerconfiguration->preview();
 
 } else {
-   $computerconfiguration->displayHeader();
+   Html::header(ComputerConfiguration::getTypeName(2), $_SERVER['PHP_SELF'], "config", "control",
+             "ComputerConfiguration");
    $computerconfiguration->display(array('id' => $_GET["id"]));
    Html::footer();
 }
