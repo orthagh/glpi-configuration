@@ -274,9 +274,18 @@ class ComputerConfiguration extends CommonDBTM {
 
       if ($formcontrol) {
          if (count(self::getAncestors($this->getID())) > 0) {
+            echo "<div id='parent_criteria'>";
             $this->showParentCriteria();
+            echo "<div>";
          }
       }
+
+      //clean with javascript search control
+      $clean_script = "jQuery( document ).ready(function( $ ) {
+         $('#parent_criteria img').remove();
+         $('img[name=img_deleted').remove();
+      });";
+      echo Html::scriptBlock($clean_script);
    }
 
 
