@@ -218,7 +218,6 @@ class ComputerConfiguration extends CommonDBTM {
       $p = Search::manageParams($itemtype, $p);
 
       if ($formcontrol) {
-
          //show generic search form (duplicated from Search class)
          echo "<form name='searchformComputerConfigurationCriteria' method='post'>";
          echo "<input type='hidden' name='id' value='".$this->getID()."'>";  
@@ -228,7 +227,7 @@ class ComputerConfiguration extends CommonDBTM {
          echo "<input type='hidden' name='metacriteria' value=''>"; 
       } 
 
-      echo "<div id='tabs_criteria'>";
+      echo "<div class='tabs_criteria'>";
       echo "<table class='tab_cadre_fixe'>";
       echo "<tr><th>"._n('Criterion', 'Criteria', 2)."</th></tr>";
       echo "<tr><td>";
@@ -275,10 +274,6 @@ class ComputerConfiguration extends CommonDBTM {
       // For dropdown
       echo "<input type='hidden' name='itemtype' value='$itemtype'>";
 
-      // Reset to start when submit new search
-      echo "<input type='hidden' name='start' value='0'>";
-      echo "</div>";
-
       if ($formcontrol) {
          // add new button to search form (to store and preview)
          echo "<div class='center'>";
@@ -289,9 +284,13 @@ class ComputerConfiguration extends CommonDBTM {
       }
 
       echo "</td></tr></table>";
+      echo "</div>";
 
       //restore search session variables
       $_SESSION['glpisearch'] = $glpisearch_session;
+
+      // Reset to start when submit new search
+      echo "<input type='hidden' name='start' value='0'>";
 
       Html::closeForm();
 
@@ -307,11 +306,9 @@ class ComputerConfiguration extends CommonDBTM {
       //clean with javascript search control
       $clean_script = "jQuery( document ).ready(function( $ ) {
          $('#parent_criteria img').remove();
-         $('#tabs_criteria img[name=img_deleted').remove();
+         $('.tabs_criteria img[name=img_deleted').remove();
       });";
       echo Html::scriptBlock($clean_script);
-
-      echo "</div>";
    }
 
 

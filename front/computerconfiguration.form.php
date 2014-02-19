@@ -57,7 +57,6 @@ if (isset($_POST["add"])) {
    $computerconfiguration->redirectToList();
 
 } else if (isset($_POST["update"])) {
-   //Html::printCleanArray($_POST);exit;
    $computerconfiguration->check($_POST['id'], UPDATE);
    $computerconfiguration->update($_POST);
    Event::log($_POST["id"], "computerconfigurations", 4, "setup",
