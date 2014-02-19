@@ -228,11 +228,12 @@ class ComputerConfiguration extends CommonDBTM {
          echo "<input type='hidden' name='metacriteria' value=''>"; 
       } 
 
+      echo "<div id='tabs_criteria'>";
       echo "<table class='tab_cadre_fixe'>";
       echo "<tr><th>"._n('Criterion', 'Criteria', 2)."</th></tr>";
       echo "<tr><td>";
 
-      echo "<div id='searchcriterias'>";
+      echo "<div id='searchcriteria'>";
       $nb_criteria = count($p['criteria']);
       if ($nb_criteria == 0) $nb_criteria++;
       $nbsearchcountvar = 'nbcriteria'.strtolower($itemtype).mt_rand();
@@ -299,16 +300,18 @@ class ComputerConfiguration extends CommonDBTM {
          if (count(self::getAncestors($this->getID())) > 0) {
             echo "<div id='parent_criteria'>";
             $this->showParentCriteria();
-            echo "<div>";
+            echo "</div>";
          }
       }
 
       //clean with javascript search control
       $clean_script = "jQuery( document ).ready(function( $ ) {
          $('#parent_criteria img').remove();
-         $('img[name=img_deleted').remove();
+         $('#tabs_criteria img[name=img_deleted').remove();
       });";
       echo Html::scriptBlock($clean_script);
+
+      echo "</div>";
    }
 
 
