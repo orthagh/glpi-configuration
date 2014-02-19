@@ -90,11 +90,11 @@ class ComputerConfiguration_Computer extends CommonDBChild {
       if ($start >= $number) {
          $start = 0;
       }
-      Html::printAjaxPager(sprintf(__('%1$s (%2$s)'), ComputerConfiguration_Computer::getTypeName(2), __('D=Dynamic')),
+      Html::printAjaxPager(sprintf(__('%1$s (%2$s)'), ComputerConfiguration::getTypeName(2), __('D=Dynamic')),
                               $start, $number);
 
       Session::initNavigateListItems("ComputerConfiguration_Computer", sprintf(__('%1$s = %2$s'),
-                                                   self::getTypeName(1), 
+                                                   ComputerConfiguration::getTypeName(1), 
                                                    ComputerConfiguration::getTypeName($number)));
 
       // display top massive actions
