@@ -116,14 +116,14 @@ class ComputerConfiguration_Computer extends CommonDBChild {
       echo "<th width='10'>"._x('item', 'State')."</th>";
       echo "<th>".__(' mismatches the configuration')."</th>";
       echo "</tr>";
-      $compconf = new ComputerConfiguration;
+      $configuration = new ComputerConfiguration;
       for ($i=$start, $j=0 ; ($i < $number) && ($j < $_SESSION['glpilist_limit']) ; $i++, $j++) {
          $current_line = array_shift($found_comp);
-         $compconf->getFromDB($current_line['computerconfigurations_id']);
+         $configuration->getFromDB($current_line['computerconfigurations_id']);
 
          //check if computer match criteria of associated configuration
          $detail = array();
-         $state = ComputerConfiguration::isComputerMatchConfiguration($computers_id, 
+         $match = ComputerConfiguration::isComputerMatchConfiguration($computers_id, 
                                                                       $current_line['computerconfigurations_id'],
                                                                       $detail); 
          
@@ -132,29 +132,26 @@ class ComputerConfiguration_Computer extends CommonDBChild {
          Html::showMassiveActionCheckBox($classname, $current_line['id']);
          echo "</td>";
 
-         echo "<td>".$compconf->getLink(array('comments' => false))."</td>";
-         if ($state) {
+         echo "<td>".$configuration->getLink(array('comments' => false))."</td>";
+         if ($match) {
             $pic = "greenbutton.png";
             $title = __('Yes');
          } else {
             $pic = "redbutton.png";
             $title = __('No');
          }
+
+
          echo "<td width='10'><img src='".$CFG_GLPI['root_doc']."/pics/$pic' title='$title'></td>";
          echo "</td>";
          echo "<td>";
          if (isset($detail['mismatch_configuration'])) {
-            $compconf->getFromDB($detail['mismatch_configuration']);
-            echo $compconf->getLink(array('comments' => false));
-            if (isset($detail['mismatch_criteria'])) {
-               echo " (";
-               $out_criterion = "";
-               foreach ($detail['mismatch_criteria'] as $criterion) {
-                  $out_criterion.= $criterion['name'].", ";
-               }
-               $out_criterion = substr($out_criterion, 0, -2);
-               echo $out_criterion.")";
+            $out = "";
+            foreach ($detail['mismatch_configuration'] as $tmp_conf_id) {
+               $configuration->getFromDB($tmp_conf_id);
+               $out.= $configuration->getLink(array('comments' => true)).", ";
             }
+            echo substr($out, 0, -2);
          }
          echo "</td>";
          echo "</tr>";

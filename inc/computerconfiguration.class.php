@@ -373,32 +373,28 @@ class ComputerConfiguration extends CommonDBTM {
     */
    function showComputers() {
       global $CFG_GLPI;
+
+      // get all computers associated this configuration and their states
+      $listofcomputer_withstate = self::getListComputerStates($this->getID());
       
-      /*// send criteria to search engin to retrieve list of all computers 
-      // who match these criteria (with inheritance)
-      $computers_mismatch = array();
-      $criteria_computers = self::getComputerFromSearchCriteria($this->getID(), $computers_mismatch);*/
-
-      // search all computers associated to this configuration 
-      $computers_id_list = self::getListOfComputersID($this->getID(), "none", 
-                                                      $this->fields['viewchilds']);
-      $computers_id_list_keys = array_keys($computers_id_list);
-
-
-      // retrieve list of association computers <=> configuration for childs
+      // get all children computers associated this configuration and their states
       if ($this->fields['viewchilds']) {
          $computers_id_list_childs = self::getListOfComputersOfChildsConfiguration($this->getID());
+         $chlidren_configurations = array_unique($computers_id_list_childs);
+         foreach ($chlidren_configurations as $tmp_conf_id) {
+            $tmp_listofcomputer_withstate = self::getListComputerStates($tmp_conf_id);
+            $listofcomputer_withstate = array_merge($tmp_listofcomputer_withstate, $listofcomputer_withstate);
+         }
       }
-      
+
       // init pager
-      $number = count($computers_id_list);
+      $number = count($listofcomputer_withstate);
       $start  = (isset($_REQUEST['start']) ? intval($_REQUEST['start']) : 0);
       if ($start >= $number) {
          $start = 0;
       }
       Html::printAjaxPager(sprintf(__('%1$s (%2$s)'), ComputerConfiguration_Computer::getTypeName(2), __('D=Dynamic')),
                               $start, $number);
-
       Session::initNavigateListItems("ComputerConfiguration_Computer", sprintf(__('%1$s = %2$s'),
                                                    self::getTypeName(1), $this->getName()));
 
@@ -426,35 +422,32 @@ class ComputerConfiguration extends CommonDBTM {
       $computer = new Computer;
       $configuration = new self;
       for ($i=$start, $j=0 ; ($i < $number) && ($j < $_SESSION['glpilist_limit']) ; $i++, $j++) {
-         $compconf_comps_id = $computers_id_list_keys[$i];
-         $computers_id = $computers_id_list[$compconf_comps_id];
-         $computer->getFromDB($computers_id);
-
-         $state = ComputerConfiguration::isComputerMatchConfiguration($computers_id, $this->getID(),
-                                                                      $detail); 
+         $currentline = array_shift($listofcomputer_withstate);
+         $computer->getFromDB($currentline['computers_id']);
 
          echo "<tr>";
    
          // displays massive actions checkboxes
          echo "<td>";
-         Html::showMassiveActionCheckBox($classname, $compconf_comps_id);
+         if ($currentline['computerconfigurations_id'] === $this->getID()) {
+            Html::showMassiveActionCheckBox($classname, $currentline['computerconfigurations_computers_id']);
+         }
          echo "</td>";
 
+         // echo computer name
          echo "<td>".$computer->getLink(array('comments' => true))."</td>";
          
          // displays inherited configuration  
          if ($this->fields['viewchilds']) {
-            if (isset($computers_id_list_childs[$computers_id])) {
-               //get configuration name
-               $configuration->getFromDB($computers_id_list_childs[$computers_id]);
-
-               // displays configuration name
+            if ($currentline['computerconfigurations_id'] != $this->getID()) {
+               //get and display configuration name
+               $configuration->getFromDB($currentline['computerconfigurations_id']);
                echo "<td>".$configuration->getLink(array('comments' => true))."</td>";
             } else echo "<td></td>";
          }
       
          // check if current computer match saved criterias
-         if ($state) {
+         if ($currentline['match']) {
             $pic = "greenbutton.png";
             $title = __('Yes');
          } else {
@@ -465,18 +458,13 @@ class ComputerConfiguration extends CommonDBTM {
 
          //for mismatch computers, displays the configuration who trigger (and criteria who mismatch)
          echo "<td>";
-         if (isset($detail['mismatch_configuration'])) {
-            $configuration->getFromDB($detail['mismatch_configuration']);
-            echo $configuration->getLink(array('comments' => false));
-            if (isset($detail['mismatch_criteria'])) {
-               echo " (";
-               $out_criterion = "";
-               foreach ($detail['mismatch_criteria'] as $criterion) {
-                  $out_criterion.= $criterion['name'].", ";
-               }
-               $out_criterion = substr($out_criterion, 0, -2);
-               echo $out_criterion.")";
+         if (!$currentline['match']) {
+            $out = "";
+            foreach ($currentline['mismatch_configuration'] as $tmp_conf_id) {
+               $configuration->getFromDB($tmp_conf_id);
+               $out.= $configuration->getLink(array('comments' => true)).", ";
             }
+            echo substr($out, 0, -2);
          }
          echo "</td>";
          echo "</tr>";
@@ -546,18 +534,29 @@ class ComputerConfiguration extends CommonDBTM {
    /**
     * return ancestor of specified configuration
     * @param  [integer] $computerconfigurations_id
+    * @param  [bool] $fullrecursive (get recursively all inheritance)
     * @return [array], list of ancestors configurations_id (ex array(incremental_index => configurations_id))
     */
-   static function getAncestors($computerconfigurations_id) {
+   static function getAncestors($computerconfigurations_id, $fullrecursive = false) {
       $compconf_compconf = new ComputerConfiguration_ComputerConfiguration;
       $found_ancestors = $compconf_compconf->find("computerconfigurations_id_1 = ".
                                                 $computerconfigurations_id);
-      $ancestors_id = array();
+      $listofancestors_id = array();
       foreach ($found_ancestors as $ancestor) {
-         $ancestors_id[] = $ancestor['computerconfigurations_id_2'];
+         $listofancestors_id[] = $ancestor['computerconfigurations_id_2'];
       }
-      return $ancestors_id;
+
+      if ($fullrecursive) {
+         foreach ($listofancestors_id as $ancestors_id) {
+            $recursive_listofancestors_id = self::getAncestors($ancestors_id, true);
+            $listofancestors_id = array_merge($listofancestors_id, 
+                                              $recursive_listofancestors_id);
+         }
+      }
+
+      return $listofancestors_id;
    }
+
 
    /**
     * return children of specified configuration
@@ -660,7 +659,7 @@ class ComputerConfiguration extends CommonDBTM {
     *                                       from inheritance mismatch each computer
     * @return array : list of computers_id (ex array(computers_id => computers_id))
     */
-   static function getComputerFromSearchCriteria($computerconfigurations_id, &$computers_mismatch = array()) {
+   static function getComputerFromSearchCriteria($computerconfigurations_id) {
       $configuration = new self;
       $configuration->getFromDB($computerconfigurations_id);
       
@@ -682,25 +681,47 @@ class ComputerConfiguration extends CommonDBTM {
          $computers_list[$computers_id] = $computers_id;
       }
 
-      // find all inheritances for this configuration
-      $conf_ancestors = self::getAncestors($computerconfigurations_id);
-      foreach ($conf_ancestors as $ancestors_id) {
-         // get all computer for current inheritance
-         $computers_inheritance = self::getComputerFromSearchCriteria($ancestors_id, $computers_mismatch);
+      return $computers_list;
+   }
 
-         // populate computer_mismatch to reference which rule mismatch each computer
-         $computers_diff = array_diff($computers_list, $computers_inheritance);
-         foreach ($computers_diff as $computers_id) {
-            if (!isset($computers_mismatch[$computers_id])) {
-               $computers_mismatch[$computers_id] = $ancestors_id;
+   
+   /**
+    * Return a list of computer (with state associated) for the given configuration
+    * @param  [integer] $computerconfigurations_id, id of the configuration
+    * @return [array]   array(computers_id => array(match => true/false,
+    *                                                        computerconfigurations_computers_id => id of glpi_computerconfigurations_computers,
+    *                                                        mismatch_configuration => list of configuration who not match computer,
+    *                                                        computers_id => id of the computer))
+    */
+   static function getListComputerStates($computerconfigurations_id) {
+      $listofcomputers_states = array();
+      $listofancestors_id = self::getAncestors($computerconfigurations_id, true);
+      $listofconfigurations_id = array_merge(array($computerconfigurations_id), $listofancestors_id);
+      $listofcomputers_associated = self::getListOfComputersID($computerconfigurations_id);
+
+      foreach ($listofconfigurations_id as $tmp_conf_id) {
+         $listofcomputers_criteria = self::getComputerFromSearchCriteria($tmp_conf_id);
+         $listofcomputers_match = array_intersect($listofcomputers_associated, $listofcomputers_criteria);
+
+         foreach ($listofcomputers_associated as $computerconfigurations_computers_id 
+                                           => $computers_id) {
+
+            if (!isset($listofcomputers_states[$computers_id]['match'])) {
+               $listofcomputers_states[$computers_id]['match'] = true;
             }
-         }
 
-         // filter computers list with those from the inheritance
-         $computers_list = array_intersect($computers_list, $computers_inheritance);
+            if (!in_array($computers_id, $listofcomputers_match)) {
+               $listofcomputers_states[$computers_id]['mismatch_configuration'][] = $tmp_conf_id;
+               $listofcomputers_states[$computers_id]['match'] = false;
+            }
+
+            $listofcomputers_states[$computers_id]['computerconfigurations_computers_id'] = $computerconfigurations_computers_id;
+            $listofcomputers_states[$computers_id]['computers_id'] = $computers_id;
+            $listofcomputers_states[$computers_id]['computerconfigurations_id'] = $computerconfigurations_id;
+         }
       }
 
-      return $computers_list;
+      return $listofcomputers_states;
    }
 
 
@@ -718,11 +739,11 @@ class ComputerConfiguration extends CommonDBTM {
 
    
    /**
-    * Check if a computer match configuration of note
+    * Check if a computer match given configuration
     * @param  integer  $computers_id,              id of computer
     * @param  integer  $computerconfigurations_id, id of configuration
     * @param  array   $detail,                     output paramater who can contains : 
-    *                                                 - mismatch_configuration : id of configuration who mismatch
+    *                                                 - mismatch_configuration : list of configurations_id who mismatch
     * @return boolean                             
     */
    static function isComputerMatchConfiguration($computers_id, $computerconfigurations_id, 
@@ -730,45 +751,12 @@ class ComputerConfiguration extends CommonDBTM {
 
       $detail = array();
 
-      //get computer search options (for retrieve the name)
-      $computer_options = Search::getCleanedOptions("Computer");
+      $listofcomputer_withstate = self::getListComputerStates($computerconfigurations_id);
 
-      // get all computers who match criteria (with inheritance)
-      $computers_mismatch = array();
-      $criteria_computers = self::getComputerFromSearchCriteria($computerconfigurations_id, $computers_mismatch);
-
-      if (!isset($criteria_computers[$computers_id])) {
-         if (isset($computers_mismatch[$computers_id])) {
-            $detail['mismatch_configuration'] = $computers_mismatch[$computers_id];
-         } else {
-            $detail['mismatch_configuration'] = $computerconfigurations_id;
-         }
-         $detail['mismatch_criteria'] = array();
-         $detail['mismatch_metacriteria'] = array();
-
-         $self = new self;
-         $self->getFromDB($computerconfigurations_id);
-         $criteria = $self->getCriteria(true);
-         $metacriteria = $self->getMetaCriteria(true);
-
-         foreach ($criteria as $criterion) {
-            if (!self::isComputerMatchCriterion($computers_id, $criterion)) {
-               $criterion['name'] = $computer_options[$criterion['field']]['name'];
-               $detail['mismatch_criteria'][] = $criterion;
-            }
-         }
-
-         foreach ($metacriteria as $metacriterion) {
-            if (!self::isComputerMatchMetaCriterion($computers_id, $metacriterion)) {
-               $meta_options = Search::getCleanedOptions($metacriterion['itemtype']);
-               $metacriterion['name'] = $meta_options[$metacriterion['field']]['name'];
-               $detail['mismatch_metacriteria'][] = $metacriterion;
-            }
-         }
-         Toolbox::logDebug($detail);
-
+      if (!$listofcomputer_withstate[$computers_id]['match']) {
+         $detail['mismatch_configuration'] = $listofcomputer_withstate[$computers_id]['mismatch_configuration'];
          return false;
-      } 
+      }
 
       return true;
    }
