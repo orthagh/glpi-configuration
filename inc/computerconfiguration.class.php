@@ -786,24 +786,20 @@ class ComputerConfiguration extends CommonDBTM {
    }
 
 
-   static function isComputerMatchCriterion($computers_id, $criterion) {
-      $p['sort']         = '';
-      $p['list_limit']   = 999999999999; // how to get all ?
-      $p['is_deleted']   = 0;
-      $p['all_search']   = false;
-      $p['no_search']    = false;
-
-      $p['criteria'] = array($criterion);
-
-      $datas = Search::getDatas("Computer", $p, array(1));
-      if (isset($datas['data']['items'][$computers_id])) {
-         return true;
-      }
-
-      return false;
-   }
-
-   static function isComputerMatchMetaCriterion($computers_id, $metacriterion) {
+   
+   /**
+    * Check if a computer match a criteria (by search it in searchengine)
+    * @param  [integer]  $computers_id [id of the computer]
+    * @param  [array]  $criterion    Array(
+    *                                     [field] => searchoption_num
+    *                                     [searchtype] => is/contains
+    *                                     [value] => value
+    *                                 )
+    *                                 See : https://forge.indepnet.net/projects/glpi/wiki/SearchEngine 
+    * @param  boolean $meta         [criterion is a metacriterion ?]
+    * @return boolean            
+    */
+   static function isComputerMatchCriterion($computers_id, $criterion, $meta = false) {
       $p['sort']         = '';
       $p['list_limit']   = 999999999999; // how to get all ?
       $p['is_deleted']   = 0;
@@ -811,8 +807,13 @@ class ComputerConfiguration extends CommonDBTM {
       $p['no_search']    = false;
 
       $p['criteria'] = array();
-      $p['metacriteria'] = array($metacriterion);
+      if (!$meta) {
+         $p['criteria'] = array($criterion);
+      } else {
+         $p['metacriteria'] = array($criterion);
+      }
 
+      //send params to search engine
       $datas = Search::getDatas("Computer", $p, array(1));
       if (isset($datas['data']['items'][$computers_id])) {
          return true;
@@ -820,6 +821,5 @@ class ComputerConfiguration extends CommonDBTM {
 
       return false;
    }
-
 }
 
