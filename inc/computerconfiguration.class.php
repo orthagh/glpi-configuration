@@ -438,7 +438,11 @@ class ComputerConfiguration extends CommonDBTM {
          echo "</td>";
 
          // echo computer name
-         echo "<td>".$computer->getLink(array('comments' => true))."</td>";
+         echo "<td>".$computer->getLink(array('comments' => true));
+         if ($currentline['is_dynamic']) {
+            echo "&nbsp;<b>(D)</b>";
+         }
+         echo "</td>";
          
          // displays inherited configuration  
          if ($this->fields['viewchilds']) {
@@ -700,16 +704,28 @@ class ComputerConfiguration extends CommonDBTM {
     */
    static function getListComputerStates($computerconfigurations_id) {
       $listofcomputers_states = array();
+      
       $listofancestors_id = self::getAncestors($computerconfigurations_id, true);
       $listofconfigurations_id = array_merge(array($computerconfigurations_id), $listofancestors_id);
-      $listofcomputers_associated = self::getListOfComputersID($computerconfigurations_id);
+
+      $listofcomputers_associated = $listofcomputers_id_associated = array();
+      $compconf_comp = new ComputerConfiguration_Computer;
+      $found_comp = $compconf_comp->find("computerconfigurations_id = $computerconfigurations_id");
+      foreach ($found_comp as $comp) {
+         $listofcomputers_associated[$comp['id']] = array('computers_id' => $comp['computers_id'], 
+                                                  'is_dynamic'   => $comp['is_dynamic']);
+         $listofcomputers_id_associated[$comp['id']] = $comp['computers_id'];
+      }
+
 
       foreach ($listofconfigurations_id as $tmp_conf_id) {
          $listofcomputers_criteria = self::getComputerFromSearchCriteria($tmp_conf_id);
-         $listofcomputers_match = array_intersect($listofcomputers_associated, $listofcomputers_criteria);
+         $listofcomputers_match = array_intersect($listofcomputers_id_associated, $listofcomputers_criteria);
 
          foreach ($listofcomputers_associated as $computerconfigurations_computers_id 
-                                           => $computers_id) {
+                                           => $computer) {
+
+            $computers_id = $computer['computers_id'];
 
             if (!isset($listofcomputers_states[$computers_id]['match'])) {
                $listofcomputers_states[$computers_id]['match'] = true;
@@ -718,10 +734,14 @@ class ComputerConfiguration extends CommonDBTM {
             if (!in_array($computers_id, $listofcomputers_match)) {
                $listofcomputers_states[$computers_id]['mismatch_configuration'][] = $tmp_conf_id;
                $listofcomputers_states[$computers_id]['match'] = false;
+
+               $listofcomputers_states[$computers_id]['mismatch_configuration'] 
+                  = array_unique($listofcomputers_states[$computers_id]['mismatch_configuration']);
             }
 
             $listofcomputers_states[$computers_id]['computerconfigurations_computers_id'] = $computerconfigurations_computers_id;
             $listofcomputers_states[$computers_id]['computers_id'] = $computers_id;
+            $listofcomputers_states[$computers_id]['is_dynamic'] = $computer['is_dynamic'];
             $listofcomputers_states[$computers_id]['computerconfigurations_id'] = $computerconfigurations_id;
          }
       }
@@ -757,6 +777,8 @@ class ComputerConfiguration extends CommonDBTM {
       $detail = array();
 
       $listofcomputer_withstate = self::getListComputerStates($computerconfigurations_id);
+
+      $detail['is_dynamic'] = $listofcomputer_withstate[$computers_id]['is_dynamic'];
 
       if (!$listofcomputer_withstate[$computers_id]['match']) {
          $detail['mismatch_configuration'] = $listofcomputer_withstate[$computers_id]['mismatch_configuration'];

@@ -132,7 +132,12 @@ class ComputerConfiguration_Computer extends CommonDBChild {
          Html::showMassiveActionCheckBox($classname, $current_line['id']);
          echo "</td>";
 
-         echo "<td>".$configuration->getLink(array('comments' => false))."</td>";
+         echo "<td>".$configuration->getLink(array('comments' => false));
+         if ($detail['is_dynamic']) {
+            echo "&nbsp;<b>(D)</b>";
+         }
+         echo "</td>";
+
          if ($match) {
             $pic = "greenbutton.png";
             $title = __('Yes');
@@ -140,8 +145,6 @@ class ComputerConfiguration_Computer extends CommonDBChild {
             $pic = "redbutton.png";
             $title = __('No');
          }
-
-
          echo "<td width='10'><img src='".$CFG_GLPI['root_doc']."/pics/$pic' title='$title'></td>";
          echo "</td>";
          echo "<td>";
