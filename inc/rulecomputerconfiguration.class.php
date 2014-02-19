@@ -182,8 +182,7 @@ class RuleComputerConfiguration extends Rule {
       } 
 
       return $output;
-   }
-   
+   }   
 }
 
 ?>

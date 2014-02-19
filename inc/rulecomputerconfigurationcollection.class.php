@@ -46,6 +46,18 @@ class RuleComputerconfigurationCollection extends RuleCollection {
       return __('Automatic assignment for computer configurations');
    }
 
+   /**
+    * @see RuleCollection::processAllRules
+    */
+   function processAllRules($input=array() ,$output=array(), $params=array(), $options=array()) {
+      $input = parent::processAllRules($input ,$output, $params, $options);
+
+      if (isset($input["_affect_configuration"]) && isset($params['computers_id'])) {
+         ComputerConfiguration_Computer::linkComputerWithConfigurations($params['computers_id'], 
+                                                                        $input["_affect_configuration"]);
+      }
+      return $input;
+   }
 
 }
 ?>

@@ -213,14 +213,26 @@ class ComputerConfiguration_Computer extends CommonDBChild {
       $compconf_comp = new self;
 
       //delete old dynamic links
-      $found_compconf_comps = $compconf_comp->find("is_dynamic = 1 
-                                                    AND computers_id = $computers_id");
-      foreach ($found_compconf_comps as $found_compconf_comp) {
+      $found_dynamic_compconf_comps = $compconf_comp->find("is_dynamic = 1 
+                                                            AND computers_id = $computers_id");
+      foreach ($found_dynamic_compconf_comps as $found_compconf_comp) {
          $compconf_comp->delete(array('id' => $found_compconf_comp['id']));
+      }
+
+      // find static link (to avoid adding dynamic links)
+      $found_static_compconf_comps = $compconf_comp->find("is_dynamic = 0 
+                                                            AND computers_id = $computers_id");
+      $static_configurations_id = array();
+      foreach ($found_static_compconf_comps as $tmp_comf_comp) {
+         $static_configurations_id[] = $tmp_comf_comp['computerconfigurations_id'];
       }
 
       // add new link
       foreach ($affect_configuration as $computerconfigurations_id) {
+         if (in_array($computerconfigurations_id, $static_configurations_id)) {
+            continue;
+         }
+
          $compconf_comp->add(array('computerconfigurations_id' => $computerconfigurations_id, 
                                    'computers_id'              => $computers_id, 
                                    'is_dynamic'                => true));
