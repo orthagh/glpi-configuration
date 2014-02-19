@@ -491,7 +491,9 @@ class ComputerConfiguration extends CommonDBTM {
          $input['metacriteria'] = http_build_query($input['metacriteria']);
       }
 
-      $this->saveInheritance($input);
+      if (!isset($input['criteria'])) {
+         $this->saveInheritance($input);
+      }
 
       return $input;
    }
