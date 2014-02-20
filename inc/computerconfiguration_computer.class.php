@@ -114,7 +114,7 @@ class ComputerConfiguration_Computer extends CommonDBChild {
       echo "<th width='10'>".Html::getCheckAllAsCheckbox('mass'.$classname.$rand)."</th>";
       echo "<th>".__('associated to the configuration')."</th>";
       echo "<th width='10'>"._x('item', 'State')."</th>";
-      echo "<th>".__(' mismatches the configuration')."</th>";
+      echo "<th>".__('do not match the configuration')."</th>";
       echo "</tr>";
       $configuration = new ComputerConfiguration;
       for ($i=$start, $j=0 ; ($i < $number) && ($j < $_SESSION['glpilist_limit']) ; $i++, $j++) {

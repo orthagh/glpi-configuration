@@ -417,7 +417,7 @@ class ComputerConfiguration extends CommonDBTM {
          echo "<th>".__('associated to the configuration')."</th>";
       }
       echo "<th width='10'>"._x('item', 'State')."</th>";
-      echo "<th>".__(' mismatches the configuration')."</th>";
+      echo "<th>".__('do not match the configuration')."</th>";
       echo "</tr>";
       $computer = new Computer;
       $configuration = new self;
