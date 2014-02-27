@@ -366,7 +366,11 @@ class Document_Item extends CommonDBRelation{
          }
 
          if ($item->canView()) {
-            $column = "name";
+            if ($item instanceof CommonDevice) {
+               $column = "designation";
+            } else {
+               $column = "name";
+            }
             if ($itemtype == 'Ticket') {
                $column = "id";
             }
@@ -383,11 +387,14 @@ class Document_Item extends CommonDBRelation{
                                 AND ";
             } else {
                $query .= "`glpi_entities`.`id` AS entity
-                          FROM `glpi_documents_items`, `$itemtable`
-                          LEFT JOIN `glpi_entities`
-                              ON (`glpi_entities`.`id` = `$itemtable`.`entities_id`)
-                          WHERE `$itemtable`.`id` = `glpi_documents_items`.`items_id`
-                                AND ";
+                          FROM `glpi_documents_items`, `$itemtable`";
+
+               if ($itemtype != 'Entity') {
+                  $query .= " LEFT JOIN `glpi_entities`
+                                 ON (`glpi_entities`.`id` = `$itemtable`.`entities_id`)";
+               }
+               $query .= " WHERE `$itemtable`.`id` = `glpi_documents_items`.`items_id`
+                                 AND ";
             }
             $query .= "`glpi_documents_items`.`itemtype` = '$itemtype'
                        AND `glpi_documents_items`.`documents_id` = '$instID' ";
@@ -435,7 +442,11 @@ class Document_Item extends CommonDBRelation{
                         $data["name"] = sprintf(__('%1$s - %2$s'), $data["name"],
                                                 $soft->fields['name']);
                      }
-                     $linkname = $data["name"];
+                     if ($item instanceof CommonDevice) {
+                        $linkname = $data["designation"];
+                     } else {
+                        $linkname = $data["name"];
+                     }
                      if ($_SESSION["glpiis_ids_visible"]
                          || empty($data["name"])) {
                         $linkname = sprintf(__('%1$s (%2$s)'), $linkname, $data["id"]);
@@ -509,6 +520,19 @@ class Document_Item extends CommonDBRelation{
          return false;
       }
 
+
+      $columns = array('name'      => __('Name'),
+                       'entity'    => __('Entity'),
+                       'filename'  => __('File'),
+                       'link'      => __('Web link'),
+                       'headings'  => __('Heading'),
+                       'mime'      => __('MIME type'));
+      if ($CFG_GLPI['use_rich_text']) {
+         $columns['tag'] = __('Tag');
+      }
+      $columns['assocdate'] = __('Date');
+
+      
       if (empty($withtemplate)) {
          $withtemplate = 0;
       }
@@ -524,7 +548,8 @@ class Document_Item extends CommonDBRelation{
          $order = "DESC";
       }
 
-      if (isset($_GET["sort"]) && !empty($_GET["sort"])) {
+      if ((isset($_GET["sort"]) && !empty($_GET["sort"]))
+         && isset($columns[$_GET["sort"]])) {
          $sort = "`".$_GET["sort"]."`";
       } else {
          $sort = "`assocdate`";
@@ -714,16 +739,6 @@ class Document_Item extends CommonDBRelation{
          $header_bottom .= "<th width='11'>".Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand);
          $header_bottom .= "</th>";
       }
-      $columns = array('name'      => __('Name'),
-                       'entity'    => __('Entity'),
-                       'filename'  => __('File'),
-                       'link'      => __('Web link'),
-                       'headings'  => __('Heading'),
-                       'mime'      => __('MIME type'));
-      if ($CFG_GLPI['use_rich_text']) {
-         $columns['tag'] = __('Tag');
-      }
-      $columns['assocdate'] = __('Date');
 
       foreach ($columns as $key => $val) {
          $header_end .= "<th>".(($sort == "`$key`") ?$sort_img:"").
