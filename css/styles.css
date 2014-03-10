@@ -176,23 +176,6 @@ hr {
 }
 
 
-/* Over link div */
-.over_link {
-   display: none;
-   position: absolute;
-   border: 1px solid  #CC9900;
-   background: url("../pics/fd_hoverlink.png") 0 0 repeat;
-   -moz-border-radius: 5px;
-   -webkit-border-radius: 5px;
-   -o-border-radius: 5px;
-   padding: 5px;
-   max-width: 350px;
-   font-size: 11px;
-   text-align: left;
-   z-index:1000;
-}
-
-
 .pointer {
    cursor:pointer;
  }
@@ -453,7 +436,7 @@ td { }
    z-index:1;
    text-align: left;
    font-size: 11px;
-   width:950px;
+   width:90%;
    /* background-color: #FFF4DF; */
   /* background : url("../pics/fond-central.png") repeat-x top right ;
    -moz-border-radius: 5px;
@@ -499,7 +482,7 @@ td { }
    vertical-align: middle;	
 }
 
-.tab_cadrehov, .tab_cadrehov_pointer {
+.tab_cadrehov {
    margin: 0 auto;
    -moz-border-radius: 4px;
    -webkit-border-radius: 4px;
@@ -514,20 +497,7 @@ td { }
    box-shadow: 0px 2px 5px #666;
 }
 
-.tab_cadre_report {
-   margin: 0 auto;
-   -moz-border-radius: 4px;
-   -webkit-border-radius: 4px;
-   -o-border-radius: 4px;
-   border: 1px solid #cccccc;
-   z-index:1;
-   text-align: left;
-   font-size: 11px;
-   text-align: center;
-   width:90%;
-}
-
-.tab_cadre th, .tab_cadre_fixe th, .tab_cadre_fixehov th, .tab_cadrehov th, .tab_cadrehov_pointer th, .tab_cadre_report th {
+.tab_cadre th, .tab_cadre_fixe th, .tab_cadre_fixehov th, .tab_cadrehov th {
    font-size: 12px;
    font-weight: bold;
    background-color: #E1D39E;
@@ -541,8 +511,7 @@ td { }
    padding: 2px;*/
 }
 
-.tab_cadre td, .tab_cadre_fixe td, .tab_cadre_fixehov td, .tab_cadrehov td, .tab_cadrehov_pointer td, 
-.tab_cadre_report td {
+.tab_cadre td, .tab_cadre_fixe td, .tab_cadre_fixehov td, .tab_cadrehov td {
    padding: 3px 5px;
 }
 
@@ -550,14 +519,9 @@ td { }
 /*    background-color: #FFF4DF; */
 /*  } */
 
-.tab_cadrehov_pointer tr:hover {
-   cursor: pointer;
-/*    background-color: #FFF4DF; */
-}
 
 /* Table Hover Effects */
 .tab_cadrehov th.headHover,
-.tab_cadrehov_pointer th.headHover, 
 .tab_cadre_fixehov th.headHover{
    background-color:#ddd;
 /*   opacity: 0.5;
@@ -565,7 +529,6 @@ td { }
 }
 
 .tab_cadrehov td.columnHover,
-.tab_cadrehov_pointer td.columnHover,
 .tab_cadre_fixehov td.columnHover{
    background-color:#ddd;
 /*   opacity: 0.5;
@@ -573,40 +536,12 @@ td { }
 }
 
 .tab_cadrehov tr.rowHover, 
-.tab_cadrehov_pointer tr.rowHover,
 .tab_cadre_fixehov tr.rowHover{
    background-color:#e7e7e2;
 /*   opacity: 0.5;
    filter : alpha(opacity=10);*/
 }
 
-
-.tab_check {
-   text-align:center;
-   margin: 20px;
-   margin-left: auto;
-   margin-right: auto;
-   width: 90%;
-   border: 1px solid #aaaaaa;
-   padding:10px;
-}
-
-.tab_check th {
-   font-size: 12px;
-   font-weight: bold;
-   color: #fccc6f;
-   vertical-align:bottom;
-}
-
-.tab_check td {
-   font-size:11px;
-   border-bottom:1px solid #bbbbbb;
-}
-
-/* Ajout pour IE */
-.tab_cadrehov_pointer tr {
-   cursor: pointer;
-}
 
 
 .tab_format {
@@ -615,6 +550,13 @@ td { }
    margin: 0px;
    border: 0px;
    border-collapse:collapse;
+}
+
+.tabcompact {
+   padding: 0px;
+   margin: 0px;
+   border: 0px;
+   border-collapse:collapse;   
 }
 
 .tab_format td {
@@ -652,14 +594,6 @@ td { }
    background-color: #f2f2f2;
 }
 
-.tab_find {
-   background-color: #ccccc7;
-}
-
-.tab_find:hover {
-   background-color:#FFF2C2;
-   cursor:pointer;
-}
 
 .tab_resa {
    border:1px dashed #cccccc;
@@ -674,7 +608,7 @@ td { }
 
 .central {
    padding-top: 15px;
-   width: 450px;
+   width: 100%;
 }
 
 .central table {
@@ -762,31 +696,7 @@ td.rotate {
 
 
 /* ################--------------- Tracking  / Reminder ---------------#################### */
-.tracking {
-   width:100%;
-   height:100%;
-   cursor:pointer;
-}
 
-.tracking:hover {
-   background-color: #FFF4DF; 
-}
-
-.tracking_hour {
-   font-family: verdana;
-   font-size: 10px;
-}
-
-.tracking_bold {
-   font-weight: bold;
-}
-
-.ldap_right, .reminder_right {
-   position:absolute; 
-   right:0;
-   margin-right:5px;
-   font-size:10px;
-}
 
 .showplan {
    font-weight: bold;
@@ -794,16 +704,6 @@ td.rotate {
    color : #659900; 
    cursor:pointer;
 }
-
-.tracking_small {
-   font-size:10px;
-}
-
-.reminder_list {
-   text-align:left;
-   margin-left:8px;
-}
-
 
 
 /* ################--------------- User Picture ---------------#################### */

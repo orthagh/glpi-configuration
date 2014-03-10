@@ -92,23 +92,23 @@ if (isset($_GET['create_ticket'])) {
 
 } else {
    Html::helpHeader(__('Home'), $_SERVER['PHP_SELF'], $_SESSION["glpiname"]);
-   echo "<table class='tab_cadre_central'><tr>";
+   echo "<table class='tab_cadre_central'><tr class='noHover'>";
    echo "<td class='top'><br>";
    echo "<table>";
    if (Session::haveRight('ticket', CREATE)) {
-      echo "<tr><td class='top' width='450px'>";
+      echo "<tr class='noHover'><td class='top' width='450px'>";
       Ticket::showCentralCount(true);
       echo "</td></tr>";
    }
 
    if (Session::haveRight("reminder_public", READ)) {
-      echo "<tr><td class='top' width='450px'>";
+      echo "<tr class='noHover'><td class='top' width='450px'>";
       Reminder::showListForCentral(false);
       echo "</td></tr>";
    }
 
    if (Session::haveRight("rssfeed_public", READ)) {
-      echo "<tr><td class='top' width='450px'>";
+      echo "<tr class='noHover'><td class='top' width='450px'>";
       RSSFeed::showListForCentral(false);
       echo "</td></tr>";
    }
@@ -119,13 +119,13 @@ if (isset($_GET['create_ticket'])) {
 
    // Show KB items
    if (Session::haveRight('knowbase', KnowbaseItem::READFAQ)) {
-      echo "<tr><td class='top' width='450px'>";
+      echo "<tr class='noHover'><td class='top' width='450px'>";
       KnowbaseItem::showRecentPopular("popular");
       echo "</td></tr>";
-      echo "<tr><td class='top' width='450px'><br>";
+      echo "<tr class='noHover'><td class='top' width='450px'><br>";
       KnowbaseItem::showRecentPopular("recent");
       echo "</td></tr>";
-      echo "<tr><td class='top' width='450px'><br>";
+      echo "<tr class='noHover'><td class='top' width='450px'><br>";
       KnowbaseItem::showRecentPopular("lastupdate");
       echo "</td></tr>";
    } else {

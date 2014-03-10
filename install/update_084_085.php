@@ -1891,7 +1891,14 @@ function update084to085() {
    $migration->addKey('glpi_documents', 'tag');
    Config::setConfigurationValues('core', array('use_rich_text' => 0));
    Config::setConfigurationValues('core', array('attach_ticket_documents_to_mail' => 0));
+   
+   $migration->migrationOneTable('glpi_documents');
+   $query = "UPDATE `glpi_documents`
+                   SET `tag` = `id`";
+   $DB->queryOrDie($query, "0.85 set tag to all documents");
 
+
+   
    // increase password length
    $migration->changeField('glpi_users', 'password', 'password', 'string');
 
@@ -2638,13 +2645,13 @@ function update084to085() {
       }
       $savesession = $_SESSION['glpishowallentities'];
       $_SESSION['glpishowallentities'] = 1;
-      
+
       $queryl = "SELECT `id`, `number`
                  FROM `glpi_softwarelicenses`";
 
       foreach ($DB->request($queryl) AS $datal) {
          if (($datal['number'] >= 0)
-            && ($datal['number'] < Computer_SoftwareLicense::countForLicense($datal['id'], -1))) {
+             && ($datal['number'] < Computer_SoftwareLicense::countForLicense($datal['id'], -1))) {
 
             $queryl2 = "UPDATE `glpi_softwarelicenses`
                         SET `is_valid` = 0
@@ -2814,15 +2821,11 @@ function update084to085() {
              SET `num` = 200
              WHERE `num` = 90";
    $DB->query($query);
-   
+
    $migration->updateDisplayPrefs($ADDTODISPLAYPREF, $DELFROMDISPLAYPREF);
 
    // must always be at the end
    $migration->executeMigration();
-
-   $query = "UPDATE `glpi_documents`
-                   SET `tag` = `id`";
-   $DB->queryOrDie($query, "0.85 set tag to all documents");
 
    return $updateresult;
 }

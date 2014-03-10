@@ -3229,7 +3229,7 @@ class Ticket extends CommonITILObject {
       }
 
       if (!$tt->isHiddenField('_users_id_observer')
-            || $tt->isPredefinedField('_users_id_observer')) {
+          || $tt->isPredefinedField('_users_id_observer')) {
          echo "<tr class='tab_bg_1'><td>".__('Watcher')."</td>";
          echo "<td>";
          $values['_right'] = "groups";
@@ -3242,7 +3242,7 @@ class Ticket extends CommonITILObject {
                echo self::getActorIcon('user', CommonITILActor::OBSERVER)."&nbsp;";
                echo Dropdown::getDropdownName("glpi_users", $values["_users_id_observer"]);
                echo "<input type='hidden' name='_users_id_observer' value=\"".
-                     $values["_users_id_observer"]."\">";
+                      $values["_users_id_observer"]."\">";
                echo '<hr>';
            }
          }
@@ -4463,7 +4463,7 @@ class Ticket extends CommonITILObject {
                             _sx('button', 'Restore')."'></td>";
                   }
                } else {
-                  if (self::canUpdate()) {
+                  if (self::canUpdate() ) {
                      echo "<input type='submit' class='submit' name='update' value='".
                             _sx('button', 'Save')."'></td>";
                   }
@@ -4683,8 +4683,8 @@ class Ticket extends CommonITILObject {
       }
 
       if ($numrows > 0) {
-         echo "<table class='tab_cadre_report'>";
-         echo "<tr><th colspan='5'>";
+         echo "<table class='tab_cadrehov'>";
+         echo "<tr class='noHover'><th colspan='4'>";
 
          $options['reset'] = 'reset';
          $forcetab         = '';
@@ -5004,7 +5004,7 @@ class Ticket extends CommonITILObject {
       $options['criteria'][0]['link']       = 'AND';
       $options['reset']         ='reset';
 
-      echo "<table class='tab_cadre_report' >";
+      echo "<table class='tab_cadrehov' >";
       echo "<tr class='noHover'><th colspan='2'>";
 
       if ($_SESSION["glpiactiveprofile"]["interface"] != "central") {
@@ -5099,7 +5099,8 @@ class Ticket extends CommonITILObject {
    static function showListForItem(CommonDBTM $item) {
       global $DB, $CFG_GLPI;
 
-      if (!Session::haveRightsAnd(self::$rightname, array(self::READALL, CREATE))) {
+      if (!Session::haveRightsOr(self::$rightname,
+                                  array(self::READALL, self::READMY, self::READASSIGN, CREATE))) {
          return false;
       }
 
@@ -5181,7 +5182,7 @@ class Ticket extends CommonITILObject {
                         " AND `itemtype` = '".$item->getType()."')";
 
             // you can only see your tickets
-            if (!Session::haveRight("show_all_ticket","1")) {
+            if (!Session::haveRight(self::$rightname, self::READALL)) {
                $restrict .= " AND (`glpi_tickets`.`users_id_recipient` = '".Session::getLoginUserID()."'
                                    OR (`glpi_tickets_users`.`tickets_id` = '".$item->getID()."'
                                        AND `glpi_tickets_users`.`users_id`
@@ -5247,7 +5248,7 @@ class Ticket extends CommonITILObject {
             $title = printf(__('%1$s (%2$s)'), $title, $link);
             echo "</th></tr>";
          } else {
-            echo "<tr><th>".__("You don't have right to see all tickets")."</th></tr>";
+            echo "<tr><th colspan='$colspan'>".__("You don't have right to see all tickets")."</th></tr>";
          }
 
       } else {

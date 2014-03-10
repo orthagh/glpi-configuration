@@ -1227,8 +1227,10 @@ class Search {
          $headers_line_top .= self::showBeginHeader($data['display_type']);
          $headers_line_top .= self::showNewLine($data['display_type']);
 
+         if ($data['display_type'] == self::HTML_OUTPUT) {
 //          $headers_line_bottom .= self::showBeginHeader($data['display_type']);
-         $headers_line_bottom .= self::showNewLine($data['display_type']);
+            $headers_line_bottom .= self::showNewLine($data['display_type']);
+         }
 
          $header_num = 1;
          if (($data['display_type'] == self::HTML_OUTPUT)
@@ -1237,10 +1239,12 @@ class Search {
                .= self::showHeaderItem($data['display_type'],
                                        Html::getCheckAllAsCheckbox($massformid),
                                        $header_num, "", 0, $data['search']['order']);
-            $headers_line_bottom
-               .= self::showHeaderItem($data['display_type'],
-                                       Html::getCheckAllAsCheckbox($massformid),
-                                       $header_num, "", 0, $data['search']['order']);
+            if ($data['display_type'] == self::HTML_OUTPUT) {
+               $headers_line_bottom
+                  .= self::showHeaderItem($data['display_type'],
+                                          Html::getCheckAllAsCheckbox($massformid),
+                                          $header_num, "", 0, $data['search']['order']);
+            }
          }
 
          // Display column Headers for toview items
@@ -1287,7 +1291,9 @@ class Search {
          $headers_line        .= self::showEndLine($data['display_type']);
 
          $headers_line_top    .= $headers_line;
-         $headers_line_bottom .= $headers_line;
+         if ($data['display_type'] == self::HTML_OUTPUT) {
+            $headers_line_bottom .= $headers_line;
+         }
 
          $headers_line_top    .= self::showEndHeader($data['display_type']);
 //          $headers_line_bottom .= self::showEndHeader($data['display_type']);
@@ -1431,79 +1437,78 @@ class Search {
                if (isset($criteria['link'])) {
                   $titlecontain = " ".$criteria['link']." ";
                }
-               $gdname = '';
+               $gdname    = '';
+               $valuename = '';
                switch ($criteria['field']) {
                   case "all" :
                      $titlecontain = sprintf(__('%1$s %2$s'), $titlecontain, __('All'));
                      break;
 
                   case "view" :
-                     $titlecontain = sprintf(__('%1$s %2$s'), $titlecontain,
-                                             __('Items seen'));
+                     $titlecontain = sprintf(__('%1$s %2$s'), $titlecontain, __('Items seen'));
                      break;
 
                   default :
-                     $titlecontain
-                        = sprintf(__('%1$s %2$s'), $titlecontain,
-                                    $searchopt[$criteria['field']]["name"]);
-                     $gdname = Dropdown::getDropdownName($searchopt[$criteria['field']]
-                                                                     ["table"],
+                     $titlecontain = sprintf(__('%1$s %2$s'), $titlecontain,
+                                             $searchopt[$criteria['field']]["name"]);
+                     $itemtype     = getItemTypeForTable($searchopt[$criteria['field']]["table"]);
+                     $valuename    = '';
+                     if ($item = getItemForItemtype($itemtype)) {
+                        $valuename = $item->getValueToDisplay($searchopt[$criteria['field']],
+                                                              $criteria['value']);
+                     }
+
+                     $gdname = Dropdown::getDropdownName($searchopt[$criteria['field']]["table"],
                                                          $criteria['value']);
                }
 
+               if (empty($valuename)) {
+                  $valuename = $criteria['value'];
+               }
                switch ($criteria['searchtype']) {
                   case "equals" :
                      if (in_array($searchopt[$criteria['field']]["field"],
-                                    array('name', 'completename'))) {
-                        $titlecontain = sprintf(__('%1$s = %2$s'), $titlecontain,
-                                                $gdname);
+                                  array('name', 'completename'))) {
+                        $titlecontain = sprintf(__('%1$s = %2$s'), $titlecontain, $gdname);
                      } else {
-                        $titlecontain = sprintf(__('%1$s = %2$s'), $titlecontain,
-                                                $criteria['value']);
+                        $titlecontain = sprintf(__('%1$s = %2$s'), $titlecontain, $valuename);
                      }
                      break;
 
                   case "notequals" :
                      if (in_array($searchopt[$criteria['field']]["field"],
                                     array('name', 'completename'))) {
-                        $titlecontain = sprintf(__('%1$s <> %2$s'), $titlecontain,
-                                                $gdname);
+                        $titlecontain = sprintf(__('%1$s <> %2$s'), $titlecontain, $gdname);
                      } else {
-                        $titlecontain = sprintf(__('%1$s <> %2$s'), $titlecontain,
-                                                $criteria['value']);
+                        $titlecontain = sprintf(__('%1$s <> %2$s'), $titlecontain, $valuename);
                      }
                      break;
 
                   case "lessthan" :
-                     $titlecontain = sprintf(__('%1$s < %2$s'), $titlecontain,
-                                             $criteria['value']);
+                     $titlecontain = sprintf(__('%1$s < %2$s'), $titlecontain, $valuename);
                      break;
 
                   case "morethan" :
-                     $titlecontain = sprintf(__('%1$s > %2$s'), $titlecontain,
-                                             $criteria['value']);
+                     $titlecontain = sprintf(__('%1$s > %2$s'), $titlecontain, $valuename);
                      break;
 
                   case "contains" :
                      $titlecontain = sprintf(__('%1$s = %2$s'), $titlecontain,
-                                             '%'.$criteria['value'].'%');
+                                             '%'.$valuename.'%');
                      break;
 
                   case "under" :
                      $titlecontain = sprintf(__('%1$s %2$s'), $titlecontain,
-                                             sprintf(__('%1$s %2$s'), __('under'),
-                                                      $gdname));
+                                             sprintf(__('%1$s %2$s'), __('under'), $gdname));
                      break;
 
                   case "notunder" :
                      $titlecontain = sprintf(__('%1$s %2$s'), $titlecontain,
-                                             sprintf(__('%1$s %2$s'), __('not under'),
-                                                      $gdname));
+                                             sprintf(__('%1$s %2$s'), __('not under'), $gdname));
                      break;
 
                   default :
-                     $titlecontain = sprintf(__('%1$s = %2$s'), $titlecontain,
-                                             $criteria['value']);
+                     $titlecontain = sprintf(__('%1$s = %2$s'), $titlecontain, $valuename);
                      break;
                }
             }
@@ -3404,6 +3409,18 @@ class Search {
                                               $addcondition) ";
                   break;
 
+               case "itemtypeonly" :
+                  $used_itemtype = $itemtype;
+                  if (isset($joinparams['specific_itemtype'])
+                      && !empty($joinparams['specific_itemtype'])) {
+                     $used_itemtype = $joinparams['specific_itemtype'];
+                  }
+                  // Itemtype join
+                  $specific_leftjoin = " LEFT JOIN `$new_table` $AS
+                                          ON (`$nt`.`itemtype` = '$used_itemtype'
+                                              $addcondition) ";
+                  break;
+
                default :
                   // Standard join
                   $specific_leftjoin = "LEFT JOIN `$new_table` $AS
@@ -4195,7 +4212,10 @@ class Search {
                return $out;
 
             case 'glpi_ticketsatisfactions.satisfaction' :
-               return TicketSatisfaction::displaySatisfaction($data[$num][0]['name']);
+               if (self::$output_type == self::HTML_OUTPUT) {
+                  return TicketSatisfaction::displaySatisfaction($data[$num][0]['name']);
+               }
+               break;
 
             case 'glpi_cartridgeitems._virtual' :
                return Cartridge::getCount($data["id"], $data[$num][0]['alarm_threshold'],
@@ -4930,6 +4950,11 @@ class Search {
          if (InfoCom::canApplyOn($itemtype)
              || ($itemtype == 'AllAssets')) {
             $search[$itemtype] += Infocom::getSearchOptionsToAdd($itemtype);
+         }
+
+         if (in_array($itemtype, $CFG_GLPI["link_types"])) {
+            $search[$itemtype]['link'] = __('Link');
+            $search[$itemtype] += Link::getSearchOptionsToAdd($itemtype);
          }
 
          if ($withplugins) {

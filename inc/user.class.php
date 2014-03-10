@@ -1968,6 +1968,11 @@ class User extends CommonDBTM {
 
       if (empty($ID)) {
          echo "<tr class='tab_bg_1'>";
+         echo "<th colspan='2'>"._n('Authorization','Authorizations',1)."</th>";
+         echo "<td>" .  __('Recursive') . "</td><td>";
+         Dropdown::showYesNo("_is_recursive",0);
+         echo "</td></tr>";
+         echo "<tr class='tab_bg_1'>";
          echo "<td>" .  __('Profile') . "</td><td>";
          Profile::dropdownUnder(array('name'  => '_profiles_id',
                                       'value' => Profile::getDefault()));
@@ -2862,7 +2867,7 @@ class User extends CommonDBTM {
                $where = '0';
             }
             break;
-            
+
          case "groups" :
             $groups = array();
             if (isset($_SESSION['glpigroups'])) {
@@ -2880,7 +2885,7 @@ class User extends CommonDBTM {
 
                if ($DB->numrows($result)) {
                   while ($data = $DB->fetch_assoc($result)) {
-                        $users[$data["id"]] = $data["id"];
+                     $users[$data["id"]] = $data["id"];
                   }
                }
             }
@@ -2896,7 +2901,7 @@ class User extends CommonDBTM {
             }
 
             break;
-         
+
 
          case "all" :
             $where = " `glpi_users`.`id` > '1' ".

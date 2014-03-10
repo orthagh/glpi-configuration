@@ -682,11 +682,13 @@ class Document extends CommonDBTM {
                    FROM `glpi_documents_items`
                    LEFT JOIN `glpi_knowbaseitems`
                         ON (`glpi_knowbaseitems`.`id` = `glpi_documents_items`.`items_id`)
+                   LEFT JOIN `glpi_entities_knowbaseitems`
+                        ON (`glpi_knowbaseitems`.`id` = `glpi_entities_knowbaseitems`.`knowbaseitems_id`)                        
                    WHERE `glpi_documents_items`.`itemtype` = 'KnowbaseItem'
                          AND `glpi_documents_items`.`documents_id` = '".$this->fields["id"]."'
                          AND `glpi_knowbaseitems`.`is_faq` = '1'
-                         AND `glpi_knowbaseitems`.`entities_id` = '0'
-                         AND `glpi_knowbaseitems`.`is_recursive` = '1'";
+                         AND `glpi_entities_knowbaseitems`.`entities_id` = '0'
+                         AND `glpi_entities_knowbaseitems`.`is_recursive` = '1'";
 
          $result = $DB->query($query);
          if ($DB->numrows($result) > 0) {
@@ -1277,18 +1279,20 @@ class Document extends CommonDBTM {
                         'used'   => $p['used']);
 
       $out .= Ajax::updateItemOnSelectEvent($field_id,"show_".$p['name'].$rand,
-                                    $CFG_GLPI["root_doc"]."/ajax/dropdownRubDocument.php", $params, false);
+                                            $CFG_GLPI["root_doc"]."/ajax/dropdownRubDocument.php",
+                                            $params, false);
       $out .= "<span id='show_".$p['name']."$rand'>";
       $out .= "</span>\n";
 
       $params['rubdoc'] = 0;
-      $out .= Ajax::updateItem("show_".$p['name'].$rand, $CFG_GLPI["root_doc"]. "/ajax/dropdownRubDocument.php",  $params, false);
+      $out .= Ajax::updateItem("show_".$p['name'].$rand,
+                               $CFG_GLPI["root_doc"]. "/ajax/dropdownRubDocument.php",
+                               $params, false);
       if ($p['display']) {
          echo $out;
          return $rand;
-      } else {
-         return $out;
       }
+      return $out;
    }
 
 

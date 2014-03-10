@@ -129,7 +129,7 @@ class Budget extends CommonDropdown{
            "</td></tr>";
 
       echo "<tr class='tab_bg_1'>";
-      echo "<td>".__('Value')."</td>";
+      echo "<td>"._x('price', 'Value')."</td>";
       echo "<td><input type='text' name='value' size='14'
                  value='".Html::formatNumber($this->fields["value"], true)."'></td></tr>";
 
@@ -215,7 +215,7 @@ class Budget extends CommonDropdown{
 
       $tab[4]['table']           = $this->getTable();
       $tab[4]['field']           = 'value';
-      $tab[4]['name']            = __('Value');
+      $tab[4]['name']            = _x('price', 'Value');
       $tab[4]['datatype']        = 'decimal';
 
       $tab[16]['table']          = $this->getTable();
@@ -279,7 +279,7 @@ class Budget extends CommonDropdown{
       echo "<th>".__('Name')."</th>";
       echo "<th>".__('Serial number')."</th>";
       echo "<th>".__('Inventory number')."</th>";
-      echo "<th>".__('Value')."</th>";
+      echo "<th>"._x('price', 'Value')."</th>";
       echo "</tr>";
 
       $num       = 0;
@@ -574,7 +574,7 @@ class Budget extends CommonDropdown{
 
       $colspan = count($found_types)+2;
       echo "<div class='spaced'><table class='tab_cadre_fixehov'>";
-      echo "<tr><th colspan='$colspan'>".__('Total spent on the budget')."</th></tr>";
+      echo "<tr class='noHover'><th colspan='$colspan'>".__('Total spent on the budget')."</th></tr>";
       echo "<tr><th>".__('Entity')."</th>";
       if (count($found_types)) {
          foreach ($found_types as $type => $typename) {
@@ -618,7 +618,7 @@ class Budget extends CommonDropdown{
          echo "<td class='numeric b'>".Html::formatNumber($total)."</td>";
          echo "</tr>";
       }
-      echo "<tr class='tab_bg_1'><th colspan='$colspan'><br></th></tr>";
+      echo "<tr class='tab_bg_1 noHover'><th colspan='$colspan'><br></th></tr>";
       echo "<tr class='tab_bg_1 noHover'>";
       echo "<td class='right' colspan='".($colspan-1)."'>".__('Total spent on the budget')."</td>";
       echo "<td class='numeric b'>".Html::formatNumber($total)."</td></tr>";

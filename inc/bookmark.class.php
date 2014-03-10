@@ -302,7 +302,7 @@ class Bookmark extends CommonDBTM {
          echo "<input type='hidden' name='url' value='" . rawurlencode($options['url']) . "'>";
       }
 
-      echo "<table class='tab_cadre_report' width='".self::WIDTH."px'>";
+      echo "<table class='tab_cadre' width='".self::WIDTH."px'>";
       echo "<tr><th>&nbsp;</th><th>";
       if ($ID > 0) {
          //TRANS: %1$s is the Itemtype name and $2$d the ID of the item
@@ -370,7 +370,7 @@ class Bookmark extends CommonDBTM {
       switch ($type) {
          case self::SEARCH :
             $fields_toclean = array('add_search_count', 'add_search_count2', 'delete_search_count',
-                                    'delete_search_count2', 
+                                    'delete_search_count2',
                                     'start', '_glpi_csrf_token');
             foreach ($fields_toclean as $field) {
                if (isset($query_tab[$field])) {
@@ -661,11 +661,11 @@ class Bookmark extends CommonDBTM {
                                     'specific_actions' => $maactions);
 
       // No massive action on bottom
-      
+
       echo "<table class='tab_cadre_fixehov'>";
       echo "<tr>";
       echo "<th>".Html::getCheckAllAsCheckbox('mass'.__CLASS__.$rand)."</th>";
-      echo "<th class='center' colspan='2'>".__('Bookmarks')."</th>";
+      echo "<th class='center' colspan='2'>"._n('Bookmark', 'Bookmarks', 2)."</th>";
       echo "<th width='20px'>&nbsp;</th>";
       echo "<th>".__('Default view')."</th>";
       $colspan = 5;
