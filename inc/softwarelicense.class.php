@@ -78,6 +78,11 @@ class SoftwareLicense extends CommonDBTM {
       return $input;
    }
 
+
+   /**
+    * @since version 0.85
+    * @see CommonDBTM::prepareInputForUpdate()
+   **/
    function prepareInputForUpdate($input) {
 
       // Update number : compute validity indicator
@@ -88,29 +93,38 @@ class SoftwareLicense extends CommonDBTM {
       return $input;
    }
 
+
    /**
     * Compute licence validity indicator.
-    * @param $ID ID of the licence
-    * @param $number licence count to check
+    *
+    * @param $ID        ID of the licence
+    * @param $number    licence count to check (default -1)
+    *
     * @since version 0.85
+    *
     * @return validity indicator
    **/
-   static function computeValidityIndicator($ID, $number = -1) {
+   static function computeValidityIndicator($ID, $number=-1) {
+
       if (($number >= 0)
-         && ($number < Computer_SoftwareLicense::countForLicense($ID, -1))) {
+          && ($number < Computer_SoftwareLicense::countForLicense($ID, -1))) {
          return 0;
       }
       // Default return 1
       return 1;
    }
-   
+
+
    /**
     * Update validity indicator of a specific license
     * @param $ID ID of the licence
+    *
     * @since version 0.85
+    *
     * @return nothing
    **/
    static function updateValidityIndicator($ID) {
+
       $lic = new self();
       if ($lic->getFromDB($ID)) {
          $valid = self::computeValidityIndicator($ID, $lic->fields['number']);
@@ -120,7 +134,8 @@ class SoftwareLicense extends CommonDBTM {
          }
       }
    }
-   
+
+
    /**
     * @since version 0.84
    **/
@@ -150,16 +165,27 @@ class SoftwareLicense extends CommonDBTM {
       Software::updateValidityIndicator($this->fields["softwares_id"]);
    }
 
+   /**
+    * @since version 0.85
+    * @see CommonDBTM::post_updateItem()
+   **/
    function post_updateItem($history=1) {
+
       if (in_array("is_valid", $this->updates)) {
          Software::updateValidityIndicator($this->fields["softwares_id"]);
       }
    }
 
+
+   /**
+    * @since version 0.85
+    * @see CommonDBTM::post_deleteFromDB()
+   **/
    function post_deleteFromDB() {
       Software::updateValidityIndicator($this->fields["softwares_id"]);
    }
-   
+
+
    /**
     * @since version 0.84
     *
@@ -350,7 +376,7 @@ class SoftwareLicense extends CommonDBTM {
       // Only use for History (not by search Engine)
       $tab                       = array();
       $tab['common']             = __('Characteristics');
-      
+
       $tab[2]['table']           = $this->getTable();
       $tab[2]['field']           = 'name';
       $tab[2]['name']            = __('Name');
@@ -402,7 +428,7 @@ class SoftwareLicense extends CommonDBTM {
       $tab[9]['field']           = 'is_valid';
       $tab[9]['name']            = __('Valid');
       $tab[9]['datatype']        = 'bool';
-      
+
       $tab[16]['table']          = $this->getTable();
       $tab[16]['field']          = 'comment';
       $tab[16]['name']           = __('Comments');
@@ -594,6 +620,20 @@ class SoftwareLicense extends CommonDBTM {
       if (!$software->can($softwares_id, READ)) {
          return false;
       }
+
+      $columns = array('name'      => __('Name'),
+                       'entity'    => __('Entity'),
+                       'serial'    => __('Serial number'),
+                       'number'    => _x('quantity', 'Number'),
+                       '_affected' => __('Affected computers'),
+                       'typename'  => __('Type'),
+                       'buyname'   => __('Purchase version'),
+                       'usename'   => __('Version in use'),
+                       'expire'    => __('Expiration'));
+      if (!$software->isRecursive()) {
+         unset($columns['entity']);
+      }
+
       if (isset($_GET["start"])) {
          $start = $_GET["start"];
       } else {
@@ -607,7 +647,7 @@ class SoftwareLicense extends CommonDBTM {
          $order = "ASC";
       }
 
-      if (isset($_GET["sort"]) && !empty($_GET["sort"])) {
+      if (isset($_GET["sort"]) && !empty($_GET["sort"]) && isset($columns[$_GET["sort"]])) {
          $sort = "`".$_GET["sort"]."`";
       } else {
          $sort = "`entity` $order, `name`";
@@ -666,12 +706,18 @@ class SoftwareLicense extends CommonDBTM {
             if ($showmassiveactions) {
                Html::openMassiveActionsForm('mass'.__CLASS__.$rand);
                $massiveactionparams
-                  = array('num_displayed' => $num_displayed,
-                          'container'     => 'mass'.__CLASS__.$rand,
-                          'extraparams'   => array('options'
-                                                   => array('condition'
-                                                            => "`glpi_softwareversions`.`softwares_id`
-                                                                  = $softwares_id")));
+                  = array('num_displayed'
+                           => $num_displayed,
+                          'container'
+                           => 'mass'.__CLASS__.$rand,
+                          'extraparams'
+                           => array('options'
+                                     => array('glpi_softwareversions.name'
+                                               => array('condition'
+                                                         => "`glpi_softwareversions`.`softwares_id`
+                                                                  = $softwares_id"),
+                                              'glpi_softwarelicenses.name'
+                                               => array('itemlink_as_string' => true))));
 
                Html::showMassiveActions($massiveactionparams);
             }
@@ -679,18 +725,6 @@ class SoftwareLicense extends CommonDBTM {
                         (($order == "DESC") ? "puce-down.png" : "puce-up.png") ."\" alt='' title=''>";
 
 
-            $columns = array('name'      => __('Name'),
-                             'entity'    => __('Entity'),
-                             'serial'    => __('Serial number'),
-                             'number'    => _x('quantity', 'Number'),
-                             '_affected' => __('Affected computers'),
-                             'typename'  => __('Type'),
-                             'buyname'   => __('Purchase version'),
-                             'usename'   => __('Version in use'),
-                             'expire'    => __('Expiration'));
-            if (!$software->isRecursive()) {
-               unset($columns['entity']);
-            }
             $sort_img = "<img src=\"" . $CFG_GLPI["root_doc"] . "/pics/" .
                           (($order == "DESC") ? "puce-down.png" : "puce-up.png") ."\" alt='' title=''>";
 
@@ -735,18 +769,18 @@ class SoftwareLicense extends CommonDBTM {
                echo "<td><a href='softwarelicense.form.php?id=".$data['id']."'>".$data['name'].
                           (empty($data['name']) ?"(".$data['id'].")" :"")."</a></td>";
 
-               echo "<td>";
-               if ($software->isRecursive()) {
+               if (isset($columns['entity'])) {
+                  echo "<td>";
                   echo $data['entity'];
+                  echo "</td>";
                }
-               echo "</td>";
                echo "<td>".$data['serial']."</td>";
                echo "<td class='numeric'>".
                       (($data['number'] > 0) ?$data['number']:__('Unlimited'))."</td>";
                $nb_assoc   = Computer_SoftwareLicense::countForLicense($data['id']);
                $tot_assoc += $nb_assoc;
                $color = ($data['is_valid']?'green':'red');
-               
+
                echo "<td class='numeric $color'>".$nb_assoc."</td>";
                echo "<td>".$data['typename']."</td>";
                echo "<td>".$data['buyname']."</td>";

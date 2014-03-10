@@ -938,7 +938,7 @@ class Html {
           $output .= "<tr><th class='center'>".$param['title']."&nbsp;".$percent."%</th></tr>";
        }
        $output .= "<tr><td>
-                   <table><tr><td class='center' style='background:url(".$CFG_GLPI["root_doc"].
+                   <table class='tabcompact'><tr><td class='center' style='background:url(".$CFG_GLPI["root_doc"].
                     "/pics/loader.png) repeat-x; padding: 0px;font-size: 10px;' width='".
                     $percentwidth." px' height='12'>";
 
@@ -1726,7 +1726,7 @@ class Html {
 
       echo "<div id='footer' >";
       echo "<table width='100%'><tr><td class='left'><span class='copyright'>";
-      $timedebug = sprintf(_n('%1$s second', '%1$s seconds', $TIMER_DEBUG->getTime()),
+      $timedebug = sprintf(_n('%s second', '%s seconds', $TIMER_DEBUG->getTime()),
                            $TIMER_DEBUG->getTime());
 
       if (function_exists("memory_get_usage")) {
@@ -1988,7 +1988,8 @@ class Html {
 
          asort($list);
          echo "<li id='menu5' onmouseover=\"javascript:menuAff('menu5','menu');\">";
-         echo "<a href='#' title=\""._sn('Plugin', 'Plugins', 2)."\" class='itemP'>". __('Plugins')."</a>";  // default none
+         echo "<a href='#' title=\""._sn('Plugin', 'Plugins', 2)."\" class='itemP'>".
+                __('Plugins')."</a>";  // default none
          echo "<ul class='ssmenu'>";
 
          // list menu item
@@ -2813,19 +2814,18 @@ class Html {
             $p[$key] = $val;
          }
       }
-
       $output = "<input id='showdate".$p['rand']."' type='text' size='10' name='_$name' ".
                   "value='".self::convDate($p['value'])."'>";
       $output .= Html::hidden($name, array('value' => $p['value'],
                                            'id'    => "hiddendate".$p['rand'],
                                            'size'  => 10));
-      if ($p['maybeempty']) {
+      if ($p['maybeempty'] && $p['canedit']) {
          $output .= "<img src='".$CFG_GLPI['root_doc']."/pics/reset.png' alt=\"".__('Clear').
                       "\" id='resetdate".$p['rand']."'>";
       }
 
       $js = '';
-      if ($p['maybeempty']) {
+      if ($p['maybeempty'] && $p['canedit']) {
          $js .= "$('#resetdate".$p['rand']."').click(function(){
                   $('#showdate".$p['rand']."').val('');
                   $('#hiddendate".$p['rand']."').val('');
@@ -2844,6 +2844,11 @@ class Html {
                   showWeek: true,
                   buttonImage: '".$CFG_GLPI['root_doc']."/pics/calendar.png',
                   buttonImageOnly: true  ";
+
+      if (!$p['canedit']) {
+         $js .= ",disabled: true";
+      }
+      
       if (!empty($p['min'])) {
          $js .= ",minDate: '".self::convDate($p['min'])."'";
       }
@@ -3028,13 +3033,13 @@ class Html {
       $output  = "<input id='showdate".$p['rand']."' type='text' name='_$name' value='".
                    self::convDateTime($p['value'])."'>";
       $output .= Html::hidden($name, array('value' => $p['value'], 'id' => "hiddendate".$p['rand']));
-      if ($p['maybeempty']) {
+      if ($p['maybeempty'] && $p['canedit']) {
          $output .= "<img src='".$CFG_GLPI['root_doc']."/pics/reset.png' alt=\"".__('Clear').
                       "\" id='resetdate".$p['rand']."'>";
       }
 
       $js = "";
-      if ($p['maybeempty']) {
+      if ($p['maybeempty'] && $p['canedit']) {
          $js .= "$('#resetdate".$p['rand']."').click(function(){
                   $('#showdate".$p['rand']."').val('');
                   $('#hiddendate".$p['rand']."').val('');
@@ -3049,6 +3054,7 @@ class Html {
                   altFieldTimeOnly: false,
                   firstDay: 1,
                   parse: 'loose',
+                  stepMinute: ".$p['timestep'].",
                   showSecond: false,
                   showOtherMonths: true,
                   selectOtherMonths: true,
@@ -3060,6 +3066,10 @@ class Html {
                   controlType: 'select',
                   buttonImage: '../pics/calendar.png',
                   buttonImageOnly: true";
+      if (!$p['canedit']) {
+         $js .= ",disabled: true";
+      }
+      
       if (!empty($p['min'])) {
          $js .= ",minDate: '".self::convDate($p['min'])."'";
       }
@@ -3736,15 +3746,17 @@ class Html {
    static function initImagePasteSystem($name, $rand) {
       global $CFG_GLPI;
 
-      $params = array('name'     => $name,
-                      'root_doc' => $CFG_GLPI['root_doc'],
-                      'rand'     => $rand,
+      $params = array('name'         => $name,
+                      'root_doc'     => $CFG_GLPI['root_doc'],
+                      'rand'         => $rand,
+                      'showfilesize' => 1,
 //                      'maxsize'  => 500,
-                      'lang'     => array('pasteimage'   => _sx('button', 'Drag and drop or paste image'),
-                                          'itemnotfound' => __('Item not found'),
-                                          'toolarge'     => __('Item is too large'),
-                                          'save'         => _sx('button', 'Save'),
-                                          'cancel'       => _sx('button', 'Cancel')));
+                      'lang'         => array('pasteimage'   => _sx('button',
+                                                                    'Drag and drop or paste image'),
+                                              'itemnotfound' => __('Item not found'),
+                                              'toolarge'     => __('Item is too large'),
+                                              'save'         => _sx('button', 'Save'),
+                                              'cancel'       => _sx('button', 'Cancel')));
 
       return "if (!tinyMCE.isIE) { // Chrome, Firefox plugin
                   tinyMCE.imagePaste = $(document).imagePaste(".json_encode($params).");

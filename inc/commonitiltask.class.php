@@ -199,6 +199,7 @@ abstract class CommonITILTask  extends CommonDBTM {
 
 
    function post_deleteFromDB() {
+      global $CFG_GLPI;
 
       $itemtype = $this->getItilObjectItemType();
       $item     = new $itemtype();
@@ -213,10 +214,15 @@ abstract class CommonITILTask  extends CommonDBTM {
       Log::history($this->getField($item->getForeignKeyField()), $this->getItilObjectItemType(),
                    $changes, $this->getType(), Log::HISTORY_DELETE_SUBITEM);
 
-      $options = array('task_id'    => $this->fields["id"],
-                        // Force is_private with data / not available
-                       'is_private' => $this->isPrivate());
-      NotificationEvent::raiseEvent('delete_task', $item, $options);
+      if ($CFG_GLPI["use_mailing"]) {
+         $options = array('task_id'             => $this->fields["id"],
+                           // Force is_private with data / not available
+                          'is_private'          => $this->isPrivate(),
+                          // Pass users values
+                          'task_users_id'       => $this->fields['users_id'],
+                          'task_users_id_tech'  => $this->fields['users_id_tech']);
+         NotificationEvent::raiseEvent('delete_task', $item, $options);
+      }
    }
 
 
@@ -507,7 +513,7 @@ abstract class CommonITILTask  extends CommonDBTM {
 
       $tab[2]['table']        = 'glpi_taskcategories';
       $tab[2]['field']        = 'name';
-      $tab[2]['name']         = __('Task category');
+      $tab[2]['name']         = _n('Tasks category', 'Tasks categories', 1);
       $tab[2]['forcegroupby'] = true;
       $tab[2]['datatype']     = 'dropdown';
 
@@ -1251,7 +1257,7 @@ abstract class CommonITILTask  extends CommonDBTM {
             echo "</script>";
 
             echo "<div id='plan'  onClick='showPlanUpdate()'>\n";
-            echo "<span class='showplan'>".__('Plan this task')."</span>";
+            echo "<span class='vsubmit'>".__('Plan this task')."</span>";
             echo "</div>\n";
             echo "<div id='viewplan'></div>\n";
 
@@ -1339,7 +1345,7 @@ abstract class CommonITILTask  extends CommonDBTM {
          echo "</th></tr></table>";
       } else {
          echo "<table class='tab_cadre_fixehov'>";
-         
+
          $header = "<tr><th>&nbsp;</th><th>".__('Type')."</th><th>" . __('Date') . "</th>";
          $header .= "<th>" . __('Description') . "</th><th>" .  __('Duration') . "</th>";
          $header .= "<th>" . __('Writer') . "</th>";

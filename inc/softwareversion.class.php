@@ -260,12 +260,12 @@ class SoftwareVersion extends CommonDBChild {
 
       echo "<div class='spaced'>";
 
-            if ($canedit) {
-               echo "<div class='center firstbloc'>";
-               echo "<a class='vsubmit' href='softwareversion.form.php?softwares_id=$softwares_id'>".
-                      _x('button', 'Add a version')."</a>";
-               echo "</div>";
-            }
+      if ($canedit) {
+         echo "<div class='center firstbloc'>";
+         echo "<a class='vsubmit' href='softwareversion.form.php?softwares_id=$softwares_id'>".
+                _x('button', 'Add a version')."</a>";
+         echo "</div>";
+      }
 
       $query = "SELECT `glpi_softwareversions`.*,
                        `glpi_states`.`name` AS sname
@@ -312,11 +312,6 @@ class SoftwareVersion extends CommonDBChild {
          } else {
             echo "<table class='tab_cadre_fixe'>";
             echo "<tr><th>".__('No item found')."</th></tr>";
-            if ($canedit) {
-               echo "<tr class='tab_bg_2'><td class='center'>";
-               echo "<a href='softwareversion.form.php?softwares_id=$softwares_id'>".
-                      _x('button', 'Add a version')."</a></td></tr>";
-            }
             echo "</table>\n";
          }
 
