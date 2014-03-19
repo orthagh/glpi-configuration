@@ -140,6 +140,7 @@ class Search {
       $p['target']       = Toolbox::getItemTypeSearchURL($itemtype);
       $p['display_type'] = self::HTML_OUTPUT;
       $p['list_limit']   = $_SESSION['glpilist_limit'];
+      $p['massiveactionparams'] = array();
 
       foreach ($params as $key => $val) {
          $p[$key] = $val;
@@ -1201,10 +1202,12 @@ class Search {
              && ($data['display_type'] == self::HTML_OUTPUT)) {
 
             Html::openMassiveActionsForm($massformid);
-            $massiveactionparams = array('num_displayed' => $end_display-$begin_display,
-                                         'fixed'         => false,
-                                         'is_deleted'    => $data['search']['is_deleted'],
-                                         'container'     => $massformid);
+            $massiveactionparams = $data['search']['massiveactionparams'];
+            $massiveactionparams['num_displayed'] = $end_display-$begin_display;
+            $massiveactionparams['fixed']         = false;
+            $massiveactionparams['is_deleted']    = $data['search']['is_deleted'];
+            $massiveactionparams['container']     = $massformid;
+            
             Html::showMassiveActions($massiveactionparams);
          }
 
@@ -1667,8 +1670,11 @@ class Search {
       $p['is_deleted']   = 0;
       $p['criteria']     = array();
       $p['metacriteria'] = array();
+      $p['target']       = Toolbox::getItemTypeSearchURL($itemtype);
+      $p['showreset']    = true;
+      $p['showbookmark'] = true;
+      $p['addhidden']    = array();
 
-      $p['target']      = Toolbox::getItemTypeSearchURL($itemtype);
 
       foreach ($params as $key => $val) {
          $p[$key] = $val;
@@ -1734,22 +1740,36 @@ class Search {
       // Display submit button
       echo "<td width='80' class='center'>";
       echo "<input type='submit' value=\""._sx('button', 'Search')."\" class='submit' >";
-      echo "</td><td>";
-      Bookmark::showSaveButton(Bookmark::SEARCH, $itemtype);
-      echo "<a href='".$p['target']."?reset=reset' >";
-      echo "&nbsp;&nbsp;<img title=\"".__s('Blank')."\" alt=\"".__s('Blank')."\" src='".
-            $CFG_GLPI["root_doc"]."/pics/reset.png' class='calendrier'></a>";
+      echo "</td>";
+      if ($p['showbookmark'] || $p['showreset']) {
+         echo "<td>";
+         if ($p['showbookmark']) {
+            Bookmark::showSaveButton(Bookmark::SEARCH, $itemtype);
+         }
 
-      echo "</td></tr></table>\n";
+         if ($p['showreset']) {
+            echo "<a href='".$p['target']."?reset=reset' >";
+            echo "&nbsp;&nbsp;<img title=\"".__s('Blank')."\" alt=\"".__s('Blank')."\" src='".
+                  $CFG_GLPI["root_doc"]."/pics/reset.png' class='calendrier'></a>";
+         }
+         echo "</td>";
+      }
+      echo "</tr></table>\n";
 
       echo "</td></tr>";
       echo "</table>\n";
 
+      if (count($p['addhidden'])) {
+         foreach ($p['addhidden'] as $key => $val) {
+            echo Html::hidden($key, array('value' => $val));
+         }
+      }
+      
       // For dropdown
-      echo "<input type='hidden' name='itemtype' value='$itemtype'>";
-
+      echo Html::hidden('itemtype', array('value' => $itemtype));
       // Reset to start when submit new search
-      echo "<input type='hidden' name='start' value='0'>";
+      echo Html::hidden('start', array('value'    => 0));
+      
       echo "</div>";
       Html::closeForm();
    }
@@ -2130,7 +2150,7 @@ class Search {
 
 
       // Virtual display no select : only get additional fields
-      if ($field == '_virtual') {
+      if (strpos($field, '_virtual') === 0) {
          return $ADDITONALFIELDS;
       }
 
@@ -2378,6 +2398,9 @@ class Search {
       switch ($itemtype) {
          case 'Reminder' :
             return Reminder::addVisibilityRestrict();
+
+         case 'RSSFeed' :
+            return RSSFeed::addVisibilityRestrict();
 
          case 'Notification' :
             if (!Config::canView()) {
@@ -3104,6 +3127,9 @@ class Search {
          case 'Reminder' :
             return Reminder::addVisibilityJoins();
 
+         case 'RSSFeed' :
+            return RSSFeed::addVisibilityJoins();
+            
          case 'ProjectTask' :
             // Same structure in addDefaultWhere
             $out  = '';
@@ -3225,7 +3251,7 @@ class Search {
       $cleannt    = $nt;
 
       // Virtual field no link
-      if ($linkfield == '_virtual') {
+      if (strpos($linkfield, '_virtual') === 0) {
          return false;
       }
 
@@ -4217,6 +4243,14 @@ class Search {
                }
                break;
 
+            case 'glpi_projects._virtual_planned_duration' :
+               return Html::timestampToString(ProjectTask::getTotalPlannedDurationForProject($data["id"]),
+                                 false);
+
+            case 'glpi_projects._virtual_effective_duration' :
+               return Html::timestampToString(ProjectTask::getTotalEffectiveDurationForProject($data["id"]),
+                                 false);
+
             case 'glpi_cartridgeitems._virtual' :
                return Cartridge::getCount($data["id"], $data[$num][0]['alarm_threshold'],
                                           self::$output_type != self::HTML_OUTPUT);
@@ -4224,7 +4258,7 @@ class Search {
             case 'glpi_printers._virtual' :
                return Cartridge::getCountForPrinter($data["id"],
                                                     self::$output_type != self::HTML_OUTPUT);
-
+                                                    
             case 'glpi_consumableitems._virtual' :
                return Consumable::getCount($data["id"], $data[$num][0]['alarm_threshold'],
                                            self::$output_type != self::HTML_OUTPUT);
