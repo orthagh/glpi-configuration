@@ -729,7 +729,7 @@ class Contract extends CommonDBTM {
                                                       'joinparams' => array('jointype' => 'child')));
 
       $tab += Notepad::getSearchOptionsToAdd();
-      
+
       $tab['cost']                  = __('Cost');
 
       $tab[11]['table']             = 'glpi_contractcosts';
@@ -1202,6 +1202,7 @@ class Contract extends CommonDBTM {
       $p['used']           = array();
       $p['nochecklimit']   = false;
       $p['on_change']      = '';
+      $p['display']        = true;
 
       if (is_array($options) && count($options)) {
          foreach ($options as $key => $val) {
@@ -1265,7 +1266,8 @@ class Contract extends CommonDBTM {
       }
       return Dropdown::showFromArray($p['name'], $values,
                                      array('value'     => $p['value'],
-                                           'on_change' => $p['on_change']));
+                                           'on_change' => $p['on_change'],
+                                           'display'   => $p['display']));
    }
 
 
@@ -1403,6 +1405,7 @@ class Contract extends CommonDBTM {
 
       $options['entities_id'] = $this->getEntityID();
       $options['contracts']   = array();
+      $options['items']       = array();
       NotificationEvent::debugEvent($this, $options);
    }
 
