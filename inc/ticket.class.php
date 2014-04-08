@@ -2639,6 +2639,7 @@ class Ticket extends CommonITILObject {
                      if ($item->maybeTemplate()) {
                         $query .= " AND `is_template` = '0' ";
                      }
+                     $query .= ' ORDER BY `name`';
 
                      $result = $DB->query($query);
                      if ($DB->numrows($result) > 0) {
@@ -3094,8 +3095,8 @@ class Ticket extends CommonITILObject {
                // Is always default value : not set
                // Set if already predefined field
                // Set if ticket template change
-               if ((count($values['_predefined_fields'])==0
-                       && ($values[$predeffield] == $default_values[$predeffield]))
+               if (((count($values['_predefined_fields']) == 0)
+                    && ($values[$predeffield] == $default_values[$predeffield]))
                    || (isset($values['_predefined_fields'][$predeffield])
                        && ($values[$predeffield] == $values['_predefined_fields'][$predeffield]))
                    || (isset($values['_tickettemplates_id'])
@@ -3667,12 +3668,12 @@ class Ticket extends CommonITILObject {
                   // Is always default value : not set
                   // Set if already predefined field
                   // Set if ticket template change
-                  if ((count($values['_predefined_fields'])==0
+                  if (((count($values['_predefined_fields']) == 0)
                        && ($values[$predeffield] == $default_values[$predeffield]))
-                     || (isset($values['_predefined_fields'][$predeffield])
-                         && ($values[$predeffield] == $values['_predefined_fields'][$predeffield]))
-                     || (isset($values['_tickettemplates_id'])
-                         && ($values['_tickettemplates_id'] != $tt->getID()))) {
+                      || (isset($values['_predefined_fields'][$predeffield])
+                          && ($values[$predeffield] == $values['_predefined_fields'][$predeffield]))
+                      || (isset($values['_tickettemplates_id'])
+                          && ($values['_tickettemplates_id'] != $tt->getID()))) {
                      // Load template data
                      $values[$predeffield]            = $predefvalue;
                      $this->fields[$predeffield]      = $predefvalue;
@@ -4387,18 +4388,23 @@ class Ticket extends CommonITILObject {
                    class='pointer' src='".$CFG_GLPI["root_doc"]."/pics/add_dropdown.png'>";
          }
          echo '</th>';
-         echo "<td width='$colsize4%'>";
+         echo "<td width='$colsize4%' colspan='3'>";
          if ($canupdate) {
             echo "<div style='display:none' id='linkedticket$rand_linked_ticket'>";
+            echo "<table class='tab_format' width='100%'><tr><td width='30%'>";
             Ticket_Ticket::dropdownLinks('_link[link]',
                                          (isset($values["_link"])?$values["_link"]['link']:''));
-            echo "<br>";
-            printf(__('%1$s: %2$s'), __('Ticket'), __('ID'));
             echo "<input type='hidden' name='_link[tickets_id_1]' value='$ID'>\n";
-            echo "<input type='text' name='_link[tickets_id_2]'
-                   value='".(isset($values["_link"])?$values["_link"]['tickets_id_2']:'')."'
-                   size='10'>\n";
-            echo "&nbsp;";
+            echo "</td><td width='70%'>";
+            $linkparam = array('name'        => '_link[tickets_id_2]',
+                               'entity'      => $this->getEntityID(),
+                               'displaywith' => array('id'));
+
+            if (isset($values["_link"])) {
+               $linkparam['value'] = $values["_link"]['tickets_id_2'];
+            }
+            Ticket::dropdown($linkparam);
+            echo "</td></tr></table>"    ;
             echo "</div>";
 
             if (isset($values["_link"])
