@@ -746,6 +746,7 @@ class Ticket extends CommonITILObject {
          }
       }
       $check_allowed_fields_for_template = false;
+      $allowed_fields                    = array();
       if (!Session::isCron()
           && !Session::haveRight(self::$rightname, UPDATE)) {
 
@@ -2672,7 +2673,7 @@ class Ticket extends CommonITILObject {
                   }
                }
                if (count($devices)) {
-                  $my_devices[__s('Devices own by my groups')] = $devices;
+                  $my_devices[__('Devices own by my groups')] = $devices;
                }
             }
          }
@@ -2728,7 +2729,7 @@ class Ticket extends CommonITILObject {
                }
             }
             if (count($devices)) {
-               $my_devices[__s('Connected devices')] = $devices;
+               $my_devices[__('Connected devices')] = $devices;
             }
 
             // Software
@@ -2771,8 +2772,7 @@ class Ticket extends CommonITILObject {
                      }
                   }
                   if (count($devices)) {
-                     $my_devices[_sn('Installed software',
-                                     'Installed software', 2)] = $devices;
+                     $my_devices[__('Installed software')] = $devices;
                   }
                }
             }

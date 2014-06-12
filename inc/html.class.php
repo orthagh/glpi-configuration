@@ -2848,7 +2848,7 @@ class Html {
       if (!$p['canedit']) {
          $js .= ",disabled: true";
       }
-      
+
       if (!empty($p['min'])) {
          $js .= ",minDate: '".self::convDate($p['min'])."'";
       }
@@ -3069,7 +3069,7 @@ class Html {
       if (!$p['canedit']) {
          $js .= ",disabled: true";
       }
-      
+
       if (!empty($p['min'])) {
          $js .= ",minDate: '".self::convDate($p['min'])."'";
       }
@@ -3747,10 +3747,10 @@ class Html {
       global $CFG_GLPI;
 
       $params = array('name'         => $name,
+                      'filename'     => self::generateImageName(),
                       'root_doc'     => $CFG_GLPI['root_doc'],
                       'rand'         => $rand,
                       'showfilesize' => 1,
-//                      'maxsize'  => 500,
                       'lang'         => array('pasteimage'   => _sx('button',
                                                                     'Drag and drop or paste image'),
                                               'itemnotfound' => __('Item not found'),
@@ -5011,7 +5011,8 @@ class Html {
                         reader.onloadend = function(e){
                            $('#desc_paste_image').html(e.target.result);
                            tinyMCE.imagePaste.processpaste($('#desc_paste_image'),
-                                                           '"._sx('button', 'Paste image')."');
+                                                           '"._sx('button', 'Paste image')."',
+                                                           data.originalFiles[0]);
                         }
                      }
                      return false
@@ -5100,6 +5101,17 @@ class Html {
 
       return $script;
    }
+
+
+   /**
+    * @since version 0.85
+    *
+    * @return string
+   **/
+   static function generateImageName(){
+      return 'pastedImage'.str_replace('-', '', Html::convDateTime(date('Y-m-d', time())));
+   }
+
 
    /**
     * Display choice matrix

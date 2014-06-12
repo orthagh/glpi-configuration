@@ -1692,6 +1692,21 @@ class MailCollector  extends CommonDBTM {
 
 
    /**
+    * @since version 0.85
+   **/
+   static function getNumberOfActiveMailCollectors() {
+      global $DB;
+
+      $query = "SELECT COUNT(*) AS cpt
+                FROM `glpi_mailcollectors`
+                WHERE `is_active` = 1";
+      $result = $DB->query($query);
+
+      return $DB->result($result, 0, 'cpt');
+   }
+
+
+   /**
     * @param $name
     * @param $value  (default 0)
    **/

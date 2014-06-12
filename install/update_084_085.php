@@ -1996,6 +1996,8 @@ function update084to085() {
       $ADDTODISPLAYPREF['Project'] = array(3,4,12,5,15,21);
    }
 
+   $migration->addField("glpi_projects", 'is_deleted', "bool");
+   
    if (countElementsInTable("glpi_profilerights", "`name` = 'project'") == 0) {
       ProfileRight::addProfileRights(array('project'));
 
@@ -2600,7 +2602,8 @@ function update084to085() {
 
    //////////////////////////////////////////////////
    // Device update
-
+   $migration->displayMessage(sprintf(__('Data migration - %s'), 'Devices'));
+   
    foreach (array_merge(CommonDevice::getDeviceTypes(),
                         Item_Devices::getDeviceTypes()) as $itemtype) {
       $table = $itemtype::getTable();
@@ -2654,7 +2657,20 @@ function update084to085() {
          $migration->addKey($table, 'busID');
       }
    }
+   
+   // Add key
+   foreach (array('glpi_items_devicecases', 'glpi_items_devicecontrols', 'glpi_items_devicedrives',
+                  'glpi_items_devicegraphiccards', 'glpi_items_deviceharddrives',
+                  'glpi_items_devicememories', 'glpi_items_devicemotherboards',
+                  'glpi_items_devicenetworkcards', 'glpi_items_devicepcis',
+                  'glpi_items_devicepowersupplies', 'glpi_items_deviceprocessors',
+                  'glpi_items_devicesoundcards') as $table) {
+      $migration->dropKey($table, 'item');
+      $migration->migrationOneTable($table);
+      $migration->addKey($table, array('itemtype', 'items_id'), 'item');
+   }
 
+   
    if (!FieldExists('glpi_devicegraphiccards', 'chipset')) {
       $migration->addField('glpi_devicegraphiccards', 'chipset', 'string');
       $migration->addKey('glpi_devicegraphiccards', 'chipset');
@@ -2677,7 +2693,7 @@ function update084to085() {
    $ADDTODISPLAYPREF['ConsumableItem']  = array(9);
    $ADDTODISPLAYPREF['ReservationItem'] = array(9);
 
-
+   $migration->displayMessage(sprintf(__('Data migration - %s'), 'License validity'));
    // for licence validity
    if ($migration->addField("glpi_softwarelicenses", "is_valid", "bool", array("value" => 1))) {
       $migration->migrationOneTable("glpi_softwarelicenses");
@@ -2752,6 +2768,25 @@ function update084to085() {
    //Add comment field to a virtualmachine
    $migration->addField('glpi_computervirtualmachines','comment', 'text');
 
+   $migration->displayMessage(sprintf(__('Data migration - %s'), 'IP improvment'));
+   // Ip search improve
+   $migration->addField('glpi_ipaddresses', 'mainitems_id', 'integer');
+   $migration->addField('glpi_ipaddresses', 'mainitemtype', 'string', array('after'  => 'mainitems_id'));
+   $migration->migrationOneTable('glpi_ipaddresses');
+   $migration->addKey('glpi_ipaddresses', array('mainitemtype', 'mainitems_id', 'is_deleted'), 'mainitem');
+
+   $query_doc_i = "UPDATE `glpi_ipaddresses` as `ip`
+                   INNER JOIN `glpi_networknames` as `netname`
+                     ON  (`ip`.`items_id` = `netname`.`id`
+                            AND `ip`.`itemtype` = 'NetworkName')
+                   INNER JOIN `glpi_networkports` as `netport`
+                     ON  (`netname`.`items_id` = `netport`.`id`
+                            AND `netname`.`itemtype` = 'NetworkPort')
+                   SET `ip`.`mainitemtype` = `netport`.`itemtype`,
+                       `ip`.`mainitems_id` = `netport`.`items_id`";
+   $DB->queryOrDie($query_doc_i, "0.85 update mainitems fields of ipaddresses");
+
+   
    // Upgrade ticket bookmarks
    $query = "SELECT *
              FROM `glpi_bookmarks`
@@ -2805,7 +2840,7 @@ function update084to085() {
             if (isset($options['field2']) && is_array($options['field2'])) {
                $newkey = 0;
                foreach ($options['field2'] as $key => $val) {
-                  $options['metacriteria'][$newkey]['field2'] = $val;
+                  $options['metacriteria'][$newkey]['field'] = $val;
 
                   //  other field
                   if (isset($options['itemtype2'][$key])) {

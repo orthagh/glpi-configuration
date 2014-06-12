@@ -201,10 +201,10 @@ class Problem extends CommonITILObject {
                   break;
 
                case 2 :
-                  if (!isset($_POST['load_kb_sol'])) {
-                     $_POST['load_kb_sol'] = 0;
+                  if (!isset($_GET['load_kb_sol'])) {
+                     $_GET['load_kb_sol'] = 0;
                   }
-                  $item->showSolutionForm($_POST['load_kb_sol']);
+                  $item->showSolutionForm($_GET['load_kb_sol']);
                   break;
 
                case 4 :
@@ -370,7 +370,6 @@ class Problem extends CommonITILObject {
       }
 
    }
-
 
    /**
     * Get default values to search engine to override
@@ -1150,7 +1149,7 @@ class Problem extends CommonITILObject {
       echo "<td colspan='3'>";
       $rand = mt_rand();
       echo "<textarea id='content$rand' name='content' cols='90' rows='6'>".
-             $this->fields["content"]."</textarea>";
+             Html::clean(Html::entity_decode_deep($this->fields["content"]))."</textarea>";
       echo "</td></tr>";
 
       if ($ID) {

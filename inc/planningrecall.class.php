@@ -314,8 +314,8 @@ class PlanningRecall extends CommonDBChild {
       echo "<form method='post' action='".$CFG_GLPI['root_doc']."/front/planningrecall.form.php'>";
       echo "<table width='100%'><tr><td>";
       self::dropdown($options);
-      echo "</td><td>";
-      echo " <input type='submit' name='update' value=\""._sx('button', 'Save')."\" class='submit'>";
+      echo "&nbsp;";
+      echo "<input type='submit' name='update' value=\""._sx('button', 'Save')."\" class='submit'>";
       echo "</td></tr></table>";
       Html::closeForm();
    }
@@ -363,7 +363,7 @@ class PlanningRecall extends CommonDBChild {
 
       $pr = new self();
       foreach ($DB->request($query) as $data) {
-         if ($pr->getFromDB($data['id'])) {
+         if ($pr->getFromDB($data['id']) && $pr->getItem()) {
             if (NotificationEvent::raiseEvent('planningrecall', $pr)) {
 
                $cron_status         = 1;
@@ -375,6 +375,9 @@ class PlanningRecall extends CommonDBChild {
 
                $alert->add($input);
             }
+         } else {
+            // Clean item
+            $pr->delete($data);
          }
       }
       return $cron_status;

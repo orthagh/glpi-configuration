@@ -253,6 +253,10 @@ input {
    vertical-align: middle;
 }
 
+input[type="checkbox"] {
+    border: 0;
+}
+
 input[type="image"] {
    height: auto;
    background-color: transparent;
@@ -447,6 +451,15 @@ td { }
    box-shadow: 0px 2px 5px #666;*/
 }
 
+.tab_cadre_postonly {
+   margin: 0 auto;
+   /*border: 1px solid #bbbbbb;*/
+   z-index:1;
+   text-align: left;
+   font-size: 11px;
+   width: 80%;
+}
+
 .tab_cadre_navigation {
    margin: 0 auto;
    padding: 4px;
@@ -535,8 +548,10 @@ td { }
    filter : alpha(opacity=10);*/
 }
 
-.tab_cadrehov tr.rowHover, 
-.tab_cadre_fixehov tr.rowHover{
+.tab_cadrehov tr.rowHover,
+.tab_cadrehov td.rowHover,
+.tab_cadre_fixehov tr.rowHover,
+.tab_cadre_fixehov td.rowHover{
    background-color:#e7e7e2;
 /*   opacity: 0.5;
    filter : alpha(opacity=10);*/
@@ -764,6 +779,13 @@ td.rotate {
    margin: 0 auto;
    width:71px;
    height:71px;
+   border-radius: 5px;
+}
+
+.user_picture_verysmall {
+   margin: 0 auto;
+   width:35px;
+   height:35px;
    border-radius: 5px;
 }
 /* ################--------------- Space to replace &nbsp; ---------------#################### */
@@ -1113,6 +1135,8 @@ div#tabcontent {
    font-size: 11px;
 }
 
+
+
 .boxnoteleft {
    float: left;
    width: 10%;
@@ -1123,6 +1147,7 @@ div#tabcontent {
 .boxnotecontent {
    float: left;
    padding: 1px;
+   padding-top: 5px;
    width: 75%;
 /*   top:  -60px;
    left: 110px;*/
@@ -1136,6 +1161,13 @@ div#tabcontent {
    min-height: 40px;
    padding: 1px;
    vertical-align: middle;
+}
+
+.boxnotefloatright {
+   float: right;
+   position: relative;
+   padding-left: 20px;
+   padding-bottom:  5px;
 }
 .boxnotetext {
    padding: 5px;

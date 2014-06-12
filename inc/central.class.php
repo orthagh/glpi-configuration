@@ -226,7 +226,7 @@ class Central extends CommonGLPI {
       echo "<tr class='noHover'><td class='top' width='50%'>";
       RSSFeed::showListForCentral();
       echo "</td><td class='top' width='50%'>";
-      if (Session::haveRight("rssfeed_public", READ)) {
+      if (RSSFeed::canView()) {
          RSSFeed::showListForCentral(false);
       } else {
          echo "&nbsp;";

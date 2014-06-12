@@ -564,7 +564,8 @@ class TicketFollowup  extends CommonDBTM {
                    && $ticket->haveAGroup(CommonITILActor::ASSIGN, $_SESSION['glpigroups'])));
 
       $reopen_case = false;
-      if (in_array($ticket->fields["status"], $ticket->getClosedStatusArray())
+      if ($this->isNewID($ID)
+          && in_array($ticket->fields["status"], $ticket->getClosedStatusArray())
           && $ticket->isAllowedStatus($ticket->fields['status'], Ticket::INCOMING)) {
          $reopen_case = true;
          echo "<div class='center b'>".__('If you want to reopen the ticket, you must specify a reason')."</div>";
@@ -576,7 +577,7 @@ class TicketFollowup  extends CommonDBTM {
          echo "<tr class='tab_bg_1'>";
          echo "<td rowspan='3' class='middle right'>".__('Description')."</td>";
          echo "<td class='center middle' rowspan='3'>";
-         echo "<textarea name='content' cols='50' rows='6'>".$this->fields["content"]."</textarea>";
+         echo "<textarea name='content' cols='70' rows='6'>".$this->fields["content"]."</textarea>";
          if ($this->fields["date"]) {
             echo "</td><td>".__('Date')."</td>";
             echo "<td>".Html::convDateTime($this->fields["date"]);
@@ -671,8 +672,9 @@ class TicketFollowup  extends CommonDBTM {
                             OR `users_id` ='" . Session::getLoginUserID() . "') ";
       }
 
-      $query = "SELECT *
+      $query = "SELECT `glpi_ticketfollowups`.*, `glpi_users`.`picture`
                 FROM `glpi_ticketfollowups`
+                LEFT JOIN `glpi_users` ON (`glpi_ticketfollowups`.`users_id` = `glpi_users`.`id`)
                 WHERE `tickets_id` = '$tID'
                       $RESTRICT
                 ORDER BY `date` DESC";
@@ -693,6 +695,7 @@ class TicketFollowup  extends CommonDBTM {
                          'id'         => -1);
          Ajax::updateItemJsCode("viewfollowup" . $ticket->fields['id'] . "$rand",
                                 $CFG_GLPI["root_doc"]."/ajax/viewsubitem.php", $params);
+         echo Html::jsHide('addbutton'.$ticket->fields['id'] . "$rand");
          echo "};";
          echo "</script>\n";
          // Not closed ticket or closed
@@ -703,7 +706,7 @@ class TicketFollowup  extends CommonDBTM {
             if (isset($_GET['_openfollowup']) && $_GET['_openfollowup']) {
                echo Html::scriptBlock("viewAddFollowup".$ticket->fields['id']."$rand()");
             } else {
-               echo "<div class='center firstbloc'>".
+               echo "<div id='addbutton".$ticket->fields['id'] . "$rand' class='center firstbloc'>".
                     "<a class='vsubmit' href='javascript:viewAddFollowup".$ticket->fields['id'].
                                               "$rand();'>";
                if ($reopen_case) {
@@ -721,26 +724,28 @@ class TicketFollowup  extends CommonDBTM {
          echo "<table class='tab_cadre_fixe'><tr class='tab_bg_2'>";
          echo "<th class='b'>" . __('No followup for this ticket.')."</th></tr></table>";
       } else {
-         $steps = array(0 => array('end'   => WEEK_TIMESTAMP,
-                                   'name'  => __('Last week')),
-                        1 => array('end'   => MONTH_TIMESTAMP,
+         $steps = array(0 => array('end'   => strtotime('today'),
+                                   'name'  => __('Today')),
+                        1 => array('end'   => strtotime('last monday'),
+                                   'name'  => __('This week')),
+                        2 => array('end'   => strtotime('-1 month'),
                                    'name'  => __('Last month')),
-                        2 => array('end'   => 12*MONTH_TIMESTAMP,
-                                   'name'  => __('Last year')),
-                        3 => array('end'   => 9999999*MONTH_TIMESTAMP,
+                        3 => array('end'   => 0,
                                    'name'  => __('Oldest')),
                        );
+
          $currentpos = -1;
+
          while ($data = $DB->fetch_assoc($result)) {
             $this->getFromDB($data['id']);
             $candelete = $this->canPurge() && $this->canPurgeItem();
             $canedit   = $this->canUpdate() && $this->canUpdateItem();
 
-            $time      = max(0,time()-strtotime($data['date']));
+            $time      = strtotime($data['date']);
             if (!isset($steps[$currentpos])
-                || ($steps[$currentpos]['end'] < $time)) {
+                || ($steps[$currentpos]['end'] > $time)) {
                $currentpos++;
-               while (($currentpos < 4) && ($steps[$currentpos]['end'] < $time)) {
+               while (($currentpos < 4) && ($steps[$currentpos]['end'] > $time)) {
                   $currentpos++;
                }
                if (isset($steps[$currentpos])) {
@@ -760,35 +765,18 @@ class TicketFollowup  extends CommonDBTM {
                $classtoadd = " pointer";
             }
 
-            echo "<div class='boxnote $color $classtoadd' id='view$id'";
-            if ($canedit) {
-               echo " onClick=\"viewEditFollowup".$ticket->fields['id'].
-                        $data['id']."$rand(); ".Html::jsHide("view$id")." ".
-                        Html::jsShow("viewfollowup" . $ticket->fields['id'].$data["id"]."$rand")."\" ";
-            }
+            echo "<div class='boxnote $color' id='view$id'";
             echo ">";
 
             echo "<div class='boxnoteleft'>";
-            if ($candelete) {
-               Html::showSimpleForm(Toolbox::getItemTypeFormURL('TicketFollowup'),
-                                    array('purge' => 'purge'),
-                                    _x('button', 'Delete permanently'),
-                                    array('id' => $data['id']),
-                                    $CFG_GLPI["root_doc"]."/pics/delete.png",
-                                    '',
-                                     __('Confirm the final deletion?'));
-            }
+            echo "<img class='user_picture_verysmall' alt=\"".__s('Picture')."\" src='".
+                User::getThumbnailURLForPicture($data['picture'])."'>";
             echo "</div>"; // boxnoteleft
 
             echo "<div class='boxnotecontent'";
             echo ">";
 
-            echo "<div class='boxnotetext'>";
-            $content = nl2br($data['content']);
-            if (empty($content)) $content = NOT_AVAILABLE;
-            echo $content.'</div>'; // boxnotetext
-
-            echo "<div class='floatright'>";
+            echo "<div class='boxnotefloatright'>";
             $username = NOT_AVAILABLE;
             if ($data['users_id']) {
                $username = getUserName($data['users_id'], $showuserlink);
@@ -805,7 +793,30 @@ class TicketFollowup  extends CommonDBTM {
             }
             echo $name;
             echo "</div>"; // floatright
+
+            echo "<div class='boxnotetext $classtoadd'";
+            if ($canedit) {
+               echo " onClick=\"viewEditFollowup".$ticket->fields['id'].
+                        $data['id']."$rand(); ".Html::jsHide("view$id")." ".
+                        Html::jsShow("viewfollowup" . $ticket->fields['id'].$data["id"]."$rand")."\" ";
+            }
+            echo ">";
+            $content = nl2br($data['content']);
+            if (empty($content)) $content = NOT_AVAILABLE;
+            echo $content.'</div>'; // boxnotetext
+
             echo "</div>"; // boxnotecontent
+            echo "<div class='boxnoteright'>";
+            if ($candelete) {
+               Html::showSimpleForm(Toolbox::getItemTypeFormURL('TicketFollowup'),
+                                    array('purge' => 'purge'),
+                                    _x('button', 'Delete permanently'),
+                                    array('id' => $data['id']),
+                                    $CFG_GLPI["root_doc"]."/pics/delete.png",
+                                    '',
+                                     __('Confirm the final deletion?'));
+            }
+            echo "</div>"; // boxnoteright
             echo "</div>"; // boxnote
             if ($canedit) {
                echo "<div id='viewfollowup" . $ticket->fields['id'].$data["id"]."$rand' class='starthidden'></div>\n";
