@@ -349,8 +349,7 @@ class ProjectTask extends CommonDBChild {
       echo "</td>";
       echo "<td>".__('As child of')."</td>";
       echo "<td>";
-      $this->dropdown(array('comments'  => 0,
-                            'entity'    => $this->fields['entities_id'],
+      $this->dropdown(array('entity'    => $this->fields['entities_id'],
                             'value'     => $this->fields['projecttasks_id'],
                             'condition' => "`glpi_projecttasks`.`projects_id`='".
                                              $this->fields['projects_id']."'",
@@ -826,8 +825,14 @@ class ProjectTask extends CommonDBChild {
                echo "<td>".Html::timestampToString($data['planned_duration'], false)."</td>";
                echo "<td>".Html::timestampToString(self::getTotalEffectiveDuration($data['id']),
                                                    false)."</td>";
-               echo "<td>".Dropdown::getDropdownName('glpi_projecttasks', $data['projecttasks_id']).
-                    "</td></tr>";
+               echo "<td>";
+               if ($data['projecttasks_id']>0) {
+                  $father = Dropdown::getDropdownName('glpi_projecttasks', $data['projecttasks_id']);
+                  echo "<a id='ProjectTask".$data["projecttasks_id"].$rand."' href='projecttask.form.php?id=".
+                           $data['projecttasks_id']."'>".$father.
+                           (empty($father)?"(".$data['projecttasks_id'].")":"")."</a>";
+               }
+               echo "</td></tr>";
             }
             echo $header;
             echo "</table>\n";

@@ -1178,6 +1178,9 @@ function update084to085() {
       $DB->queryOrDie($query, "0.85 create glpi_changes");
    }
 
+   $migration->addField('glpi_itilcategories', 'is_change', 'bool');
+   $migration->addKey('glpi_itilcategories', 'is_change');
+   
    if (!TableExists('glpi_changes_users')) {
       $query = "CREATE TABLE `glpi_changes_users` (
                   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -1259,14 +1262,9 @@ function update084to085() {
    if (!TableExists('glpi_changetasks')) {
       $query = "CREATE TABLE `glpi_changetasks` (
                   `id` int(11) NOT NULL AUTO_INCREMENT,
-                  `name` varchar(255) DEFAULT NULL,
                   `changes_id` int(11) NOT NULL DEFAULT '0',
-                  `changetasks_id` int(11) NOT NULL DEFAULT '0',
-                  `is_blocked` tinyint(1) NOT NULL DEFAULT '0',
                   `taskcategories_id` int(11) NOT NULL DEFAULT '0',
-                  `status` varchar(255) DEFAULT NULL,
-                  `priority` int(11) NOT NULL DEFAULT '1',
-                  `percentdone` int(11) NOT NULL DEFAULT '0',
+                  `state` int(11) NOT NULL DEFAULT '0',
                   `date` datetime DEFAULT NULL,
                   `begin` datetime DEFAULT NULL,
                   `end` datetime DEFAULT NULL,
@@ -1275,13 +1273,8 @@ function update084to085() {
                   `content` longtext COLLATE utf8_unicode_ci,
                   `actiontime` int(11) NOT NULL DEFAULT '0',
                   PRIMARY KEY (`id`),
-                  KEY `name` (`name`),
                   KEY `changes_id` (`changes_id`),
-                  KEY `changetasks_id` (`changetasks_id`),
-                  KEY `is_blocked` (`is_blocked`),
-                  KEY `priority` (`priority`),
-                  KEY `status` (`status`),
-                  KEY `percentdone` (`percentdone`),
+                  KEY `state` (`state`),
                   KEY `users_id` (`users_id`),
                   KEY `users_id_tech` (`users_id_tech`),
                   KEY `date` (`date`),
@@ -1291,7 +1284,7 @@ function update084to085() {
                 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
       $DB->queryOrDie($query, "0.85 add table glpi_changetasks");
    }
-
+   
    if (!TableExists('glpi_changecosts')) {
       $query = "CREATE TABLE `glpi_changecosts` (
                `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -1329,7 +1322,7 @@ function update084to085() {
             `users_id_validate` int(11) NOT NULL DEFAULT '0',
             `comment_submission` text COLLATE utf8_unicode_ci,
             `comment_validation` text COLLATE utf8_unicode_ci,
-            `status` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'waiting',
+            `status` int(11) NOT NULL DEFAULT '2',
             `submission_date` datetime DEFAULT NULL,
             `validation_date` datetime DEFAULT NULL,
             PRIMARY KEY (`id`),
@@ -1701,7 +1694,13 @@ function update084to085() {
    // Add validation percent for tickets
    $migration->addField('glpi_tickets', 'validation_percent', 'integer', array('value' => 0));
 
+   // Add missing key
+   $migration->addKey('glpi_tickettasks', 'state');
+   $migration->addKey('glpi_tickettasks', 'users_id_tech');
+   $migration->addKey('glpi_tickettasks', 'begin');
+   $migration->addKey('glpi_tickettasks', 'end');
 
+   
    // Create notification for reply to satisfaction survey based on satisfaction notif
    // Check if notifications already exists
    if (countElementsInTable('glpi_notifications',
